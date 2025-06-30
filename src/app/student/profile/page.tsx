@@ -16,14 +16,14 @@ export default function StudentProfilePage() {
 
   if (!student) {
     return (
-      <div className="px-8 py-8 text-center">
+      <div className="p-4 md:p-8 text-center">
         Student data not available.
       </div>
     );
   }
 
   return (
-    <div className="px-8 py-8">
+    <div className="p-4 md:p-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
             <Button variant="outline" size="icon" onClick={() => router.back()}>

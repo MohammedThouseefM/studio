@@ -213,7 +213,7 @@ export function TeacherManagementPanel() {
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="add-student">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
             <TabsTrigger value="add-student">Add Student</TabsTrigger>
             <TabsTrigger value="manage-students">Manage Students</TabsTrigger>
             <TabsTrigger value="departments">Departments</TabsTrigger>
