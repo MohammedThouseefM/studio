@@ -1,7 +1,8 @@
+
 'use client';
 
 import { Suspense } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { AttendanceSheet } from '@/components/attendance-sheet';
 import { Button } from '@/components/ui/button';
@@ -39,18 +40,12 @@ function AttendanceSheetSkeleton() {
   );
 }
 
-type AttendancePageProps = {
-  searchParams: {
-    dept?: string;
-    year?: string;
-    hour?: string;
-    date?: string;
-  };
-};
-
-export default function AttendancePage({ searchParams }: AttendancePageProps) {
-  const router = useRouter();
-  const { dept, year, hour, date } = searchParams;
+function AttendanceContent() {
+  const searchParams = useSearchParams();
+  const dept = searchParams.get('dept');
+  const year = searchParams.get('year');
+  const hour = searchParams.get('hour');
+  const date = searchParams.get('date');
 
   const classDetails = {
     department: dept || 'N/A',
@@ -61,24 +56,30 @@ export default function AttendancePage({ searchParams }: AttendancePageProps) {
 
   const isValid = dept && year && hour && date;
 
+  return isValid ? (
+    <AttendanceSheet classDetails={classDetails} />
+  ) : (
+    <div className="text-center text-red-500 bg-red-100 p-4 rounded-md">
+      Invalid class details provided. Please go back to the dashboard and select a class.
+    </div>
+  );
+}
+
+export default function AttendancePage() {
+  const router = useRouter();
+
   return (
     <div className="p-4 md:p-8">
       <div className="flex items-center gap-4 mb-6">
         <Button variant="outline" size="icon" onClick={() => router.back()}>
-            <ArrowLeft className="h-4 w-4" />
-            <span className="sr-only">Back</span>
+          <ArrowLeft className="h-4 w-4" />
+          <span className="sr-only">Back</span>
         </Button>
         <h1 className="text-3xl font-bold">Attendance Sheet</h1>
       </div>
 
       <Suspense fallback={<AttendanceSheetSkeleton />}>
-        {isValid ? (
-          <AttendanceSheet classDetails={classDetails} />
-        ) : (
-          <div className="text-center text-red-500 bg-red-100 p-4 rounded-md">
-            Invalid class details provided. Please go back to the dashboard and select a class.
-          </div>
-        )}
+        <AttendanceContent />
       </Suspense>
     </div>
   );
