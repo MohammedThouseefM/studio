@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { School, Building, GraduationCap, Volume2 } from 'lucide-react';
+import { School, Building, GraduationCap, Volume2, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,9 +26,34 @@ export default function LandingPage() {
   const [studentPassword, setStudentPassword] = useState('');
   const [teacherId, setTeacherId] = useState('');
   const [teacherPassword, setTeacherPassword] = useState('');
+  const [captcha, setCaptcha] = useState('');
+  const [studentCaptchaInput, setStudentCaptchaInput] = useState('');
+  const [teacherCaptchaInput, setTeacherCaptchaInput] = useState('');
   const [fontSize, setFontSize] = useState('base');
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [loginTab, setLoginTab] = useState<'student' | 'teacher'>('student');
+
+  const generateCaptcha = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let captchaText = '';
+    for (let i = 0; i < 6; i++) {
+        captchaText += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setCaptcha(captchaText);
+  };
+  
+  useEffect(() => {
+    generateCaptcha();
+  }, []);
+
+  useEffect(() => {
+    if (isLoginOpen) {
+        generateCaptcha();
+        setStudentCaptchaInput('');
+        setTeacherCaptchaInput('');
+    }
+  }, [isLoginOpen]);
+
 
   useEffect(() => {
     const html = document.documentElement;
@@ -43,6 +68,17 @@ export default function LandingPage() {
 
   const handleStudentLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (studentCaptchaInput.toLowerCase() !== captcha.toLowerCase()) {
+      toast({
+        variant: 'destructive',
+        title: 'Login Failed',
+        description: 'Invalid Captcha. Please try again.',
+      });
+      generateCaptcha();
+      setStudentCaptchaInput('');
+      return;
+    }
+    
     const isValid = await validateStudent(studentId, studentPassword);
     if (isValid) {
       router.push('/student/dashboard');
@@ -52,11 +88,23 @@ export default function LandingPage() {
         title: 'Login Failed',
         description: 'Invalid Student ID or Password.',
       });
+      generateCaptcha();
+      setStudentCaptchaInput('');
     }
   };
 
   const handleTeacherLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (teacherCaptchaInput.toLowerCase() !== captcha.toLowerCase()) {
+      toast({
+        variant: 'destructive',
+        title: 'Login Failed',
+        description: 'Invalid Captcha. Please try again.',
+      });
+      generateCaptcha();
+      setTeacherCaptchaInput('');
+      return;
+    }
     const isValid = await validateTeacher(teacherId, teacherPassword);
     if (isValid) {
       router.push('/teacher/dashboard');
@@ -66,6 +114,8 @@ export default function LandingPage() {
         title: 'Login Failed',
         description: 'Invalid Staff ID or Password.',
       });
+      generateCaptcha();
+      setTeacherCaptchaInput('');
     }
   };
   
@@ -190,6 +240,31 @@ export default function LandingPage() {
                       onChange={(e) => setStudentPassword(e.target.value)} 
                       required />
                   </div>
+                   <div className="space-y-2">
+                    <Label htmlFor="student-captcha">Captcha</Label>
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1 select-none rounded-md border bg-muted p-2 text-center text-xl font-bold tracking-widest">
+                        <span className="line-through">{captcha}</span>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={generateCaptcha}
+                        aria-label="Refresh captcha"
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <Input
+                      id="student-captcha"
+                      placeholder="Enter the captcha above"
+                      value={studentCaptchaInput}
+                      onChange={(e) => setStudentCaptchaInput(e.target.value)}
+                      required
+                      autoComplete="off"
+                    />
+                  </div>
                   <Button type="submit" className="w-full bg-accent hover:bg-accent/90">
                     Login as Student
                   </Button>
@@ -218,6 +293,31 @@ export default function LandingPage() {
                       value={teacherPassword}
                       onChange={(e) => setTeacherPassword(e.target.value)}
                       required />
+                  </div>
+                   <div className="space-y-2">
+                    <Label htmlFor="teacher-captcha">Captcha</Label>
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1 select-none rounded-md border bg-muted p-2 text-center text-xl font-bold tracking-widest">
+                         <span className="line-through">{captcha}</span>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={generateCaptcha}
+                        aria-label="Refresh captcha"
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <Input
+                      id="teacher-captcha"
+                      placeholder="Enter the captcha above"
+                      value={teacherCaptchaInput}
+                      onChange={(e) => setTeacherCaptchaInput(e.target.value)}
+                      required
+                      autoComplete="off"
+                    />
                   </div>
                   <Button type="submit" className="w-full bg-accent hover:bg-accent/90">
                     Login as Teacher
