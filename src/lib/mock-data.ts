@@ -1,3 +1,4 @@
+
 // Mock data for the application
 
 export type Student = {
@@ -50,7 +51,13 @@ export type FullTimeTable = {
   [department: string]: DepartmentTimeTable;
 };
 
-export const teachers = [
+export type Teacher = {
+  id: string;
+  password: string;
+  name: string;
+};
+
+export const teachers: Teacher[] = [
     { id: 'TEACHER01', password: 'password', name: 'Dr. Evelyn Reed' },
     { id: 'TEACHER02', password: 'password123', name: 'Prof. Samuel Cruz' }
 ];
@@ -79,7 +86,7 @@ export const students: Student[] = rawStudents.map(s => ({
 
 export const studentUsers = students.map(student => ({
   id: student.university_number,
-  password: student.rollNumber,
+  password: student.dob,
 }));
 
 export const teacherUsers = teachers;

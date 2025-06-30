@@ -86,7 +86,7 @@ export default function LandingPage() {
       toast({
         variant: 'destructive',
         title: 'Login Failed',
-        description: 'Invalid Student ID or Password.',
+        description: 'Invalid University Number or Password.',
       });
       generateCaptcha();
       setStudentCaptchaInput('');
@@ -206,7 +206,12 @@ export default function LandingPage() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader className="text-center">
             <DialogTitle className="text-2xl">Welcome Back!</DialogTitle>
-            <DialogDescription>Sign in to access your dashboard</DialogDescription>
+            <DialogDescription>
+              {loginTab === 'student'
+                ? "Student ID is your University Number. Password is your Date of Birth (YYYY-MM-DD)."
+                : "Teacher ID is your Staff ID. Password is provided by the admin."
+              }
+            </DialogDescription>
           </DialogHeader>
           <Tabs value={loginTab} onValueChange={(value) => setLoginTab(value as 'student' | 'teacher')}>
             <TabsList className="grid w-full grid-cols-2">
@@ -231,11 +236,11 @@ export default function LandingPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="student-password">Password (Roll No.)</Label>
+                    <Label htmlFor="student-password">Password (DOB: YYYY-MM-DD)</Label>
                     <Input 
                       id="student-password" 
                       type="password" 
-                      placeholder="Enter your roll number"
+                      placeholder="Enter your date of birth"
                       value={studentPassword}
                       onChange={(e) => setStudentPassword(e.target.value)} 
                       required />
