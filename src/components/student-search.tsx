@@ -57,7 +57,7 @@ export function StudentSearch() {
   }, [searchTerm, department, year, attendanceRange]);
 
   const attendanceRanges = [
-    { label: "All Attendance", value: "" },
+    { label: "All Attendance", value: "all" },
     { label: "Long Absentees (0%)", value: "0" },
     { label: "1% - 20%", value: "1-20" },
     { label: "21% - 40%", value: "21-40" },
@@ -118,7 +118,7 @@ export function StudentSearch() {
             </div>
             <div>
                 <Label>Attendance Range</Label>
-                <Select value={attendanceRange} onValueChange={setAttendanceRange}>
+                <Select value={attendanceRange} onValueChange={(value) => setAttendanceRange(value === 'all' ? '' : value)}>
                     <SelectTrigger>
                         <SelectValue placeholder="Filter by Attendance" />
                     </SelectTrigger>
