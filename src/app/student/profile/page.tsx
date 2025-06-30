@@ -1,11 +1,15 @@
+'use client';
 
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, User } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { students } from "@/lib/mock-data";
-import { User } from "lucide-react";
 
 export default function StudentProfilePage() {
+  const router = useRouter();
   // In a real app, you would get the logged-in student's ID from a session
   // and fetch their specific data. For this demo, we'll use the first student.
   const student = students[0];
@@ -21,7 +25,13 @@ export default function StudentProfilePage() {
   return (
     <div className="container py-8">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">My Profile</h1>
+        <div className="flex items-center gap-4">
+            <Button variant="outline" size="icon" onClick={() => router.back()}>
+                <ArrowLeft className="h-4 w-4" />
+                <span className="sr-only">Back</span>
+            </Button>
+            <h1 className="text-3xl font-bold">My Profile</h1>
+        </div>
       </div>
       <Card className="max-w-4xl mx-auto">
         <CardHeader className="flex flex-col md:flex-row items-center gap-6 p-6 text-center md:text-left">

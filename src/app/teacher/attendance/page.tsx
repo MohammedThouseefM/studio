@@ -1,5 +1,10 @@
+'use client';
+
 import { Suspense } from 'react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
 import { AttendanceSheet } from '@/components/attendance-sheet';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
@@ -44,6 +49,7 @@ type AttendancePageProps = {
 };
 
 export default function AttendancePage({ searchParams }: AttendancePageProps) {
+  const router = useRouter();
   const { dept, year, hour, date } = searchParams;
 
   const classDetails = {
@@ -57,7 +63,14 @@ export default function AttendancePage({ searchParams }: AttendancePageProps) {
 
   return (
     <div className="container py-8">
-      <h1 className="text-3xl font-bold mb-6">Attendance Sheet</h1>
+      <div className="flex items-center gap-4 mb-6">
+        <Button variant="outline" size="icon" onClick={() => router.back()}>
+            <ArrowLeft className="h-4 w-4" />
+            <span className="sr-only">Back</span>
+        </Button>
+        <h1 className="text-3xl font-bold">Attendance Sheet</h1>
+      </div>
+
       <Suspense fallback={<AttendanceSheetSkeleton />}>
         {isValid ? (
           <AttendanceSheet classDetails={classDetails} />
