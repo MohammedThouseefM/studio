@@ -24,9 +24,10 @@ export function StudentSearch() {
   const [searchTerm, setSearchTerm] = useState('');
   const [department, setDepartment] = useState('');
   const [year, setYear] = useState('');
+  const [attendanceRange, setAttendanceRange] = useState('');
 
   const filteredStudents = useMemo(() => {
-    if (!searchTerm && !department && !year) {
+    if (!searchTerm && !department && !year && !attendanceRange) {
       return [];
     }
     
@@ -41,9 +42,29 @@ export function StudentSearch() {
       const matchesDepartment = !department || student.department === department;
       const matchesYear = !year || student.year === year;
 
-      return matchesSearchTerm && matchesDepartment && matchesYear;
+      const matchesAttendance = (() => {
+        if (!attendanceRange) return true;
+        const attendance = calculateAttendancePercentage(student.id);
+        if (attendanceRange === "0") {
+            return attendance === 0;
+        }
+        const [min, max] = attendanceRange.split('-').map(Number);
+        return attendance >= min && attendance <= max;
+      })();
+
+      return matchesSearchTerm && matchesDepartment && matchesYear && matchesAttendance;
     });
-  }, [searchTerm, department, year]);
+  }, [searchTerm, department, year, attendanceRange]);
+
+  const attendanceRanges = [
+    { label: "All Attendance", value: "" },
+    { label: "Long Absentees (0%)", value: "0" },
+    { label: "1% - 20%", value: "1-20" },
+    { label: "21% - 40%", value: "21-40" },
+    { label: "41% - 60%", value: "41-60" },
+    { label: "61% - 75%", value: "61-75" },
+    { label: "76% - 100%", value: "76-100" },
+  ];
 
   return (
     <Card>
@@ -52,8 +73,8 @@ export function StudentSearch() {
         <CardDescription>Find a student by name, roll number, or university number, and filter by class.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="md:col-span-3">
+        <div className="space-y-4">
+          <div>
             <Label htmlFor="student-search">Search Student</Label>
             <Input
               id="student-search"
@@ -62,42 +83,59 @@ export function StudentSearch() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <div>
-            <Label>Department</Label>
-            <Select value={department} onValueChange={(value) => setDepartment(value === 'all' ? '' : value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by Department" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Departments</SelectItem>
-                {collegeData.departments.map((dept) => (
-                  <SelectItem key={dept} value={dept}>
-                    {dept}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label>Year</Label>
-            <Select value={year} onValueChange={(value) => setYear(value === 'all' ? '' : value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by Year" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Years</SelectItem>
-                {collegeData.years.map((y) => (
-                  <SelectItem key={y} value={y}>
-                    {y}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <Label>Department</Label>
+              <Select value={department} onValueChange={(value) => setDepartment(value === 'all' ? '' : value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filter by Department" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Departments</SelectItem>
+                  {collegeData.departments.map((dept) => (
+                    <SelectItem key={dept} value={dept}>
+                      {dept}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Year</Label>
+              <Select value={year} onValueChange={(value) => setYear(value === 'all' ? '' : value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filter by Year" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Years</SelectItem>
+                  {collegeData.years.map((y) => (
+                    <SelectItem key={y} value={y}>
+                      {y}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+                <Label>Attendance Range</Label>
+                <Select value={attendanceRange} onValueChange={setAttendanceRange}>
+                    <SelectTrigger>
+                        <SelectValue placeholder="Filter by Attendance" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {attendanceRanges.map((range) => (
+                        <SelectItem key={range.value} value={range.value}>
+                            {range.label}
+                        </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
           </div>
         </div>
 
         <div className="space-y-4">
-          {searchTerm || department || year ? (
+          {searchTerm || department || year || attendanceRange ? (
             filteredStudents.length > 0 ? (
               <div className="grid gap-4 md:grid-cols-2">
                 {filteredStudents.map(student => {
