@@ -9,7 +9,7 @@ import { students, defaultTimetable } from '@/lib/mock-data';
 import { useCollegeData } from '@/context/college-data-context';
 
 export function TimetableCard() {
-  const { timeTable } = useCollegeData();
+  const { timeTable, hours } = useCollegeData();
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
   
   // In a real app, you would get the logged-in student's ID from a session.
@@ -30,9 +30,9 @@ export function TimetableCard() {
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          {todaySchedule.slice(0, 3).map((subject, index) => (
+          {todaySchedule.map((subject, index) => (
              <div key={index} className="text-sm p-2 rounded-md bg-card-foreground/5">
-                <span className="font-medium">{`Hour ${index + 1}: `}</span>
+                <span className="font-medium">{`${hours[index] || `Hour ${index + 1}`}: `}</span>
                 <span className="text-muted-foreground">{subject}</span>
             </div>
           ))}
