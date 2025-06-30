@@ -4,12 +4,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { School, Building, GraduationCap, Volume2, Minus, Plus } from 'lucide-react';
+import { School, Building, GraduationCap, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { validateStudent, validateTeacher } from '@/lib/auth';
 
@@ -21,6 +22,8 @@ export default function LandingPage() {
   const [teacherId, setTeacherId] = useState('');
   const [teacherPassword, setTeacherPassword] = useState('');
   const [fontSize, setFontSize] = useState('base');
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [loginTab, setLoginTab] = useState<'student' | 'teacher'>('student');
 
   useEffect(() => {
     const html = document.documentElement;
@@ -61,12 +64,9 @@ export default function LandingPage() {
     }
   };
   
-  const handleScrollToLogin = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    const loginSection = document.getElementById('login-section');
-    if (loginSection) {
-        loginSection.scrollIntoView({ behavior: 'smooth' });
-    }
+  const handleLoginClick = (tab: 'student' | 'teacher') => {
+    setLoginTab(tab);
+    setIsLoginOpen(true);
   };
 
   return (
@@ -97,11 +97,11 @@ export default function LandingPage() {
               <Volume2 className="h-5 w-5" />
             </Button>
             <div className="flex items-center gap-2">
-                <Button asChild variant="outline">
-                    <a href="#login-section" onClick={handleScrollToLogin}>Student Login</a>
+                <Button variant="outline" onClick={() => handleLoginClick('student')}>
+                    Student Login
                 </Button>
-                <Button asChild>
-                    <a href="#login-section" onClick={handleScrollToLogin}>Teacher Login</a>
+                <Button onClick={() => handleLoginClick('teacher')}>
+                    Teacher Login
                 </Button>
             </div>
           </div>
@@ -144,89 +144,90 @@ export default function LandingPage() {
                 </div>
             </div>
         </section>
-
-        {/* Login Section */}
-        <section id="login-section" className="py-16 sm:py-24 bg-muted/40">
-           <div className="container mx-auto flex flex-col items-center justify-center p-4">
-              <Card className="w-full max-w-md shadow-2xl">
-                <CardHeader className="text-center">
-                  <CardTitle className="text-2xl">Welcome Back!</CardTitle>
-                  <CardDescription>Sign in to access your dashboard</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Tabs defaultValue="student">
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="student">
-                        <GraduationCap className="mr-2 h-4 w-4" /> Student
-                      </TabsTrigger>
-                      <TabsTrigger value="teacher">
-                        <Building className="mr-2 h-4 w-4" /> Teacher
-                      </TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="student">
-                      <form onSubmit={handleStudentLogin}>
-                        <div className="space-y-4 pt-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="student-id">Student ID (University Number)</Label>
-                            <Input
-                              id="student-id"
-                              placeholder="Enter your university number"
-                              value={studentId}
-                              onChange={(e) => setStudentId(e.target.value)}
-                              required
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="student-password">Password (Roll No.)</Label>
-                            <Input 
-                              id="student-password" 
-                              type="password" 
-                              placeholder="Enter your roll number"
-                              value={studentPassword}
-                              onChange={(e) => setStudentPassword(e.target.value)} 
-                              required />
-                          </div>
-                          <Button type="submit" className="w-full bg-accent hover:bg-accent/90">
-                            Login as Student
-                          </Button>
-                        </div>
-                      </form>
-                    </TabsContent>
-                    <TabsContent value="teacher">
-                      <form onSubmit={handleTeacherLogin}>
-                        <div className="space-y-4 pt-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="teacher-id">Staff ID</Label>
-                            <Input
-                              id="teacher-id"
-                              placeholder="Enter your staff ID"
-                              value={teacherId}
-                              onChange={(e) => setTeacherId(e.target.value)}
-                              required
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="teacher-password">Password</Label>
-                            <Input 
-                              id="teacher-password" 
-                              type="password" 
-                              placeholder="Enter your password" 
-                              value={teacherPassword}
-                              onChange={(e) => setTeacherPassword(e.target.value)}
-                              required />
-                          </div>
-                          <Button type="submit" className="w-full bg-accent hover:bg-accent/90">
-                            Login as Teacher
-                          </Button>
-                        </div>
-                      </form>
-                    </TabsContent>
-                  </Tabs>
-                </CardContent>
-              </Card>
-            </div>
-        </section>
       </main>
+
+      {/* Login Dialog */}
+      <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
+        <DialogContent className="sm:max-w-md p-0">
+          <Card className="w-full shadow-none border-none">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl">Welcome Back!</CardTitle>
+              <CardDescription>Sign in to access your dashboard</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs value={loginTab} onValueChange={(value) => setLoginTab(value as 'student' | 'teacher')}>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="student">
+                    <GraduationCap className="mr-2 h-4 w-4" /> Student
+                  </TabsTrigger>
+                  <TabsTrigger value="teacher">
+                    <Building className="mr-2 h-4 w-4" /> Teacher
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="student">
+                  <form onSubmit={handleStudentLogin}>
+                    <div className="space-y-4 pt-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="student-id">Student ID (University Number)</Label>
+                        <Input
+                          id="student-id"
+                          placeholder="Enter your university number"
+                          value={studentId}
+                          onChange={(e) => setStudentId(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="student-password">Password (Roll No.)</Label>
+                        <Input 
+                          id="student-password" 
+                          type="password" 
+                          placeholder="Enter your roll number"
+                          value={studentPassword}
+                          onChange={(e) => setStudentPassword(e.target.value)} 
+                          required />
+                      </div>
+                      <Button type="submit" className="w-full bg-accent hover:bg-accent/90">
+                        Login as Student
+                      </Button>
+                    </div>
+                  </form>
+                </TabsContent>
+                <TabsContent value="teacher">
+                  <form onSubmit={handleTeacherLogin}>
+                    <div className="space-y-4 pt-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="teacher-id">Staff ID</Label>
+                        <Input
+                          id="teacher-id"
+                          placeholder="Enter your staff ID"
+                          value={teacherId}
+                          onChange={(e) => setTeacherId(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="teacher-password">Password</Label>
+                        <Input 
+                          id="teacher-password" 
+                          type="password" 
+                          placeholder="Enter your password" 
+                          value={teacherPassword}
+                          onChange={(e) => setTeacherPassword(e.target.value)}
+                          required />
+                      </div>
+                      <Button type="submit" className="w-full bg-accent hover:bg-accent/90">
+                        Login as Teacher
+                      </Button>
+                    </div>
+                  </form>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </DialogContent>
+      </Dialog>
+      
       <footer className="bg-primary text-primary-foreground py-6">
         <div className="container mx-auto text-center">
             <p>&copy; {new Date().getFullYear()} Merit Haji Ismail Sahib Arts and Science College. All rights reserved.</p>
