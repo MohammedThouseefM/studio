@@ -289,7 +289,7 @@ export function TeacherManagementPanel() {
                         <FormLabel>Profile Photo</FormLabel>
                         <div className="flex items-center gap-4">
                           <Avatar className="h-20 w-20 border">
-                            <AvatarImage src={studentForm.watch('photoUrl')} alt="Student avatar" data-ai-hint="student portrait"/>
+                            <AvatarImage src={studentForm.watch('photoUrl')} alt="Student avatar" data-ai-hint="student portrait" className="object-cover"/>
                             <AvatarFallback><User className="h-10 w-10" /></AvatarFallback>
                           </Avatar>
                           <div className="w-full">
@@ -436,7 +436,7 @@ export function TeacherManagementPanel() {
                       <FormLabel>Profile Photo</FormLabel>
                       <div className="flex items-center gap-4">
                         <Avatar className="h-20 w-20 border">
-                          <AvatarImage src={studentForm.watch('photoUrl')} alt="Student avatar" data-ai-hint="student portrait" />
+                          <AvatarImage src={studentForm.watch('photoUrl')} alt="Student avatar" data-ai-hint="student portrait" className="object-cover" />
                           <AvatarFallback><User className="h-10 w-10" /></AvatarFallback>
                         </Avatar>
                         <div className="w-full">
