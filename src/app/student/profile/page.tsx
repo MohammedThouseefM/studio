@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { students } from "@/lib/mock-data";
+import { format, parseISO } from 'date-fns';
 
 export default function StudentProfilePage() {
   // In a real app, you would get the logged-in student's ID from a session
@@ -65,11 +66,27 @@ export default function StudentProfilePage() {
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Date of Birth</p>
-              <p className="font-medium">{student.dob}</p>
+              <p className="font-medium">{format(parseISO(student.dob), 'PPP')}</p>
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Phone Number</p>
               <p className="font-medium">{student.phone}</p>
+            </div>
+             <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">Gender</p>
+              <p className="font-medium">{student.gender}</p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">Current Semester</p>
+              <p className="font-medium">{student.currentSemester}</p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">Academic Year</p>
+              <p className="font-medium">{student.academicYear}</p>
+            </div>
+             <div className="space-y-1 sm:col-span-2 md:col-span-3">
+              <p className="text-sm text-muted-foreground">Address</p>
+              <p className="font-medium">{student.address}</p>
             </div>
           </div>
         </CardContent>

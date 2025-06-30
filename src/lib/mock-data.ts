@@ -2,7 +2,7 @@
 
 export type Student = {
   id: string; // university_number
-  rollNumber: string; // roll_no
+  rollNumber: string;
   name: string;
   dob: string;
   university_number: string;
@@ -11,6 +11,10 @@ export type Student = {
   email: string;
   phone: string;
   photoUrl?: string;
+  gender: 'Male' | 'Female' | 'Other';
+  currentSemester: string;
+  academicYear: string;
+  address: string;
 };
 
 export type AttendanceRecord = {
@@ -52,18 +56,18 @@ export const teachers = [
 ];
 
 const rawStudents = [
-    { "roll_no": "3BCA-28", "name": "Mohammed Thouseef", "dob": "12-12-2005", "university_number": "36623U09028", "department": "BCA", "year": "3rd Year", "email": "mthouseef100@gmail.com", "phone": "986578987" },
-    { "roll_no": "3BCA-15", "name": "Priya Verma", "dob": "05-08-2004", "university_number": "36623U09015", "department": "BCA", "year": "3rd Year", "email": "priya.verma@gmail.com", "phone": "8876543210" },
-    { "roll_no": "3BCA-42", "name": "Rahul Desai", "dob": "22-03-2005", "university_number": "36623U09042", "department": "BCA", "year": "3rd Year", "email": "rahul.desai@gmail.com", "phone": "7765432109" },
-    { "roll_no": "3BSC-07", "name": "Ananya Joshi", "dob": "14-09-2004", "university_number": "36623U08007", "department": "BSC", "year": "3rd Year", "email": "ananya.joshi@gmail.com", "phone": "9988776655" },
-    { "roll_no": "3BSC-19", "name": "Karan Patel", "dob": "30-11-2005", "university_number": "36623U08019", "department": "BSC", "year": "3rd Year", "email": "karan.patel@gmail.com", "phone": "8899001122" },
-    { "roll_no": "3BSC-33", "name": "Sneha Menon", "dob": "17-01-2005", "university_number": "36623U08033", "department": "BSC", "year": "3rd Year", "email": "sneha.menon@gmail.com", "phone": "7788990011" },
-    { "roll_no": "3BBA-12", "name": "Aditya Rao", "dob": "08-04-2004", "university_number": "36623U07012", "department": "BBA", "year": "3rd Year", "email": "aditya.rao@gmail.com", "phone": "9876543210" },
-    { "roll_no": "3BBA-25", "name": "Divya Iyer", "dob": "25-07-2005", "university_number": "36623U07025", "department": "BBA", "year": "3rd Year", "email": "divya.iyer@gmail.com", "phone": "8765432109" },
-    { "roll_no": "3BBA-38", "name": "Vikram Choudhary", "dob": "03-10-2004", "university_number": "36623U07038", "department": "BBA", "year": "3rd Year", "email": "vikram.c@gmail.com", "phone": "7654321098" },
-    { "roll_no": "3BCOM-05", "name": "Neha Gupta", "dob": "19-06-2005", "university_number": "36623U06005", "department": "BCOM", "year": "3rd Year", "email": "neha.gupta@gmail.com", "phone": "6543210987" },
-    { "roll_no": "3BCOM-21", "name": "Rajesh Khanna", "dob": "11-12-2004", "university_number": "36623U06021", "department": "BCOM", "year": "3rd Year", "email": "rajesh.k@gmail.com", "phone": "9432109876" },
-    { "roll_no": "3BCOM-14", "name": "Swati Nair", "dob": "28-02-2005", "university_number": "36623U06014", "department": "BCOM", "year": "3rd Year", "email": "swati.nair@gmail.com", "phone": "8321098765" }
+    { "roll_no": "3BCA-28", "name": "Mohammed Thouseef", "dob": "2005-12-12", "university_number": "36623U09028", "department": "BCA", "year": "3rd Year", "email": "mthouseef100@gmail.com", "phone": "986578987", "gender": "Male" as const, "currentSemester": "6th", "academicYear": "2024-2025", "address": "123 Main St, Anytown, India" },
+    { "roll_no": "3BCA-15", "name": "Priya Verma", "dob": "2004-08-05", "university_number": "36623U09015", "department": "BCA", "year": "3rd Year", "email": "priya.verma@gmail.com", "phone": "8876543210", "gender": "Female" as const, "currentSemester": "6th", "academicYear": "2024-2025", "address": "456 Oak Ave, Anytown, India" },
+    { "roll_no": "3BCA-42", "name": "Rahul Desai", "dob": "2005-03-22", "university_number": "36623U09042", "department": "BCA", "year": "3rd Year", "email": "rahul.desai@gmail.com", "phone": "7765432109", "gender": "Male" as const, "currentSemester": "6th", "academicYear": "2024-2025", "address": "789 Pine Ln, Anytown, India" },
+    { "roll_no": "3BSC-07", "name": "Ananya Joshi", "dob": "2004-09-14", "university_number": "36623U08007", "department": "BSC", "year": "3rd Year", "email": "ananya.joshi@gmail.com", "phone": "9988776655", "gender": "Female" as const, "currentSemester": "6th", "academicYear": "2024-2025", "address": "101 Maple Dr, Anytown, India" },
+    { "roll_no": "3BSC-19", "name": "Karan Patel", "dob": "2005-11-30", "university_number": "36623U08019", "department": "BSC", "year": "3rd Year", "email": "karan.patel@gmail.com", "phone": "8899001122", "gender": "Male" as const, "currentSemester": "6th", "academicYear": "2024-2025", "address": "212 Birch Rd, Anytown, India" },
+    { "roll_no": "3BSC-33", "name": "Sneha Menon", "dob": "2005-01-17", "university_number": "36623U08033", "department": "BSC", "year": "3rd Year", "email": "sneha.menon@gmail.com", "phone": "7788990011", "gender": "Female" as const, "currentSemester": "6th", "academicYear": "2024-2025", "address": "333 Cedar Ct, Anytown, India" },
+    { "roll_no": "3BBA-12", "name": "Aditya Rao", "dob": "2004-04-08", "university_number": "36623U07012", "department": "BBA", "year": "3rd Year", "email": "aditya.rao@gmail.com", "phone": "9876543210", "gender": "Male" as const, "currentSemester": "6th", "academicYear": "2024-2025", "address": "444 Elm St, Anytown, India" },
+    { "roll_no": "3BBA-25", "name": "Divya Iyer", "dob": "2005-07-25", "university_number": "36623U07025", "department": "BBA", "year": "3rd Year", "email": "divya.iyer@gmail.com", "phone": "8765432109", "gender": "Female" as const, "currentSemester": "6th", "academicYear": "2024-2025", "address": "555 Spruce Way, Anytown, India" },
+    { "roll_no": "3BBA-38", "name": "Vikram Choudhary", "dob": "2004-10-03", "university_number": "36623U07038", "department": "BBA", "year": "3rd Year", "email": "vikram.c@gmail.com", "phone": "7654321098", "gender": "Male" as const, "currentSemester": "6th", "academicYear": "2024-2025", "address": "666 Walnut Blvd, Anytown, India" },
+    { "roll_no": "3BCOM-05", "name": "Neha Gupta", "dob": "2005-06-19", "university_number": "36623U06005", "department": "BCOM", "year": "3rd Year", "email": "neha.gupta@gmail.com", "phone": "6543210987", "gender": "Female" as const, "currentSemester": "6th", "academicYear": "2024-2025", "address": "777 Aspen Ave, Anytown, India" },
+    { "roll_no": "3BCOM-21", "name": "Rajesh Khanna", "dob": "2004-12-11", "university_number": "36623U06021", "department": "BCOM", "year": "3rd Year", "email": "rajesh.k@gmail.com", "phone": "9432109876", "gender": "Male" as const, "currentSemester": "6th", "academicYear": "2024-2025", "address": "888 Willow Dr, Anytown, India" },
+    { "roll_no": "3BCOM-14", "name": "Swati Nair", "dob": "2005-02-28", "university_number": "36623U06014", "department": "BCOM", "year": "3rd Year", "email": "swati.nair@gmail.com", "phone": "8321098765", "gender": "Female" as const, "currentSemester": "6th", "academicYear": "2024-2025", "address": "999 Poplar Pl, Anytown, India" }
 ];
 
 export const students: Student[] = rawStudents.map(s => ({
@@ -75,7 +79,7 @@ export const students: Student[] = rawStudents.map(s => ({
 
 export const studentUsers = students.map(student => ({
   id: student.university_number,
-  password: student.roll_no,
+  password: student.rollNumber,
 }));
 
 export const teacherUsers = teachers;

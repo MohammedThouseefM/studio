@@ -34,11 +34,16 @@ const studentSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
   email: z.string().email('Invalid email address.'),
   phone: z.string().min(10, 'Phone number must be at least 10 digits.'),
-  roll_no: z.string().min(1, 'Roll number is required.'),
+  rollNumber: z.string().min(1, 'Roll number is required.'),
   university_number: z.string().min(1, 'University number is required.'),
   department: z.string().min(1, 'Please select a department.'),
   year: z.string().min(1, 'Please select a year.'),
   photoUrl: z.string().optional(),
+  dob: z.date({ required_error: 'Date of birth is required.' }),
+  gender: z.enum(['Male', 'Female', 'Other'], { required_error: 'Please select a gender.' }),
+  currentSemester: z.string().min(1, 'Semester is required.'),
+  academicYear: z.string().min(1, 'Academic year is required.'),
+  address: z.string().min(1, 'Address is required.'),
 });
 
 type StudentFormData = z.infer<typeof studentSchema>;
@@ -98,7 +103,7 @@ export function TeacherManagementPanel() {
 
   const studentForm = useForm<StudentFormData>({
     resolver: zodResolver(studentSchema),
-    defaultValues: { name: '', email: '', phone: '', roll_no: '', university_number: '', department: '', year: '', photoUrl: '' },
+    defaultValues: { name: '', email: '', phone: '', rollNumber: '', university_number: '', department: '', year: '', photoUrl: '', gender: undefined, currentSemester: '', academicYear: '', address: '' },
   });
 
   const eventForm = useForm<EventFormData>({
@@ -124,8 +129,7 @@ export function TeacherManagementPanel() {
     const newStudent: Student = {
       ...data,
       id: data.university_number,
-      rollNumber: data.roll_no,
-      dob: 'N/A', 
+      dob: format(data.dob, 'yyyy-MM-dd'),
     };
     setStudents(prev => [newStudent, ...prev]);
     toast({ title: 'Student Added', description: `Successfully added ${data.name}.` });
@@ -138,18 +142,23 @@ export function TeacherManagementPanel() {
       name: student.name,
       email: student.email,
       phone: student.phone,
-      roll_no: student.rollNumber,
+      rollNumber: student.rollNumber,
       university_number: student.university_number,
       department: student.department,
       year: student.year,
       photoUrl: student.photoUrl || '',
+      dob: parseISO(student.dob),
+      gender: student.gender,
+      currentSemester: student.currentSemester,
+      academicYear: student.academicYear,
+      address: student.address,
     });
     setIsStudentFormDialogOpen(true);
   };
   
   const onEditStudentSubmit = (data: StudentFormData) => {
     if (!editingStudent) return;
-    setStudents(prev => prev.map(s => s.id === editingStudent.id ? { ...s, ...data, rollNumber: data.roll_no, university_number: data.university_number, id: data.university_number } : s));
+    setStudents(prev => prev.map(s => s.id === editingStudent.id ? { ...s, ...data, id: data.university_number, dob: format(data.dob, 'yyyy-MM-dd') } : s));
     toast({ title: 'Student Updated', description: `Successfully updated ${data.name}.` });
     setIsStudentFormDialogOpen(false);
     setEditingStudent(null);
@@ -290,16 +299,21 @@ export function TeacherManagementPanel() {
                     <FormField control={studentForm.control} name="name" render={({ field }) => ( <FormItem> <FormLabel>Full Name</FormLabel> <FormControl><Input placeholder="Enter student's name" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                     <FormField control={studentForm.control} name="email" render={({ field }) => ( <FormItem> <FormLabel>Email</FormLabel> <FormControl><Input placeholder="student@example.com" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                     <FormField control={studentForm.control} name="phone" render={({ field }) => ( <FormItem> <FormLabel>Phone Number</FormLabel> <FormControl><Input placeholder="9876543210" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                    <FormField control={studentForm.control} name="roll_no" render={({ field }) => ( <FormItem> <FormLabel>Roll Number</FormLabel> <FormControl><Input placeholder="e.g., 3BCA-29" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                    <FormField control={studentForm.control} name="rollNumber" render={({ field }) => ( <FormItem> <FormLabel>Roll Number</FormLabel> <FormControl><Input placeholder="e.g., 3BCA-29" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                     <FormField control={studentForm.control} name="university_number" render={({ field }) => ( <FormItem> <FormLabel>University Number</FormLabel> <FormControl><Input placeholder="e.g., 36623U09029" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                     <FormField control={studentForm.control} name="department" render={({ field }) => ( <FormItem> <FormLabel>Department</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl><SelectTrigger><SelectValue placeholder="Select a department" /></SelectTrigger></FormControl> <SelectContent>{departments.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent> </Select> <FormMessage /> </FormItem> )}/>
                     <FormField control={studentForm.control} name="year" render={({ field }) => ( <FormItem> <FormLabel>Year</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl><SelectTrigger><SelectValue placeholder="Select a year" /></SelectTrigger></FormControl> <SelectContent>{years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}</SelectContent> </Select> <FormMessage /> </FormItem> )}/>
+                    <FormField control={studentForm.control} name="dob" render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>Date of Birth</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}><CalendarIcon className="mr-2 h-4 w-4" />{field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}</Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus /></PopoverContent></Popover><FormMessage /></FormItem>)}/>
+                    <FormField control={studentForm.control} name="gender" render={({ field }) => ( <FormItem> <FormLabel>Gender</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl><SelectTrigger><SelectValue placeholder="Select a gender" /></SelectTrigger></FormControl> <SelectContent><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem><SelectItem value="Other">Other</SelectItem></SelectContent> </Select> <FormMessage /> </FormItem> )}/>
+                    <FormField control={studentForm.control} name="currentSemester" render={({ field }) => ( <FormItem> <FormLabel>Current Semester</FormLabel> <FormControl><Input placeholder="e.g., 6th" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                    <FormField control={studentForm.control} name="academicYear" render={({ field }) => ( <FormItem> <FormLabel>Academic Year</FormLabel> <FormControl><Input placeholder="e.g., 2024-2025" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                   </div>
+                   <FormField control={studentForm.control} name="address" render={({ field }) => ( <FormItem> <FormLabel>Address</FormLabel> <FormControl><Textarea placeholder="Enter student's full address" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                   <FormField
                     control={studentForm.control}
                     name="photoUrl"
                     render={({ field }) => (
-                      <FormItem className="md:col-span-2">
+                      <FormItem>
                         <FormLabel>Profile Photo</FormLabel>
                         <div className="flex items-center gap-4">
                           <Avatar className="h-20 w-20 border">
@@ -524,23 +538,28 @@ export function TeacherManagementPanel() {
       </Dialog>
 
       <Dialog open={isStudentFormDialogOpen} onOpenChange={setIsStudentFormDialogOpen}>
-        <DialogContent className="sm:max-w-[625px]"><DialogHeader><DialogTitle>Edit Student: {editingStudent?.name}</DialogTitle><DialogDescription>Update the student's details below. Click save to apply changes.</DialogDescription></DialogHeader>
+        <DialogContent className="sm:max-w-2xl"><DialogHeader><DialogTitle>Edit Student: {editingStudent?.name}</DialogTitle><DialogDescription>Update the student's details below. Click save to apply changes.</DialogDescription></DialogHeader>
           <Form {...studentForm}>
-            <form onSubmit={studentForm.handleSubmit(onEditStudentSubmit)} className="space-y-6 pt-4">
+            <form onSubmit={studentForm.handleSubmit(onEditStudentSubmit)} className="space-y-6 pt-4 max-h-[70vh] overflow-y-auto pr-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <FormField control={studentForm.control} name="name" render={({ field }) => ( <FormItem> <FormLabel>Full Name</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                 <FormField control={studentForm.control} name="email" render={({ field }) => ( <FormItem> <FormLabel>Email</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                 <FormField control={studentForm.control} name="phone" render={({ field }) => ( <FormItem> <FormLabel>Phone</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                <FormField control={studentForm.control} name="roll_no" render={({ field }) => ( <FormItem> <FormLabel>Roll No</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                <FormField control={studentForm.control} name="rollNumber" render={({ field }) => ( <FormItem> <FormLabel>Roll No</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                 <FormField control={studentForm.control} name="university_number" render={({ field }) => ( <FormItem> <FormLabel>University No</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                <FormField control={studentForm.control} name="department" render={({ field }) => ( <FormItem> <FormLabel>Department</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl> <SelectContent>{departments.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent> </Select> <FormMessage /> </FormItem> )}/>
-                <FormField control={studentForm.control} name="year" render={({ field }) => ( <FormItem> <FormLabel>Year</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl> <SelectContent>{years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}</SelectContent> </Select> <FormMessage /> </FormItem> )}/>
+                <FormField control={studentForm.control} name="department" render={({ field }) => ( <FormItem> <FormLabel>Department</FormLabel> <Select onValueChange={field.onChange} value={field.value}> <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl> <SelectContent>{departments.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent> </Select> <FormMessage /> </FormItem> )}/>
+                <FormField control={studentForm.control} name="year" render={({ field }) => ( <FormItem> <FormLabel>Year</FormLabel> <Select onValueChange={field.onChange} value={field.value}> <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl> <SelectContent>{years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}</SelectContent> </Select> <FormMessage /> </FormItem> )}/>
+                <FormField control={studentForm.control} name="dob" render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>Date of Birth</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}><CalendarIcon className="mr-2 h-4 w-4" />{field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}</Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus /></PopoverContent></Popover><FormMessage /></FormItem>)}/>
+                <FormField control={studentForm.control} name="gender" render={({ field }) => ( <FormItem> <FormLabel>Gender</FormLabel> <Select onValueChange={field.onChange} value={field.value}> <FormControl><SelectTrigger><SelectValue placeholder="Select a gender" /></SelectTrigger></FormControl> <SelectContent><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem><SelectItem value="Other">Other</SelectItem></SelectContent> </Select> <FormMessage /> </FormItem> )}/>
+                <FormField control={studentForm.control} name="currentSemester" render={({ field }) => ( <FormItem> <FormLabel>Current Semester</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                <FormField control={studentForm.control} name="academicYear" render={({ field }) => ( <FormItem> <FormLabel>Academic Year</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
               </div>
+              <FormField control={studentForm.control} name="address" render={({ field }) => ( <FormItem> <FormLabel>Address</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                <FormField
                   control={studentForm.control}
                   name="photoUrl"
                   render={({ field }) => (
-                    <FormItem className="md:col-span-2">
+                    <FormItem>
                       <FormLabel>Profile Photo</FormLabel>
                       <div className="flex items-center gap-4">
                         <Avatar className="h-20 w-20 border">
