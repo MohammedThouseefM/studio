@@ -3,6 +3,7 @@ import { Announcements } from "@/components/announcements";
 import { MotivationalQuote } from "@/components/motivational-quote";
 import { StudentAttendanceSummary } from "@/components/student-attendance-summary";
 import { TimetableCard } from "@/components/timetable-card";
+import { studentAttendance } from "@/lib/mock-data";
 
 export default function StudentDashboardPage() {
   return (
@@ -10,7 +11,7 @@ export default function StudentDashboardPage() {
       <h1 className="text-3xl font-bold mb-6">Student Dashboard</h1>
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <StudentAttendanceSummary />
+          <StudentAttendanceSummary attendanceData={studentAttendance} showLowAttendanceWarning={true} />
         </div>
         <div className="lg:col-span-1 space-y-8">
           <MotivationalQuote />
