@@ -136,21 +136,21 @@ export const collegeData = {
 };
 
 export const defaultTimetable: ClassTimeTable = {
-  'Monday': ['-', '-', '-', '-', '-'],
-  'Tuesday': ['-', '-', '-', '-', '-'],
-  'Wednesday': ['-', '-', '-', '-', '-'],
-  'Thursday': ['-', '-', '-', '-', '-'],
-  'Friday': ['-', '-', '-', '-', '-'],
-  'Saturday': ['-', '-', '-', '-', '-'],
+  'D1': ['-', '-', '-', '-', '-'],
+  'D2': ['-', '-', '-', '-', '-'],
+  'D3': ['-', '-', '-', '-', '-'],
+  'D4': ['-', '-', '-', '-', '-'],
+  'D5': ['-', '-', '-', '-', '-'],
+  'D6': ['-', '-', '-', '-', '-'],
 };
 
 const bca3rdYearTimeTable: ClassTimeTable = {
-  'Monday': ['Data Structures', 'Algorithms', 'Web Tech', 'OS', 'Project Lab'],
-  'Tuesday': ['Algorithms', 'OS', 'DS', 'Web Tech', 'DBMS'],
-  'Wednesday': ['DBMS', 'DS', 'OS', 'Algorithms', 'Web Tech'],
-  'Thursday': ['OS', 'DBMS', 'Web Tech', 'Algorithms', 'DS'],
-  'Friday': ['DS', 'Algorithms', 'DBMS', 'Project Work', 'Seminar'],
-  'Saturday': ['-', '-', '-', '-', '-'],
+  'D1': ['Data Structures', 'Algorithms', 'Web Tech', 'OS', 'Project Lab'],
+  'D2': ['Algorithms', 'OS', 'DS', 'Web Tech', 'DBMS'],
+  'D3': ['DBMS', 'DS', 'OS', 'Algorithms', 'Web Tech'],
+  'D4': ['OS', 'DBMS', 'Web Tech', 'Algorithms', 'DS'],
+  'D5': ['DS', 'Algorithms', 'DBMS', 'Project Work', 'Seminar'],
+  'D6': ['-', '-', '-', '-', '-'],
 };
 
 export const timeTable: FullTimeTable = {

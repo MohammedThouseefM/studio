@@ -10,22 +10,36 @@ import { useCollegeData } from '@/context/college-data-context';
 
 export function TimetableCard() {
   const { timeTable, hours } = useCollegeData();
-  const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+  
+  const getTodayKey = () => {
+    const dayIndex = new Date().getDay(); // Sunday - 0, Monday - 1, etc.
+    switch (dayIndex) {
+      case 1: return 'D1'; // Monday
+      case 2: return 'D2'; // Tuesday
+      case 3: return 'D3'; // Wednesday
+      case 4: return 'D4'; // Thursday
+      case 5: return 'D5'; // Friday
+      case 6: return 'D6'; // Saturday
+      default: return 'D1'; // Sunday defaults to D1
+    }
+  };
+
+  const today = getTodayKey();
   
   // In a real app, you would get the logged-in student's ID from a session.
   // For this demo, we'll use the first student.
   const student = students[0];
   const studentTimetable = timeTable[student.department]?.[student.year] || defaultTimetable;
 
-  // Fallback to Monday if today is not in timetable (e.g., Sunday) or no schedule for today
-  const todaySchedule = studentTimetable[today] || studentTimetable['Monday'];
+  // Fallback to D1 if today is not in timetable or no schedule for today
+  const todaySchedule = studentTimetable[today] || studentTimetable['D1'];
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <CalendarDays className="h-6 w-6" />
-          <span>Today's Schedule</span>
+          <span>Today's Schedule ({today})</span>
         </CardTitle>
       </CardHeader>
       <CardContent>

@@ -51,7 +51,7 @@ const eventSchema = z.object({
 
 type EventFormData = z.infer<typeof eventSchema>;
 
-const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const daysOfWeek = ['D1', 'D2', 'D3', 'D4', 'D5', 'D6'];
 
 export function TeacherManagementPanel() {
   const { toast } = useToast();

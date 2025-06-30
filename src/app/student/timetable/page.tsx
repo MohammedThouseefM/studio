@@ -22,7 +22,7 @@ import {
 import { students, defaultTimetable } from '@/lib/mock-data';
 import { useCollegeData } from '@/context/college-data-context';
 
-const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const daysOfWeek = ['D1', 'D2', 'D3', 'D4', 'D5', 'D6'];
 
 export default function TimetablePage() {
   const { timeTable, hours } = useCollegeData();
