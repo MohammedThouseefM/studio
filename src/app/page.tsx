@@ -77,7 +77,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-4">
             <School className="h-10 w-10 text-primary" />
             <div>
-              <h1 className="text-xl font-bold text-primary">AttendEase University</h1>
+              <h1 className="text-xl font-bold text-primary">Merit Haji Ismail Sahib Arts and Science College</h1>
               <p className="text-xs text-muted-foreground">Accredited Grade 'A' | Anytown, India</p>
             </div>
           </div>
@@ -132,11 +132,11 @@ export default function LandingPage() {
             <div className="container mx-auto px-4 md:px-6">
                 <div className="max-w-3xl mx-auto text-center">
                     <h2 className="text-3xl font-bold tracking-tight sm:text-4xl inline-block relative pb-2">
-                        About Our University
+                        About Our College
                         <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-1 bg-primary rounded-full"></span>
                     </h2>
                     <p className="mt-8 text-lg/relaxed text-muted-foreground">
-                        Founded in 1985, AttendEase University has been a beacon of knowledge and innovation for nearly four decades. Our mission is to provide a holistic education that not only imparts knowledge but also fosters critical thinking, creativity, and a sense of social responsibility.
+                        Founded in 1985, Merit Haji Ismail Sahib Arts and Science College has been a beacon of knowledge and innovation for nearly four decades. Our mission is to provide a holistic education that not only imparts knowledge but also fosters critical thinking, creativity, and a sense of social responsibility.
                     </p>
                     <p className="mt-4 text-lg/relaxed text-muted-foreground">
                         With a diverse student body and a world-class faculty, we are proud of our numerous achievements in research, academia, and community service. We are committed to creating an environment where every student can thrive and achieve their full potential.
@@ -229,7 +229,7 @@ export default function LandingPage() {
       </main>
       <footer className="bg-primary text-primary-foreground py-6">
         <div className="container mx-auto text-center">
-            <p>&copy; {new Date().getFullYear()} AttendEase University. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} Merit Haji Ismail Sahib Arts and Science College. All rights reserved.</p>
         </div>
       </footer>
     </div>

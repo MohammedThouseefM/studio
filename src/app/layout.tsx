@@ -5,7 +5,7 @@ import { AnnouncementsProvider } from '@/context/announcements-context';
 import { CollegeDataProvider } from '@/context/college-data-context';
 
 export const metadata: Metadata = {
-  title: 'AttendEase',
+  title: 'AttendEase - Merit Haji Ismail Sahib Arts and Science College',
   description: 'Digital Attendance Management System',
 };
 
