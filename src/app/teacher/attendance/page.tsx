@@ -2,6 +2,7 @@
 'use client';
 
 import { Suspense } from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { AttendanceSheet } from '@/components/attendance-sheet';
@@ -71,9 +72,11 @@ export default function AttendancePage() {
   return (
     <div className="p-4 md:p-8">
       <div className="flex items-center gap-4 mb-6">
-        <Button variant="outline" size="icon" onClick={() => router.back()}>
-          <ArrowLeft className="h-4 w-4" />
-          <span className="sr-only">Back</span>
+        <Button variant="outline" size="icon" asChild>
+          <Link href="/teacher/dashboard">
+            <ArrowLeft className="h-4 w-4" />
+            <span className="sr-only">Back</span>
+          </Link>
         </Button>
         <h1 className="text-3xl font-bold">Attendance Sheet</h1>
       </div>

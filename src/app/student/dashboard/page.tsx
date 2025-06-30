@@ -1,5 +1,7 @@
 import { Announcements } from "@/components/announcements";
+import { MotivationalQuote } from "@/components/motivational-quote";
 import { StudentAttendanceSummary } from "@/components/student-attendance-summary";
+import { TimetableCard } from "@/components/timetable-card";
 
 export default function StudentDashboardPage() {
   return (
@@ -9,7 +11,9 @@ export default function StudentDashboardPage() {
         <div className="lg:col-span-2">
           <StudentAttendanceSummary />
         </div>
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 space-y-8">
+          <MotivationalQuote />
+          <TimetableCard />
           <Announcements />
         </div>
       </div>

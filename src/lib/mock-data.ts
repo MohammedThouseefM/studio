@@ -113,3 +113,14 @@ export const collegeData = {
   years: ['1st Year', '2nd Year', '3rd Year'],
   hours: ['1st Hour', '2nd Hour', '3rd Hour', '4th Hour', '5th Hour'],
 };
+
+export const timeTable = {
+  'Monday': ['Data Structures', 'Algorithms', 'Lunch', 'Database Management', 'Operating Systems'],
+  'Tuesday': ['Algorithms', 'Operating Systems', 'Lunch', 'Data Structures', 'Database Management'],
+  'Wednesday': ['Database Management', 'Data Structures', 'Lunch', 'Operating Systems', 'Algorithms'],
+  'Thursday': ['Operating Systems', 'Database Management', 'Lunch', 'Algorithms', 'Data Structures'],
+  'Friday': ['Data Structures', 'Algorithms', 'Lunch', 'Database Management', 'Project Work'],
+  'Saturday': ['-', '-', 'Lunch', '-', '-'],
+};
+
+export const timeSlots = ['9:00 - 10:00', '10:00 - 11:00', '11:00 - 12:00', '1:00 - 2:00', '2:00 - 3:00'];

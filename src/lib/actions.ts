@@ -2,6 +2,7 @@
 
 import { predictAttendance, type AttendancePredictionInput } from '@/ai/flows/attendance-prediction';
 import { generateDefaulterReport } from '@/ai/flows/defaulter-report-flow';
+import { getMotivationalQuote as getQuoteFlow } from '@/ai/flows/quote-flow';
 import { students, previousAttendanceData } from '@/lib/mock-data';
 
 export async function getAttendancePrediction(input: AttendancePredictionInput) {
@@ -26,4 +27,15 @@ export async function getDefaulterReport() {
         console.error('Error generating defaulter report:', error);
         return { success: false, error: 'Failed to generate defaulter report.' };
     }
+}
+
+export async function getQuote() {
+  try {
+    const result = await getQuoteFlow();
+    return { success: true, data: result.quote };
+  } catch (error) {
+    console.error('Error getting motivational quote:', error);
+    // Return a fallback quote on error
+    return { success: false, data: "Believe you can and you're halfway there." };
+  }
 }
