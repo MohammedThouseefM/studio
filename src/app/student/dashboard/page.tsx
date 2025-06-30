@@ -3,7 +3,7 @@ import { StudentAttendanceSummary } from "@/components/student-attendance-summar
 
 export default function StudentDashboardPage() {
   return (
-    <div className="container py-8">
+    <div className="px-8 py-8">
       <h1 className="text-3xl font-bold mb-6">Student Dashboard</h1>
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
