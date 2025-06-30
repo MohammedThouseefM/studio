@@ -11,6 +11,7 @@ export type Student = {
   year: string;
   email: string;
   phone: string;
+  photoUrl?: string;
 };
 
 export type AttendanceRecord = {
@@ -70,6 +71,7 @@ export const students: Student[] = rawStudents.map(s => ({
   ...s,
   id: s.university_number,
   rollNumber: s.roll_no,
+  photoUrl: '',
 }));
 
 export const studentUsers = students.map(student => ({

@@ -37,7 +37,7 @@ export default function StudentProfilePage() {
       <Card className="max-w-4xl mx-auto">
         <CardHeader className="flex flex-col md:flex-row items-center gap-6 p-6 text-center md:text-left">
             <Avatar className="h-24 w-24 border">
-                <AvatarImage src={`https://placehold.co/200x200.png`} alt="Student avatar" data-ai-hint="student portrait" />
+                <AvatarImage src={student.photoUrl || `https://placehold.co/200x200.png`} alt="Student avatar" data-ai-hint="student portrait" />
                 <AvatarFallback>
                     <User className="h-12 w-12" />
                 </AvatarFallback>

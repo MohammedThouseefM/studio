@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format, parseISO } from 'date-fns';
-import { PlusCircle, Trash2, Megaphone, Pencil, Search, FileText, Loader2, Calendar as CalendarIcon, CalendarClock } from 'lucide-react';
+import { PlusCircle, Trash2, Megaphone, Pencil, Search, FileText, Loader2, Calendar as CalendarIcon, CalendarClock, User } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,6 +28,7 @@ import { useCollegeData, type CalendarEventWithId } from '@/context/college-data
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { cn } from '@/lib/utils';
 import { Calendar } from './ui/calendar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const studentSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -37,6 +38,7 @@ const studentSchema = z.object({
   university_number: z.string().min(1, 'University number is required.'),
   department: z.string().min(1, 'Please select a department.'),
   year: z.string().min(1, 'Please select a year.'),
+  photoUrl: z.string().optional(),
 });
 
 type StudentFormData = z.infer<typeof studentSchema>;
@@ -90,7 +92,7 @@ export function TeacherManagementPanel() {
 
   const studentForm = useForm<StudentFormData>({
     resolver: zodResolver(studentSchema),
-    defaultValues: { name: '', email: '', phone: '', roll_no: '', university_number: '', department: '', year: '' },
+    defaultValues: { name: '', email: '', phone: '', roll_no: '', university_number: '', department: '', year: '', photoUrl: '' },
   });
 
   const eventForm = useForm<EventFormData>({
@@ -134,6 +136,7 @@ export function TeacherManagementPanel() {
       university_number: student.university_number,
       department: student.department,
       year: student.year,
+      photoUrl: student.photoUrl || '',
     });
     setIsStudentFormDialogOpen(true);
   };
@@ -278,6 +281,42 @@ export function TeacherManagementPanel() {
                     <FormField control={studentForm.control} name="department" render={({ field }) => ( <FormItem> <FormLabel>Department</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl><SelectTrigger><SelectValue placeholder="Select a department" /></SelectTrigger></FormControl> <SelectContent>{departments.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent> </Select> <FormMessage /> </FormItem> )}/>
                     <FormField control={studentForm.control} name="year" render={({ field }) => ( <FormItem> <FormLabel>Year</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl><SelectTrigger><SelectValue placeholder="Select a year" /></SelectTrigger></FormControl> <SelectContent>{years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}</SelectContent> </Select> <FormMessage /> </FormItem> )}/>
                   </div>
+                  <FormField
+                    control={studentForm.control}
+                    name="photoUrl"
+                    render={({ field }) => (
+                      <FormItem className="md:col-span-2">
+                        <FormLabel>Profile Photo</FormLabel>
+                        <div className="flex items-center gap-4">
+                          <Avatar className="h-20 w-20 border">
+                            <AvatarImage src={studentForm.watch('photoUrl')} alt="Student avatar" data-ai-hint="student portrait"/>
+                            <AvatarFallback><User className="h-10 w-10" /></AvatarFallback>
+                          </Avatar>
+                          <div className="w-full">
+                            <FormControl>
+                              <Input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => {
+                                      studentForm.setValue('photoUrl', reader.result as string);
+                                    };
+                                    reader.readAsDataURL(file);
+                                  }
+                                }}
+                                className="flex-1"
+                              />
+                            </FormControl>
+                            <p className="text-xs text-muted-foreground mt-2">Upload a picture for the student's profile.</p>
+                          </div>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <Button type="submit" className="w-full"><PlusCircle /> Add Student</Button>
                 </form>
               </Form>
@@ -389,6 +428,42 @@ export function TeacherManagementPanel() {
                 <FormField control={studentForm.control} name="department" render={({ field }) => ( <FormItem> <FormLabel>Department</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl> <SelectContent>{departments.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent> </Select> <FormMessage /> </FormItem> )}/>
                 <FormField control={studentForm.control} name="year" render={({ field }) => ( <FormItem> <FormLabel>Year</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl> <SelectContent>{years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}</SelectContent> </Select> <FormMessage /> </FormItem> )}/>
               </div>
+               <FormField
+                  control={studentForm.control}
+                  name="photoUrl"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-2">
+                      <FormLabel>Profile Photo</FormLabel>
+                      <div className="flex items-center gap-4">
+                        <Avatar className="h-20 w-20 border">
+                          <AvatarImage src={studentForm.watch('photoUrl')} alt="Student avatar" data-ai-hint="student portrait" />
+                          <AvatarFallback><User className="h-10 w-10" /></AvatarFallback>
+                        </Avatar>
+                        <div className="w-full">
+                          <FormControl>
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onloadend = () => {
+                                    studentForm.setValue('photoUrl', reader.result as string);
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                              className="flex-1"
+                            />
+                          </FormControl>
+                          <p className="text-xs text-muted-foreground mt-2">Upload a picture for the student's profile.</p>
+                        </div>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               <DialogFooter><Button type="button" variant="outline" onClick={() => setIsStudentFormDialogOpen(false)}>Cancel</Button><Button type="submit">Save Changes</Button></DialogFooter>
             </form>
           </Form>

@@ -151,7 +151,7 @@ export function StudentSearch() {
                         <div>
                             <CardHeader className="flex flex-row items-center gap-4 p-4">
                                 <Avatar className="h-12 w-12 border">
-                                <AvatarImage src={`https://placehold.co/100x100.png`} alt={student.name} data-ai-hint="student portrait" />
+                                <AvatarImage src={student.photoUrl || `https://placehold.co/100x100.png`} alt={student.name} data-ai-hint="student portrait" />
                                 <AvatarFallback><User /></AvatarFallback>
                                 </Avatar>
                                 <div>
