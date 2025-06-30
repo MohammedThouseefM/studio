@@ -1,13 +1,18 @@
+'use client';
+
 import Link from 'next/link';
 import { Calendar, ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from './ui/button';
-import { academicCalendarEvents } from '@/lib/mock-data';
 import { format, isAfter, parseISO } from 'date-fns';
+import { useCollegeData } from '@/context/college-data-context';
 
 export function AcademicCalendarCard() {
-  const upcomingEvents = academicCalendarEvents
+  const { events } = useCollegeData();
+
+  const upcomingEvents = events
     .filter(event => isAfter(parseISO(event.date), new Date()))
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     .slice(0, 3);
 
   return (
@@ -22,8 +27,8 @@ export function AcademicCalendarCard() {
       <CardContent>
         <div className="space-y-3">
           {upcomingEvents.length > 0 ? (
-            upcomingEvents.map((event, index) => (
-             <div key={index} className="text-sm p-3 rounded-md bg-card-foreground/5">
+            upcomingEvents.map((event) => (
+             <div key={event.id} className="text-sm p-3 rounded-md bg-card-foreground/5">
                 <p className="font-semibold">{event.title}</p>
                 <p className="text-muted-foreground">{format(parseISO(event.date), 'MMMM d, yyyy')}</p>
             </div>

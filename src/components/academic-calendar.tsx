@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import { format, parseISO } from 'date-fns';
-import { Calendar, Tag, Book, Beaker, PartyPopper } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 import { Calendar as DayPicker } from '@/components/ui/calendar';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { academicCalendarEvents, type CalendarEvent } from '@/lib/mock-data';
 import { cn } from '@/lib/utils';
+import { useCollegeData, type CalendarEventWithId } from '@/context/college-data-context';
 
 const eventColors = {
   holiday: 'bg-green-500',
@@ -17,16 +17,17 @@ const eventColors = {
 };
 
 export function AcademicCalendar() {
+  const { events } = useCollegeData();
   const [selectedDay, setSelectedDay] = useState<Date | undefined>(new Date());
   
-  const eventsByDate = academicCalendarEvents.reduce((acc, event) => {
+  const eventsByDate = events.reduce((acc, event) => {
     const date = event.date;
     if (!acc[date]) {
       acc[date] = [];
     }
     acc[date].push(event);
     return acc;
-  }, {} as Record<string, CalendarEvent[]>);
+  }, {} as Record<string, CalendarEventWithId[]>);
 
   const selectedDayEvents = selectedDay ? eventsByDate[format(selectedDay, 'yyyy-MM-dd')] || [] : [];
 
@@ -95,8 +96,8 @@ export function AcademicCalendar() {
           </h3>
           <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
             {selectedDayEvents.length > 0 ? (
-              selectedDayEvents.map((event, i) => (
-                <div key={i} className="p-3 rounded-md border bg-card-foreground/5 flex items-start gap-3">
+              selectedDayEvents.map((event) => (
+                <div key={event.id} className="p-3 rounded-md border bg-card-foreground/5 flex items-start gap-3">
                    <span className={cn('mt-1 h-4 w-4 shrink-0 rounded-full', eventColors[event.type])} />
                   <div>
                     <p className="font-semibold">{event.title}</p>

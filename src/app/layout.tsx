@@ -2,6 +2,7 @@ import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { AnnouncementsProvider } from '@/context/announcements-context';
+import { CollegeDataProvider } from '@/context/college-data-context';
 
 export const metadata: Metadata = {
   title: 'AttendEase',
@@ -22,8 +23,10 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased bg-background">
         <AnnouncementsProvider>
-          {children}
-          <Toaster />
+          <CollegeDataProvider>
+            {children}
+            <Toaster />
+          </CollegeDataProvider>
         </AnnouncementsProvider>
       </body>
     </html>
