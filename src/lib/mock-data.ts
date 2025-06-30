@@ -26,6 +26,13 @@ export type Announcement = {
   date: string;
 };
 
+export type CalendarEvent = {
+  date: string; // YYYY-MM-DD
+  title: string;
+  type: 'holiday' | 'exam' | 'assignment' | 'event';
+  description?: string;
+};
+
 export const teachers = [
     { id: 'TEACHER01', password: 'password', name: 'Dr. Evelyn Reed' },
     { id: 'TEACHER02', password: 'password123', name: 'Prof. Samuel Cruz' }
@@ -124,3 +131,19 @@ export const timeTable = {
 };
 
 export const timeSlots = ['9:00 - 10:00', '10:00 - 11:00', '11:00 - 12:00', '1:00 - 2:00', '2:00 - 3:00'];
+
+export const academicCalendarEvents: CalendarEvent[] = [
+  { date: '2024-08-05', title: 'Mid-term Exams Start', type: 'exam', description: 'Best of luck to all students.' },
+  { date: '2024-08-06', title: 'Mid-term Exam: Data Structures', type: 'exam' },
+  { date: '2024-08-07', title: 'Mid-term Exam: Algorithms', type: 'exam' },
+  { date: '2024-08-08', title: 'Mid-term Exam: OS', type: 'exam' },
+  { date: '2024-08-09', title: 'Mid-term Exam: DBMS', type: 'exam' },
+  { date: '2024-08-12', title: 'Mid-term Exams End', type: 'exam' },
+  { date: '2024-08-15', title: 'Independence Day', type: 'holiday', description: 'College will be closed.' },
+  { date: '2024-08-20', title: 'Annual Sports Day', type: 'event', description: 'Join us at the sports complex.' },
+  { date: '2024-08-25', title: 'DSA Assignment Due', type: 'assignment', description: 'Submit the linked list implementation.' },
+  { date: '2024-09-05', title: "Teacher's Day", type: 'event', description: 'Special assembly at 10 AM.' },
+  { date: '2024-09-15', title: 'OS Assignment Due', type: 'assignment', description: 'Submit the report on process scheduling.' },
+  { date: '2024-10-02', title: 'Gandhi Jayanti', type: 'holiday', description: 'College will be closed.' },
+  { date: '2024-10-15', title: 'Final Project Submissions', type: 'assignment', description: 'Final project reports and demos are due.' },
+];
