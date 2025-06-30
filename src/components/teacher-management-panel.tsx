@@ -1,11 +1,12 @@
+
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format, parseISO } from 'date-fns';
-import { PlusCircle, Trash2, Megaphone, Pencil, Search, FileText, Loader2, Calendar as CalendarIcon } from 'lucide-react';
+import { PlusCircle, Trash2, Megaphone, Pencil, Search, FileText, Loader2, Calendar as CalendarIcon, CalendarClock } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { collegeData, students as initialStudents, type Student } from '@/lib/mock-data';
+import { collegeData, students as initialStudents, type Student, type ClassTimeTable } from '@/lib/mock-data';
 import { useAnnouncements } from '@/context/announcements-context';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -49,6 +50,8 @@ const eventSchema = z.object({
 
 type EventFormData = z.infer<typeof eventSchema>;
 
+const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
 export function TeacherManagementPanel() {
   const { toast } = useToast();
   // Academic Structure State
@@ -73,10 +76,17 @@ export function TeacherManagementPanel() {
   const [reportData, setReportData] = useState<DefaulterReportOutput | null>(null);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
 
+  // College Data from Context
+  const { events, addEvent, updateEvent, deleteEvent, timeTable, updateTimeTable } = useCollegeData();
+
   // Calendar State
-  const { events, addEvent, updateEvent, deleteEvent } = useCollegeData();
   const [isEventFormDialogOpen, setIsEventFormDialogOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<CalendarEventWithId | null>(null);
+  
+  // Timetable State
+  const [selectedDept, setSelectedDept] = useState('');
+  const [selectedYear, setSelectedYear] = useState('');
+  const [editableTimetable, setEditableTimetable] = useState<ClassTimeTable | null>(null);
 
   const studentForm = useForm<StudentFormData>({
     resolver: zodResolver(studentSchema),
@@ -86,6 +96,14 @@ export function TeacherManagementPanel() {
   const eventForm = useForm<EventFormData>({
     resolver: zodResolver(eventSchema),
   });
+
+  useEffect(() => {
+    if (selectedDept && selectedYear) {
+      setEditableTimetable(JSON.parse(JSON.stringify(timeTable[selectedDept]?.[selectedYear] || {})));
+    } else {
+      setEditableTimetable(null);
+    }
+  }, [selectedDept, selectedYear, timeTable]);
 
   const filteredStudents = students.filter(
     (student) =>
@@ -204,6 +222,30 @@ export function TeacherManagementPanel() {
     deleteEvent(eventId);
     toast({ variant: 'destructive', title: 'Event Deleted' });
   };
+  
+  const handleTimetableChange = (day: string, hourIndex: number, value: string) => {
+    if (!editableTimetable) return;
+
+    const newTimetable = { ...editableTimetable };
+    if (!newTimetable[day]) {
+      newTimetable[day] = [];
+    }
+    const newDaySchedule = [...newTimetable[day]];
+    newDaySchedule[hourIndex] = value;
+    
+    setEditableTimetable({
+      ...newTimetable,
+      [day]: newDaySchedule,
+    });
+  };
+
+  const handleSaveTimetable = () => {
+    if (selectedDept && selectedYear && editableTimetable) {
+      updateTimeTable(selectedDept, selectedYear, editableTimetable);
+      toast({ title: 'Timetable Saved', description: `Timetable for ${selectedDept} - ${selectedYear} has been updated.` });
+    }
+  };
+
 
   return (
     <>
@@ -214,12 +256,13 @@ export function TeacherManagementPanel() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="add-student" className="min-h-[600px]">
-            <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+            <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-7">
               <TabsTrigger value="add-student">Add Student</TabsTrigger>
               <TabsTrigger value="manage-students">Manage Students</TabsTrigger>
               <TabsTrigger value="academic-structure">Academic Structure</TabsTrigger>
               <TabsTrigger value="announcements">Announcements</TabsTrigger>
               <TabsTrigger value="academic-settings">Academic Settings</TabsTrigger>
+              <TabsTrigger value="timetable">Timetable</TabsTrigger>
               <TabsTrigger value="reports"><FileText className="mr-2 h-4 w-4" />Reports</TabsTrigger>
             </TabsList>
             
@@ -265,6 +308,60 @@ export function TeacherManagementPanel() {
                   <Button onClick={handleAddEventClick}><PlusCircle /> Add Event</Button>
                 </div>
                 <div className="rounded-md border"><Table><TableHeader><TableRow><TableHead>Title</TableHead><TableHead>Date</TableHead><TableHead>Type</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader><TableBody>{events.map((event) => (<TableRow key={event.id}><TableCell className="font-medium">{event.title}</TableCell><TableCell>{format(parseISO(event.date), 'PPP')}</TableCell><TableCell><span className="capitalize">{event.type}</span></TableCell><TableCell className="text-right space-x-2"><Button variant="ghost" size="icon" onClick={() => handleEditEventClick(event)}><Pencil className="h-4 w-4" /></Button><AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="text-destructive"><Trash2 className="h-4 w-4" /></Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>This will permanently delete the event "{event.title}".</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteEvent(event.id)}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog></TableCell></TableRow>))}</TableBody></Table></div>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="timetable">
+              <div className="pt-4 space-y-4">
+                <div className="flex items-center gap-2">
+                  <CalendarClock className="h-6 w-6" />
+                  <h3 className="font-semibold text-lg">Manage Class Timetables</h3>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4 p-4 border rounded-lg">
+                  <div>
+                    <Label>Department</Label>
+                    <Select value={selectedDept} onValueChange={setSelectedDept}>
+                      <SelectTrigger><SelectValue placeholder="Select Department" /></SelectTrigger>
+                      <SelectContent>{collegeData.departments.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Year</Label>
+                    <Select value={selectedYear} onValueChange={setSelectedYear}>
+                      <SelectTrigger><SelectValue placeholder="Select Year" /></SelectTrigger>
+                      <SelectContent>{collegeData.years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {editableTimetable ? (
+                  <div className="space-y-4">
+                    <div className="rounded-md border">
+                    <Table>
+                      <TableHeader><TableRow><TableHead>Day</TableHead>{collegeData.hours.map(h => <TableHead key={h}>{h}</TableHead>)}</TableRow></TableHeader>
+                      <TableBody>
+                        {daysOfWeek.map((day) => (
+                          <TableRow key={day}>
+                            <TableCell className="font-medium">{day}</TableCell>
+                            {collegeData.hours.map((_, hourIndex) => (
+                              <TableCell key={hourIndex}>
+                                <Input
+                                  value={editableTimetable[day]?.[hourIndex] || ''}
+                                  onChange={(e) => handleTimetableChange(day, hourIndex, e.target.value)}
+                                  className="h-8"
+                                />
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                    </div>
+                    <Button onClick={handleSaveTimetable} className="w-full md:w-auto">Save Timetable</Button>
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground py-8">Select a department and year to edit the timetable.</p>
+                )}
               </div>
             </TabsContent>
 

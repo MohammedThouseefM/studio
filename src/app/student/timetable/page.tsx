@@ -1,3 +1,6 @@
+
+'use client';
+
 import { ArrowLeft, CalendarDays } from 'lucide-react';
 import Link from 'next/link';
 
@@ -17,11 +20,19 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { timeTable, timeSlots } from '@/lib/mock-data';
+import { students, timeSlots } from '@/lib/mock-data';
+import { useCollegeData } from '@/context/college-data-context';
 
-const days = Object.keys(timeTable);
+const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 export default function TimetablePage() {
+  const { timeTable } = useCollegeData();
+  
+  // In a real app, you would get the logged-in student's ID from a session.
+  // For this demo, we'll use the first student.
+  const student = students[0];
+  const studentTimetable = timeTable[student.department]?.[student.year] || {};
+
   return (
     <div className="p-4 md:p-8">
       <div className="flex items-center gap-4 mb-6">
@@ -36,7 +47,7 @@ export default function TimetablePage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <CalendarDays /> Weekly Schedule
+            <CalendarDays /> Weekly Schedule for {student.department} - {student.year}
           </CardTitle>
           <CardDescription>Your class schedule for the week.</CardDescription>
         </CardHeader>
@@ -52,10 +63,10 @@ export default function TimetablePage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {days.map((day) => (
+                {daysOfWeek.map((day) => (
                   <TableRow key={day}>
                     <TableCell className="font-medium">{day}</TableCell>
-                    {timeTable[day as keyof typeof timeTable].map((subject, index) => (
+                    {(studentTimetable[day] || []).map((subject, index) => (
                       <TableCell key={index}>{subject}</TableCell>
                     ))}
                   </TableRow>

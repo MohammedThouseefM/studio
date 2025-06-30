@@ -1,3 +1,4 @@
+
 // Mock data for the application
 
 export type Student = {
@@ -33,24 +34,36 @@ export type CalendarEvent = {
   description?: string;
 };
 
+export type ClassTimeTable = {
+  [day: string]: string[];
+};
+
+export type DepartmentTimeTable = {
+  [year: string]: ClassTimeTable;
+};
+
+export type FullTimeTable = {
+  [department: string]: DepartmentTimeTable;
+};
+
 export const teachers = [
     { id: 'TEACHER01', password: 'password', name: 'Dr. Evelyn Reed' },
     { id: 'TEACHER02', password: 'password123', name: 'Prof. Samuel Cruz' }
 ];
 
 const rawStudents = [
-    { "roll_no": "3BCA-28", "name": "Mohammed Thouseef", "dob": "12-12-2005", "university_number": "36623U09028", "department": "BCA", "year": "3rd", "email": "mthouseef100@gmail.com", "phone": "986578987" },
-    { "roll_no": "3BCA-15", "name": "Priya Verma", "dob": "05-08-2004", "university_number": "36623U09015", "department": "BCA", "year": "3rd", "email": "priya.verma@gmail.com", "phone": "8876543210" },
-    { "roll_no": "3BCA-42", "name": "Rahul Desai", "dob": "22-03-2005", "university_number": "36623U09042", "department": "BCA", "year": "3rd", "email": "rahul.desai@gmail.com", "phone": "7765432109" },
-    { "roll_no": "3BSC-07", "name": "Ananya Joshi", "dob": "14-09-2004", "university_number": "36623U08007", "department": "BSC", "year": "3rd", "email": "ananya.joshi@gmail.com", "phone": "9988776655" },
-    { "roll_no": "3BSC-19", "name": "Karan Patel", "dob": "30-11-2005", "university_number": "36623U08019", "department": "BSC", "year": "3rd", "email": "karan.patel@gmail.com", "phone": "8899001122" },
-    { "roll_no": "3BSC-33", "name": "Sneha Menon", "dob": "17-01-2005", "university_number": "36623U08033", "department": "BSC", "year": "3rd", "email": "sneha.menon@gmail.com", "phone": "7788990011" },
-    { "roll_no": "3BBA-12", "name": "Aditya Rao", "dob": "08-04-2004", "university_number": "36623U07012", "department": "BBA", "year": "3rd", "email": "aditya.rao@gmail.com", "phone": "9876543210" },
-    { "roll_no": "3BBA-25", "name": "Divya Iyer", "dob": "25-07-2005", "university_number": "36623U07025", "department": "BBA", "year": "3rd", "email": "divya.iyer@gmail.com", "phone": "8765432109" },
-    { "roll_no": "3BBA-38", "name": "Vikram Choudhary", "dob": "03-10-2004", "university_number": "36623U07038", "department": "BBA", "year": "3rd", "email": "vikram.c@gmail.com", "phone": "7654321098" },
-    { "roll_no": "3BCOM-05", "name": "Neha Gupta", "dob": "19-06-2005", "university_number": "36623U06005", "department": "BCOM", "year": "3rd", "email": "neha.gupta@gmail.com", "phone": "6543210987" },
-    { "roll_no": "3BCOM-21", "name": "Rajesh Khanna", "dob": "11-12-2004", "university_number": "36623U06021", "department": "BCOM", "year": "3rd", "email": "rajesh.k@gmail.com", "phone": "9432109876" },
-    { "roll_no": "3BCOM-14", "name": "Swati Nair", "dob": "28-02-2005", "university_number": "36623U06014", "department": "BCOM", "year": "3rd", "email": "swati.nair@gmail.com", "phone": "8321098765" }
+    { "roll_no": "3BCA-28", "name": "Mohammed Thouseef", "dob": "12-12-2005", "university_number": "36623U09028", "department": "BCA", "year": "3rd Year", "email": "mthouseef100@gmail.com", "phone": "986578987" },
+    { "roll_no": "3BCA-15", "name": "Priya Verma", "dob": "05-08-2004", "university_number": "36623U09015", "department": "BCA", "year": "3rd Year", "email": "priya.verma@gmail.com", "phone": "8876543210" },
+    { "roll_no": "3BCA-42", "name": "Rahul Desai", "dob": "22-03-2005", "university_number": "36623U09042", "department": "BCA", "year": "3rd Year", "email": "rahul.desai@gmail.com", "phone": "7765432109" },
+    { "roll_no": "3BSC-07", "name": "Ananya Joshi", "dob": "14-09-2004", "university_number": "36623U08007", "department": "BSC", "year": "3rd Year", "email": "ananya.joshi@gmail.com", "phone": "9988776655" },
+    { "roll_no": "3BSC-19", "name": "Karan Patel", "dob": "30-11-2005", "university_number": "36623U08019", "department": "BSC", "year": "3rd Year", "email": "karan.patel@gmail.com", "phone": "8899001122" },
+    { "roll_no": "3BSC-33", "name": "Sneha Menon", "dob": "17-01-2005", "university_number": "36623U08033", "department": "BSC", "year": "3rd Year", "email": "sneha.menon@gmail.com", "phone": "7788990011" },
+    { "roll_no": "3BBA-12", "name": "Aditya Rao", "dob": "08-04-2004", "university_number": "36623U07012", "department": "BBA", "year": "3rd Year", "email": "aditya.rao@gmail.com", "phone": "9876543210" },
+    { "roll_no": "3BBA-25", "name": "Divya Iyer", "dob": "25-07-2005", "university_number": "36623U07025", "department": "BBA", "year": "3rd Year", "email": "divya.iyer@gmail.com", "phone": "8765432109" },
+    { "roll_no": "3BBA-38", "name": "Vikram Choudhary", "dob": "03-10-2004", "university_number": "36623U07038", "department": "BBA", "year": "3rd Year", "email": "vikram.c@gmail.com", "phone": "7654321098" },
+    { "roll_no": "3BCOM-05", "name": "Neha Gupta", "dob": "19-06-2005", "university_number": "36623U06005", "department": "BCOM", "year": "3rd Year", "email": "neha.gupta@gmail.com", "phone": "6543210987" },
+    { "roll_no": "3BCOM-21", "name": "Rajesh Khanna", "dob": "11-12-2004", "university_number": "36623U06021", "department": "BCOM", "year": "3rd Year", "email": "rajesh.k@gmail.com", "phone": "9432109876" },
+    { "roll_no": "3BCOM-14", "name": "Swati Nair", "dob": "28-02-2005", "university_number": "36623U06014", "department": "BCOM", "year": "3rd Year", "email": "swati.nair@gmail.com", "phone": "8321098765" }
 ];
 
 export const students: Student[] = rawStudents.map(s => ({
@@ -121,13 +134,29 @@ export const collegeData = {
   hours: ['1st Hour', '2nd Hour', '3rd Hour', '4th Hour', '5th Hour'],
 };
 
-export const timeTable = {
-  'Monday': ['Data Structures', 'Algorithms', 'Lunch', 'Database Management', 'Operating Systems'],
-  'Tuesday': ['Algorithms', 'Operating Systems', 'Lunch', 'Data Structures', 'Database Management'],
-  'Wednesday': ['Database Management', 'Data Structures', 'Lunch', 'Operating Systems', 'Algorithms'],
-  'Thursday': ['Operating Systems', 'Database Management', 'Lunch', 'Algorithms', 'Data Structures'],
-  'Friday': ['Data Structures', 'Algorithms', 'Lunch', 'Database Management', 'Project Work'],
-  'Saturday': ['-', '-', 'Lunch', '-', '-'],
+const defaultTimetable: ClassTimeTable = {
+  'Monday': ['-', '-', '-', '-', '-'],
+  'Tuesday': ['-', '-', '-', '-', '-'],
+  'Wednesday': ['-', '-', '-', '-', '-'],
+  'Thursday': ['-', '-', '-', '-', '-'],
+  'Friday': ['-', '-', '-', '-', '-'],
+  'Saturday': ['-', '-', '-', '-', '-'],
+};
+
+const bca3rdYearTimeTable: ClassTimeTable = {
+  'Monday': ['Data Structures', 'Algorithms', 'Web Tech', 'OS', 'Project Lab'],
+  'Tuesday': ['Algorithms', 'OS', 'DS', 'Web Tech', 'DBMS'],
+  'Wednesday': ['DBMS', 'DS', 'OS', 'Algorithms', 'Web Tech'],
+  'Thursday': ['OS', 'DBMS', 'Web Tech', 'Algorithms', 'DS'],
+  'Friday': ['DS', 'Algorithms', 'DBMS', 'Project Work', 'Seminar'],
+  'Saturday': ['-', '-', '-', '-', '-'],
+};
+
+export const timeTable: FullTimeTable = {
+  'BCA': { '1st Year': defaultTimetable, '2nd Year': defaultTimetable, '3rd Year': bca3rdYearTimeTable },
+  'BSC': { '1st Year': defaultTimetable, '2nd Year': defaultTimetable, '3rd Year': defaultTimetable },
+  'BBA': { '1st Year': defaultTimetable, '2nd Year': defaultTimetable, '3rd Year': defaultTimetable },
+  'BCOM': { '1st Year': defaultTimetable, '2nd Year': defaultTimetable, '3rd Year': defaultTimetable },
 };
 
 export const timeSlots = ['9:00 - 10:00', '10:00 - 11:00', '11:00 - 12:00', '1:00 - 2:00', '2:00 - 3:00'];

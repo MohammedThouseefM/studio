@@ -1,7 +1,14 @@
+
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { academicCalendarEvents as initialEventsData, type CalendarEvent as RawCalendarEvent } from '@/lib/mock-data';
+import { 
+  academicCalendarEvents as initialEventsData,
+  timeTable as initialTimeTable,
+  type CalendarEvent as RawCalendarEvent,
+  type FullTimeTable,
+  type ClassTimeTable,
+} from '@/lib/mock-data';
 
 export type CalendarEventWithId = RawCalendarEvent & { id: string };
 
@@ -10,6 +17,8 @@ type CollegeDataContextType = {
   addEvent: (event: Omit<CalendarEventWithId, 'id'>) => void;
   updateEvent: (eventId: string, updatedEvent: Omit<CalendarEventWithId, 'id'>) => void;
   deleteEvent: (eventId: string) => void;
+  timeTable: FullTimeTable;
+  updateTimeTable: (department: string, year: string, newTimeTable: ClassTimeTable) => void;
 };
 
 const CollegeDataContext = createContext<CollegeDataContextType | undefined>(undefined);
@@ -19,6 +28,8 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
     initialEventsData.map((e, index) => ({ ...e, id: `event-${Date.now()}-${index}` }))
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
   );
+  
+  const [timeTable, setTimeTable] = useState<FullTimeTable>(initialTimeTable);
 
   const addEvent = (eventData: Omit<CalendarEventWithId, 'id'>) => {
     const newEvent: CalendarEventWithId = { 
@@ -37,8 +48,18 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
     setEvents(prev => prev.filter(e => e.id !== eventId));
   };
   
+  const updateTimeTable = (department: string, year: string, newClassTimeTable: ClassTimeTable) => {
+    setTimeTable(prev => ({
+      ...prev,
+      [department]: {
+        ...(prev[department] || {}),
+        [year]: newClassTimeTable,
+      },
+    }));
+  };
+  
   return (
-    <CollegeDataContext.Provider value={{ events, addEvent, updateEvent, deleteEvent }}>
+    <CollegeDataContext.Provider value={{ events, addEvent, updateEvent, deleteEvent, timeTable, updateTimeTable }}>
       {children}
     </CollegeDataContext.Provider>
   );
