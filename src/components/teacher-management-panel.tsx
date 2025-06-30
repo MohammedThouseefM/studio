@@ -1,10 +1,11 @@
+
 'use client';
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { PlusCircle, Trash2, Megaphone, Pencil } from 'lucide-react';
+import { PlusCircle, Trash2, Megaphone, Pencil, Search } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -74,6 +75,7 @@ export function TeacherManagementPanel() {
   const [students, setStudents] = useState<Student[]>(initialStudents);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const { announcements, addAnnouncement, deleteAnnouncement } = useAnnouncements();
   const [newAnnouncementTitle, setNewAnnouncementTitle] = useState('');
@@ -91,6 +93,13 @@ export function TeacherManagementPanel() {
       year: '',
     },
   });
+  
+  const filteredStudents = students.filter(
+    (student) =>
+      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.rollNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.university_number.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const onStudentSubmit = (data: StudentFormData) => {
     const newStudent: Student = {
@@ -331,53 +340,72 @@ export function TeacherManagementPanel() {
 
           <TabsContent value="manage-students">
             <div className="pt-4 space-y-4">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Roll No.</TableHead>
-                    <TableHead>Department</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {students.map((student) => (
-                    <TableRow key={student.id}>
-                      <TableCell className="font-medium">{student.name}</TableCell>
-                      <TableCell>{student.rollNumber}</TableCell>
-                      <TableCell>{student.department}</TableCell>
-                      <TableCell className="text-right space-x-2">
-                        <Button variant="ghost" size="icon" onClick={() => handleEditClick(student)}>
-                          <Pencil className="h-4 w-4" />
-                          <span className="sr-only">Edit</span>
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10">
-                              <Trash2 className="h-4 w-4" />
-                              <span className="sr-only">Delete</span>
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the student record for {student.name}.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDeleteStudent(student)}>
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </TableCell>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search students..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9 w-full"
+                />
+              </div>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Roll No.</TableHead>
+                      <TableHead>Department</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredStudents.length > 0 ? (
+                      filteredStudents.map((student) => (
+                        <TableRow key={student.id}>
+                          <TableCell className="font-medium">{student.name}</TableCell>
+                          <TableCell>{student.rollNumber}</TableCell>
+                          <TableCell>{student.department}</TableCell>
+                          <TableCell className="text-right space-x-2">
+                            <Button variant="ghost" size="icon" onClick={() => handleEditClick(student)}>
+                              <Pencil className="h-4 w-4" />
+                              <span className="sr-only">Edit</span>
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10">
+                                  <Trash2 className="h-4 w-4" />
+                                  <span className="sr-only">Delete</span>
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This action cannot be undone. This will permanently delete the student record for {student.name}.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleDeleteStudent(student)}>
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={4} className="h-24 text-center">
+                          No results found.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
           </TabsContent>
           
