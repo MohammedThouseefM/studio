@@ -134,7 +134,7 @@ export const collegeData = {
   hours: ['1st Hour', '2nd Hour', '3rd Hour', '4th Hour', '5th Hour'],
 };
 
-const defaultTimetable: ClassTimeTable = {
+export const defaultTimetable: ClassTimeTable = {
   'Monday': ['-', '-', '-', '-', '-'],
   'Tuesday': ['-', '-', '-', '-', '-'],
   'Wednesday': ['-', '-', '-', '-', '-'],

@@ -20,7 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { students, timeSlots } from '@/lib/mock-data';
+import { students, timeSlots, defaultTimetable } from '@/lib/mock-data';
 import { useCollegeData } from '@/context/college-data-context';
 
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -31,7 +31,7 @@ export default function TimetablePage() {
   // In a real app, you would get the logged-in student's ID from a session.
   // For this demo, we'll use the first student.
   const student = students[0];
-  const studentTimetable = timeTable[student.department]?.[student.year] || {};
+  const studentTimetable = timeTable[student.department]?.[student.year] || defaultTimetable;
 
   return (
     <div className="p-4 md:p-8">

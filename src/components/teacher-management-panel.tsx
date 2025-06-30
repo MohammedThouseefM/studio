@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { collegeData, students as initialStudents, type Student, type ClassTimeTable } from '@/lib/mock-data';
+import { collegeData, students as initialStudents, type Student, type ClassTimeTable, defaultTimetable } from '@/lib/mock-data';
 import { useAnnouncements } from '@/context/announcements-context';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -99,7 +99,7 @@ export function TeacherManagementPanel() {
 
   useEffect(() => {
     if (selectedDept && selectedYear) {
-      setEditableTimetable(JSON.parse(JSON.stringify(timeTable[selectedDept]?.[selectedYear] || {})));
+      setEditableTimetable(JSON.parse(JSON.stringify(timeTable[selectedDept]?.[selectedYear] || defaultTimetable)));
     } else {
       setEditableTimetable(null);
     }
