@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import { Calendar, Tag, Book, Beaker, PartyPopper } from 'lucide-react';
-import { Calendar as DayPicker } from 'react-day-picker';
+import { Calendar as DayPicker } from '@/components/ui/calendar';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { academicCalendarEvents, type CalendarEvent } from '@/lib/mock-data';
