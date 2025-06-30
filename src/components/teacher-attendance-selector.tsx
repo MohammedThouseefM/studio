@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -18,18 +19,16 @@ export function TeacherAttendanceSelector() {
   const router = useRouter();
   const [department, setDepartment] = useState<string>('');
   const [year, setYear] = useState<string>('');
-  const [subject, setSubject] = useState<string>('');
+  const [hour, setHour] = useState<string>('');
   const [date, setDate] = useState<Date | undefined>(new Date());
 
   const handleTakeAttendance = () => {
-    if (department && year && subject && date) {
+    if (department && year && hour && date) {
       router.push(
-        `/teacher/attendance?dept=${department}&year=${year}&subject=${subject}&date=${format(date, 'yyyy-MM-dd')}`
+        `/teacher/attendance?dept=${department}&year=${year}&hour=${hour}&date=${format(date, 'yyyy-MM-dd')}`
       );
     }
   };
-
-  const subjects = department ? collegeData.subjects[department as keyof typeof collegeData.subjects] || [] : [];
 
   return (
     <Card>
@@ -73,15 +72,15 @@ export function TeacherAttendanceSelector() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label>Subject</Label>
-            <Select value={subject} onValueChange={setSubject} disabled={!department}>
+            <Label>Hour</Label>
+            <Select value={hour} onValueChange={setHour}>
               <SelectTrigger>
-                <SelectValue placeholder="Select Subject" />
+                <SelectValue placeholder="Select Hour" />
               </SelectTrigger>
               <SelectContent>
-                {subjects.map((sub) => (
-                  <SelectItem key={sub} value={sub}>
-                    {sub}
+                {collegeData.hours.map((h) => (
+                  <SelectItem key={h} value={h}>
+                    {h}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -108,7 +107,7 @@ export function TeacherAttendanceSelector() {
 
         <Button
           onClick={handleTakeAttendance}
-          disabled={!department || !year || !subject || !date}
+          disabled={!department || !year || !hour || !date}
           className="w-full bg-accent hover:bg-accent/90"
         >
           Take Attendance

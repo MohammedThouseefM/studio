@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useTransition } from 'react';
@@ -18,7 +19,7 @@ type AttendanceSheetProps = {
   classDetails: {
     department: string;
     year: string;
-    subject: string;
+    subject: string; // This is the 'hour' from the selector
     date: string;
   };
 };

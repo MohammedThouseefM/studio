@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -8,23 +9,42 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
+import { validateStudent, validateTeacher } from '@/lib/auth';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [studentId, setStudentId] = useState('');
+  const [studentPassword, setStudentPassword] = useState('');
   const [teacherId, setTeacherId] = useState('');
+  const [teacherPassword, setTeacherPassword] = useState('');
 
-  const handleStudentLogin = (e: React.FormEvent) => {
+  const handleStudentLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (studentId) {
+    const isValid = await validateStudent(studentId, studentPassword);
+    if (isValid) {
       router.push('/student/dashboard');
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Login Failed',
+        description: 'Invalid Student ID or Password.',
+      });
     }
   };
 
-  const handleTeacherLogin = (e: React.FormEvent) => {
+  const handleTeacherLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (teacherId) {
+    const isValid = await validateTeacher(teacherId, teacherPassword);
+    if (isValid) {
       router.push('/teacher/dashboard');
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Login Failed',
+        description: 'Invalid Staff ID or Password.',
+      });
     }
   };
 
@@ -49,25 +69,28 @@ export default function LoginPage() {
                 <Building className="mr-2 h-4 w-4" /> Teacher
               </TabsTrigger>
             </TabsList>
-            <p className="text-sm text-muted-foreground text-center pt-4">
-              For demonstration purposes, you can use any ID and password to log in.
-            </p>
             <TabsContent value="student">
               <form onSubmit={handleStudentLogin}>
                 <div className="space-y-4 pt-4">
                   <div className="space-y-2">
-                    <Label htmlFor="student-id">Student ID</Label>
+                    <Label htmlFor="student-id">Student ID (University Number)</Label>
                     <Input
                       id="student-id"
-                      placeholder="Enter your student ID"
+                      placeholder="Enter your university number"
                       value={studentId}
                       onChange={(e) => setStudentId(e.target.value)}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="student-password">Password</Label>
-                    <Input id="student-password" type="password" placeholder="Enter your password" required />
+                    <Label htmlFor="student-password">Password (Roll No.)</Label>
+                    <Input 
+                      id="student-password" 
+                      type="password" 
+                      placeholder="Enter your roll number"
+                      value={studentPassword}
+                      onChange={(e) => setStudentPassword(e.target.value)} 
+                      required />
                   </div>
                   <Button type="submit" className="w-full bg-accent hover:bg-accent/90">
                     Login as Student
@@ -90,7 +113,13 @@ export default function LoginPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="teacher-password">Password</Label>
-                    <Input id="teacher-password" type="password" placeholder="Enter your password" required />
+                    <Input 
+                      id="teacher-password" 
+                      type="password" 
+                      placeholder="Enter your password" 
+                      value={teacherPassword}
+                      onChange={(e) => setTeacherPassword(e.target.value)}
+                      required />
                   </div>
                   <Button type="submit" className="w-full bg-accent hover:bg-accent/90">
                     Login as Teacher

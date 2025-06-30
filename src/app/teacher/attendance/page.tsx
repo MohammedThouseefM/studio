@@ -38,22 +38,22 @@ type AttendancePageProps = {
   searchParams: {
     dept?: string;
     year?: string;
-    subject?: string;
+    hour?: string;
     date?: string;
   };
 };
 
 export default function AttendancePage({ searchParams }: AttendancePageProps) {
-  const { dept, year, subject, date } = searchParams;
+  const { dept, year, hour, date } = searchParams;
 
   const classDetails = {
     department: dept || 'N/A',
     year: year || 'N/A',
-    subject: subject || 'N/A',
+    subject: hour || 'N/A', // Using hour as subject for backend
     date: date || 'N/A',
   };
 
-  const isValid = dept && year && subject && date;
+  const isValid = dept && year && hour && date;
 
   return (
     <div className="container py-8">
