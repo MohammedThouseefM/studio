@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -6,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format, parseISO } from 'date-fns';
-import { PlusCircle, Trash2, Megaphone, Pencil, Search, FileText, Loader2, Calendar as CalendarIcon, CalendarClock, User } from 'lucide-react';
+import { PlusCircle, Trash2, Megaphone, Pencil, Search, FileText, Loader2, Calendar as CalendarIcon, CalendarClock, User, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { collegeData, students as initialStudents, type Student, type ClassTimeTable, defaultTimetable } from '@/lib/mock-data';
+import { students as initialStudents, type Student, type ClassTimeTable, defaultTimetable } from '@/lib/mock-data';
 import { useAnnouncements } from '@/context/announcements-context';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -57,10 +56,9 @@ const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat
 export function TeacherManagementPanel() {
   const { toast } = useToast();
   // Academic Structure State
-  const [departments, setDepartments] = useState(collegeData.departments);
   const [newDepartment, setNewDepartment] = useState('');
-  const [years, setYears] = useState(collegeData.years);
   const [newYear, setNewYear] = useState('');
+  const [newHour, setNewHour] = useState('');
   
   // Student Management State
   const [students, setStudents] = useState<Student[]>(initialStudents);
@@ -79,7 +77,13 @@ export function TeacherManagementPanel() {
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
 
   // College Data from Context
-  const { events, addEvent, updateEvent, deleteEvent, timeTable, updateTimeTable } = useCollegeData();
+  const { 
+    events, addEvent, updateEvent, deleteEvent, 
+    timeTable, updateTimeTable,
+    departments, addDepartment, deleteDepartment,
+    years, addYear, deleteYear,
+    hours, addHour, deleteHour,
+  } = useCollegeData();
 
   // Calendar State
   const [isEventFormDialogOpen, setIsEventFormDialogOpen] = useState(false);
@@ -155,20 +159,28 @@ export function TeacherManagementPanel() {
   };
   
   const handleAddDepartment = () => {
-    if (newDepartment && !departments.includes(newDepartment)) {
-      setDepartments([...departments, newDepartment]);
+    if (newDepartment) {
+      addDepartment(newDepartment);
       setNewDepartment('');
       toast({ title: 'Department Added' });
     }
   };
   
   const handleAddYear = () => {
-    if (newYear && !years.includes(newYear)) {
-      setYears([...years, newYear]);
+    if (newYear) {
+      addYear(newYear);
       setNewYear('');
       toast({ title: 'Year Added' });
     }
   };
+
+  const handleAddHour = () => {
+    if (newHour) {
+      addHour(newHour);
+      setNewHour('');
+      toast({ title: 'Hour Added' });
+    }
+  }
 
   const handleAddAnnouncement = () => {
     if (newAnnouncementTitle && newAnnouncementContent) {
@@ -330,9 +342,67 @@ export function TeacherManagementPanel() {
             </TabsContent>
             
             <TabsContent value="academic-structure">
-              <div className="grid md:grid-cols-2 gap-8 pt-4">
-                <div className="space-y-4"><div className="space-y-2"><Label>Existing Departments</Label><div className="flex flex-wrap gap-2">{departments.map(dept => (<span key={dept} className="bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm">{dept}</span>))}</div></div><div className="space-y-2"><Label htmlFor="new-department">Add New Department</Label><div className="flex gap-2"><Input id="new-department" value={newDepartment} onChange={e => setNewDepartment(e.target.value)} placeholder="e.g., B.Tech"/><Button onClick={handleAddDepartment}><PlusCircle /> Add</Button></div></div></div>
-                <div className="space-y-4"><div className="space-y-2"><Label>Existing Years</Label><div className="flex flex-wrap gap-2">{years.map(year => (<span key={year} className="bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm">{year}</span>))}</div></div><div className="space-y-2"><Label htmlFor="new-year">Add New Year</Label><div className="flex gap-2"><Input id="new-year" value={newYear} onChange={e => setNewYear(e.target.value)} placeholder="e.g., 4th Year"/><Button onClick={handleAddYear}><PlusCircle /> Add</Button></div></div></div>
+              <div className="grid md:grid-cols-3 gap-8 pt-4">
+                <div className="space-y-4">
+                    <Label>Existing Departments</Label>
+                    <div className="flex flex-wrap gap-2">
+                        {departments.map(dept => (
+                        <div key={dept} className="flex items-center gap-1.5 bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm">
+                            <span>{dept}</span>
+                            <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <button className="flex items-center justify-center h-4 w-4 rounded-full bg-secondary-foreground/20 text-secondary-foreground hover:bg-destructive hover:text-destructive-foreground transition-colors"><X className="h-3 w-3" /></button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>Deleting "{dept}" will remove it from the list of available departments.</AlertDialogDescription></AlertDialogHeader>
+                                <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteDepartment(dept)}>Delete</AlertDialogAction></AlertDialogFooter>
+                            </AlertDialogContent>
+                            </AlertDialog>
+                        </div>
+                        ))}
+                    </div>
+                    <div className="space-y-2"><Label htmlFor="new-department">Add New Department</Label><div className="flex gap-2"><Input id="new-department" value={newDepartment} onChange={e => setNewDepartment(e.target.value)} placeholder="e.g., B.Tech"/><Button onClick={handleAddDepartment}><PlusCircle /> Add</Button></div></div>
+                </div>
+                <div className="space-y-4">
+                    <Label>Existing Years</Label>
+                    <div className="flex flex-wrap gap-2">
+                        {years.map(year => (
+                           <div key={year} className="flex items-center gap-1.5 bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm">
+                           <span>{year}</span>
+                           <AlertDialog>
+                           <AlertDialogTrigger asChild>
+                                <button className="flex items-center justify-center h-4 w-4 rounded-full bg-secondary-foreground/20 text-secondary-foreground hover:bg-destructive hover:text-destructive-foreground transition-colors"><X className="h-3 w-3" /></button>
+                           </AlertDialogTrigger>
+                           <AlertDialogContent>
+                               <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>Deleting "{year}" will remove it from the list of available years.</AlertDialogDescription></AlertDialogHeader>
+                               <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteYear(year)}>Delete</AlertDialogAction></AlertDialogFooter>
+                           </AlertDialogContent>
+                           </AlertDialog>
+                       </div>
+                        ))}
+                    </div>
+                    <div className="space-y-2"><Label htmlFor="new-year">Add New Year</Label><div className="flex gap-2"><Input id="new-year" value={newYear} onChange={e => setNewYear(e.target.value)} placeholder="e.g., 4th Year"/><Button onClick={handleAddYear}><PlusCircle /> Add</Button></div></div>
+                </div>
+                <div className="space-y-4">
+                    <Label>Class Hours</Label>
+                    <div className="flex flex-wrap gap-2">
+                        {hours.map(hour => (
+                            <div key={hour} className="flex items-center gap-1.5 bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm">
+                            <span>{hour}</span>
+                            <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                 <button className="flex items-center justify-center h-4 w-4 rounded-full bg-secondary-foreground/20 text-secondary-foreground hover:bg-destructive hover:text-destructive-foreground transition-colors"><X className="h-3 w-3" /></button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>Deleting "{hour}" will remove it from the list of available class hours.</AlertDialogDescription></AlertDialogHeader>
+                                <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteHour(hour)}>Delete</AlertDialogAction></AlertDialogFooter>
+                            </AlertDialogContent>
+                            </AlertDialog>
+                        </div>
+                        ))}
+                    </div>
+                    <div className="space-y-2"><Label htmlFor="new-hour">Add New Hour</Label><div className="flex gap-2"><Input id="new-hour" value={newHour} onChange={e => setNewHour(e.target.value)} placeholder="e.g., 6th Hour"/><Button onClick={handleAddHour}><PlusCircle /> Add</Button></div></div>
+                </div>
               </div>
             </TabsContent>
 
@@ -361,14 +431,14 @@ export function TeacherManagementPanel() {
                     <Label>Department</Label>
                     <Select value={selectedDept} onValueChange={setSelectedDept}>
                       <SelectTrigger><SelectValue placeholder="Select Department" /></SelectTrigger>
-                      <SelectContent>{collegeData.departments.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                      <SelectContent>{departments.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                     </Select>
                   </div>
                   <div>
                     <Label>Year</Label>
                     <Select value={selectedYear} onValueChange={setSelectedYear}>
                       <SelectTrigger><SelectValue placeholder="Select Year" /></SelectTrigger>
-                      <SelectContent>{collegeData.years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}</SelectContent>
+                      <SelectContent>{years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}</SelectContent>
                     </Select>
                   </div>
                 </div>
@@ -377,12 +447,12 @@ export function TeacherManagementPanel() {
                   <div className="space-y-4">
                     <div className="rounded-md border">
                     <Table>
-                      <TableHeader><TableRow><TableHead>Day</TableHead>{collegeData.hours.map(h => <TableHead key={h}>{h}</TableHead>)}</TableRow></TableHeader>
+                      <TableHeader><TableRow><TableHead>Day</TableHead>{hours.map(h => <TableHead key={h}>{h}</TableHead>)}</TableRow></TableHeader>
                       <TableBody>
                         {daysOfWeek.map((day) => (
                           <TableRow key={day}>
                             <TableCell className="font-medium">{day}</TableCell>
-                            {collegeData.hours.map((_, hourIndex) => (
+                            {hours.map((_, hourIndex) => (
                               <TableCell key={hourIndex}>
                                 <Input
                                   value={editableTimetable[day]?.[hourIndex] || ''}

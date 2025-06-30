@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -11,7 +10,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { collegeData } from '@/lib/mock-data';
+import { useCollegeData } from '@/context/college-data-context';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 
@@ -21,6 +20,8 @@ export function TeacherAttendanceSelector() {
   const [year, setYear] = useState<string>('');
   const [hour, setHour] = useState<string>('');
   const [date, setDate] = useState<Date | undefined>(new Date());
+  
+  const { departments, years, hours } = useCollegeData();
 
   const handleTakeAttendance = () => {
     if (department && year && hour && date) {
@@ -45,7 +46,7 @@ export function TeacherAttendanceSelector() {
                 <SelectValue placeholder="Select Department" />
               </SelectTrigger>
               <SelectContent>
-                {collegeData.departments.map((dept) => (
+                {departments.map((dept) => (
                   <SelectItem key={dept} value={dept}>
                     {dept}
                   </SelectItem>
@@ -60,7 +61,7 @@ export function TeacherAttendanceSelector() {
                 <SelectValue placeholder="Select Year" />
               </SelectTrigger>
               <SelectContent>
-                {collegeData.years.map((y) => (
+                {years.map((y) => (
                   <SelectItem key={y} value={y}>
                     {y}
                   </SelectItem>
@@ -78,7 +79,7 @@ export function TeacherAttendanceSelector() {
                 <SelectValue placeholder="Select Hour" />
               </SelectTrigger>
               <SelectContent>
-                {collegeData.hours.map((h) => (
+                {hours.map((h) => (
                   <SelectItem key={h} value={h}>
                     {h}
                   </SelectItem>

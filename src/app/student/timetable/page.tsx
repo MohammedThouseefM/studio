@@ -1,4 +1,3 @@
-
 'use client';
 
 import { ArrowLeft, CalendarDays } from 'lucide-react';
@@ -20,13 +19,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { students, timeSlots, defaultTimetable } from '@/lib/mock-data';
+import { students, defaultTimetable } from '@/lib/mock-data';
 import { useCollegeData } from '@/context/college-data-context';
 
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 export default function TimetablePage() {
-  const { timeTable } = useCollegeData();
+  const { timeTable, hours } = useCollegeData();
   
   // In a real app, you would get the logged-in student's ID from a session.
   // For this demo, we'll use the first student.
@@ -57,8 +56,8 @@ export default function TimetablePage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[120px]">Day</TableHead>
-                  {timeSlots.map((slot, index) => (
-                    <TableHead key={index}>{`Hour ${index + 1} (${slot})`}</TableHead>
+                  {hours.map((hour, index) => (
+                    <TableHead key={index}>{hour}</TableHead>
                   ))}
                 </TableRow>
               </TableHeader>

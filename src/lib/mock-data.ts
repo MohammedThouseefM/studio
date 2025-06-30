@@ -1,4 +1,3 @@
-
 // Mock data for the application
 
 export type Student = {
@@ -160,8 +159,6 @@ export const timeTable: FullTimeTable = {
   'BBA': { '1st Year': defaultTimetable, '2nd Year': defaultTimetable, '3rd Year': defaultTimetable },
   'BCOM': { '1st Year': defaultTimetable, '2nd Year': defaultTimetable, '3rd Year': defaultTimetable },
 };
-
-export const timeSlots = ['9:00 - 10:00', '10:00 - 11:00', '11:00 - 12:00', '1:00 - 2:00', '2:00 - 3:00'];
 
 export const academicCalendarEvents: CalendarEvent[] = [
   { date: '2024-08-05', title: 'Mid-term Exams Start', type: 'exam', description: 'Best of luck to all students.' },

@@ -8,10 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
-import { students, collegeData, previousAttendanceData, studentAttendance, type Student } from '@/lib/mock-data';
+import { students, previousAttendanceData, studentAttendance, type Student } from '@/lib/mock-data';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { StudentAttendanceSummary } from './student-attendance-summary';
 import { Button } from './ui/button';
+import { useCollegeData } from '@/context/college-data-context';
 
 // Helper function to calculate attendance
 const calculateAttendancePercentage = (studentId: string) => {
@@ -29,6 +30,8 @@ export function StudentSearch() {
   const [year, setYear] = useState('');
   const [attendanceRange, setAttendanceRange] = useState('');
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+
+  const { departments, years } = useCollegeData();
 
   const filteredStudents = useMemo(() => {
     if (!searchTerm && !department && !year && !attendanceRange) {
@@ -98,7 +101,7 @@ export function StudentSearch() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Departments</SelectItem>
-                    {collegeData.departments.map((dept) => (
+                    {departments.map((dept) => (
                       <SelectItem key={dept} value={dept}>
                         {dept}
                       </SelectItem>
@@ -114,7 +117,7 @@ export function StudentSearch() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Years</SelectItem>
-                    {collegeData.years.map((y) => (
+                    {years.map((y) => (
                       <SelectItem key={y} value={y}>
                         {y}
                       </SelectItem>
