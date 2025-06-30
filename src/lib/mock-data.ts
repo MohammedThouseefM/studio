@@ -85,20 +85,20 @@ export const previousAttendanceData = [
 ];
 
 export const studentAttendance = {
-  totalPercentage: 85,
+  totalPercentage: 70,
   subjects: [
-    { name: 'Data Structures', percentage: 90 },
-    { name: 'Algorithms', percentage: 80 },
+    { name: 'Data Structures', percentage: 70 },
+    { name: 'Algorithms', percentage: 65 },
     { name: 'Database Management', percentage: 75 },
-    { name: 'Operating Systems', percentage: 95 },
+    { name: 'Operating Systems', percentage: 70 },
   ],
   monthly: [
     { month: 'Jan', present: 20, total: 22 },
     { month: 'Feb', present: 18, total: 20 },
     { month: 'Mar', present: 21, total: 24 },
-    { month: 'Apr', present: 19, total: 21 },
-    { month: 'May', present: 22, total: 22 },
-    { month: 'Jun', present: 17, total: 20 },
+    { month: 'Apr', present: 15, total: 21 },
+    { month: 'May', present: 16, total: 22 },
+    { month: 'Jun', present: 14, total: 20 },
   ],
 };
 
