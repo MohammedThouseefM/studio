@@ -49,6 +49,9 @@ export default function LoginPage() {
                 <Building className="mr-2 h-4 w-4" /> Teacher
               </TabsTrigger>
             </TabsList>
+            <p className="text-sm text-muted-foreground text-center pt-4">
+              For demonstration purposes, you can use any ID and password to log in.
+            </p>
             <TabsContent value="student">
               <form onSubmit={handleStudentLogin}>
                 <div className="space-y-4 pt-4">
