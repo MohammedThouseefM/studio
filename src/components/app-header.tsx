@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { LogOut, School, UserCircle } from 'lucide-react';
+import { LogOut, School, User, UserCircle } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,10 @@ export function AppHeader({ userType }: AppHeaderProps) {
 
   const handleLogout = () => {
     router.push('/');
+  };
+
+  const goToProfile = () => {
+    router.push('/student/profile');
   };
 
   return (
@@ -57,6 +61,12 @@ export function AppHeader({ userType }: AppHeaderProps) {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
+              {userType === 'Student' && (
+                <DropdownMenuItem onClick={goToProfile}>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
