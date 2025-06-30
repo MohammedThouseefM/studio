@@ -6,11 +6,16 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { School, Building, GraduationCap, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { validateStudent, validateTeacher } from '@/lib/auth';
 
@@ -148,83 +153,79 @@ export default function LandingPage() {
 
       {/* Login Dialog */}
       <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
-        <DialogContent className="sm:max-w-md p-0">
-          <Card className="w-full shadow-none border-none">
-            <CardHeader className="text-center">
-              <CardTitle className="text-2xl">Welcome Back!</CardTitle>
-              <CardDescription>Sign in to access your dashboard</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Tabs value={loginTab} onValueChange={(value) => setLoginTab(value as 'student' | 'teacher')}>
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="student">
-                    <GraduationCap className="mr-2 h-4 w-4" /> Student
-                  </TabsTrigger>
-                  <TabsTrigger value="teacher">
-                    <Building className="mr-2 h-4 w-4" /> Teacher
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="student">
-                  <form onSubmit={handleStudentLogin}>
-                    <div className="space-y-4 pt-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="student-id">Student ID (University Number)</Label>
-                        <Input
-                          id="student-id"
-                          placeholder="Enter your university number"
-                          value={studentId}
-                          onChange={(e) => setStudentId(e.target.value)}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="student-password">Password (Roll No.)</Label>
-                        <Input 
-                          id="student-password" 
-                          type="password" 
-                          placeholder="Enter your roll number"
-                          value={studentPassword}
-                          onChange={(e) => setStudentPassword(e.target.value)} 
-                          required />
-                      </div>
-                      <Button type="submit" className="w-full bg-accent hover:bg-accent/90">
-                        Login as Student
-                      </Button>
-                    </div>
-                  </form>
-                </TabsContent>
-                <TabsContent value="teacher">
-                  <form onSubmit={handleTeacherLogin}>
-                    <div className="space-y-4 pt-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="teacher-id">Staff ID</Label>
-                        <Input
-                          id="teacher-id"
-                          placeholder="Enter your staff ID"
-                          value={teacherId}
-                          onChange={(e) => setTeacherId(e.target.value)}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="teacher-password">Password</Label>
-                        <Input 
-                          id="teacher-password" 
-                          type="password" 
-                          placeholder="Enter your password" 
-                          value={teacherPassword}
-                          onChange={(e) => setTeacherPassword(e.target.value)}
-                          required />
-                      </div>
-                      <Button type="submit" className="w-full bg-accent hover:bg-accent/90">
-                        Login as Teacher
-                      </Button>
-                    </div>
-                  </form>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="text-center">
+            <DialogTitle className="text-2xl">Welcome Back!</DialogTitle>
+            <DialogDescription>Sign in to access your dashboard</DialogDescription>
+          </DialogHeader>
+          <Tabs value={loginTab} onValueChange={(value) => setLoginTab(value as 'student' | 'teacher')}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="student">
+                <GraduationCap className="mr-2 h-4 w-4" /> Student
+              </TabsTrigger>
+              <TabsTrigger value="teacher">
+                <Building className="mr-2 h-4 w-4" /> Teacher
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="student">
+              <form onSubmit={handleStudentLogin}>
+                <div className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="student-id">Student ID (University Number)</Label>
+                    <Input
+                      id="student-id"
+                      placeholder="Enter your university number"
+                      value={studentId}
+                      onChange={(e) => setStudentId(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="student-password">Password (Roll No.)</Label>
+                    <Input 
+                      id="student-password" 
+                      type="password" 
+                      placeholder="Enter your roll number"
+                      value={studentPassword}
+                      onChange={(e) => setStudentPassword(e.target.value)} 
+                      required />
+                  </div>
+                  <Button type="submit" className="w-full bg-accent hover:bg-accent/90">
+                    Login as Student
+                  </Button>
+                </div>
+              </form>
+            </TabsContent>
+            <TabsContent value="teacher">
+              <form onSubmit={handleTeacherLogin}>
+                <div className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="teacher-id">Staff ID</Label>
+                    <Input
+                      id="teacher-id"
+                      placeholder="Enter your staff ID"
+                      value={teacherId}
+                      onChange={(e) => setTeacherId(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="teacher-password">Password</Label>
+                    <Input 
+                      id="teacher-password" 
+                      type="password" 
+                      placeholder="Enter your password" 
+                      value={teacherPassword}
+                      onChange={(e) => setTeacherPassword(e.target.value)}
+                      required />
+                  </div>
+                  <Button type="submit" className="w-full bg-accent hover:bg-accent/90">
+                    Login as Teacher
+                  </Button>
+                </div>
+              </form>
+            </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
       
