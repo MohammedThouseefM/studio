@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { PlusCircle, Trash2, Megaphone } from 'lucide-react';
+import { PlusCircle, Trash2, Megaphone, Pencil } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,8 +22,35 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { collegeData } from '@/lib/mock-data';
+import { collegeData, students as initialStudents, type Student } from '@/lib/mock-data';
 import { useAnnouncements } from '@/context/announcements-context';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 const studentSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -43,6 +70,10 @@ export function TeacherManagementPanel() {
   const [newDepartment, setNewDepartment] = useState('');
   const [years, setYears] = useState(collegeData.years);
   const [newYear, setNewYear] = useState('');
+  
+  const [students, setStudents] = useState<Student[]>(initialStudents);
+  const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const { announcements, addAnnouncement, deleteAnnouncement } = useAnnouncements();
   const [newAnnouncementTitle, setNewAnnouncementTitle] = useState('');
@@ -62,12 +93,68 @@ export function TeacherManagementPanel() {
   });
 
   const onStudentSubmit = (data: StudentFormData) => {
-    console.log('New student data:', data);
+    const newStudent: Student = {
+      ...data,
+      id: data.university_number,
+      rollNumber: data.roll_no,
+      dob: 'N/A', // DOB is not in the form, so setting a default
+    };
+    setStudents(prev => [newStudent, ...prev]);
     toast({
       title: 'Student Added',
       description: `Successfully added ${data.name}.`,
     });
     form.reset();
+  };
+
+  const handleEditClick = (student: Student) => {
+    setEditingStudent(student);
+    form.reset({
+      name: student.name,
+      email: student.email,
+      phone: student.phone,
+      roll_no: student.rollNumber,
+      university_number: student.university_number,
+      department: student.department,
+      year: student.year,
+    });
+    setIsEditDialogOpen(true);
+  };
+  
+  const onEditStudentSubmit = (data: StudentFormData) => {
+    if (!editingStudent) return;
+  
+    setStudents(prev => 
+      prev.map(s => 
+        s.id === editingStudent.id 
+          ? { 
+              ...s, 
+              ...data, 
+              rollNumber: data.roll_no, 
+              university_number: data.university_number, 
+              id: data.university_number 
+            } 
+          : s
+      )
+    );
+    
+    toast({
+      title: 'Student Updated',
+      description: `Successfully updated ${data.name}.`,
+    });
+    
+    setIsEditDialogOpen(false);
+    setEditingStudent(null);
+    form.reset();
+  };
+
+  const handleDeleteStudent = (student: Student) => {
+    setStudents(prev => prev.filter(s => s.id !== student.id));
+    toast({
+      variant: 'destructive',
+      title: 'Student Deleted',
+      description: `${student.name} has been removed from the list.`,
+    });
   };
   
   const handleAddDepartment = () => {
@@ -117,8 +204,9 @@ export function TeacherManagementPanel() {
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="add-student">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="add-student">Add Student</TabsTrigger>
+            <TabsTrigger value="manage-students">Manage Students</TabsTrigger>
             <TabsTrigger value="departments">Departments</TabsTrigger>
             <TabsTrigger value="years">Years</TabsTrigger>
             <TabsTrigger value="announcements">Announcements</TabsTrigger>
@@ -240,6 +328,58 @@ export function TeacherManagementPanel() {
               </form>
             </Form>
           </TabsContent>
+
+          <TabsContent value="manage-students">
+            <div className="pt-4 space-y-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Roll No.</TableHead>
+                    <TableHead>Department</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {students.map((student) => (
+                    <TableRow key={student.id}>
+                      <TableCell className="font-medium">{student.name}</TableCell>
+                      <TableCell>{student.rollNumber}</TableCell>
+                      <TableCell>{student.department}</TableCell>
+                      <TableCell className="text-right space-x-2">
+                        <Button variant="ghost" size="icon" onClick={() => handleEditClick(student)}>
+                          <Pencil className="h-4 w-4" />
+                          <span className="sr-only">Edit</span>
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10">
+                              <Trash2 className="h-4 w-4" />
+                              <span className="sr-only">Delete</span>
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete the student record for {student.name}.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDeleteStudent(student)}>
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </TabsContent>
           
           <TabsContent value="departments">
             <div className="pt-4 space-y-4">
@@ -343,6 +483,132 @@ export function TeacherManagementPanel() {
           </TabsContent>
         </Tabs>
       </CardContent>
+
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[625px]">
+          <DialogHeader>
+            <DialogTitle>Edit Student: {editingStudent?.name}</DialogTitle>
+            <DialogDescription>
+              Update the student's details below. Click save to apply changes.
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onEditStudentSubmit)} className="space-y-6 pt-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter student's name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input placeholder="student@example.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number</FormLabel>
+                      <FormControl>
+                        <Input placeholder="9876543210" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="roll_no"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Roll Number</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., 3BCA-29" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="university_number"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>University Number</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., 36623U09029" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="department"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Department</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a department" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {departments.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="year"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Year</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a year" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
+                <Button type="submit">Save Changes</Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
