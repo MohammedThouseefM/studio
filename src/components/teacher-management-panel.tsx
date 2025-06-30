@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format, parseISO } from 'date-fns';
-import { PlusCircle, Trash2, Megaphone, Pencil, Search, FileText, Loader2, Calendar as CalendarIcon, CalendarClock, User, X } from 'lucide-react';
+import { PlusCircle, Trash2, Megaphone, Pencil, Search, FileText, Loader2, Calendar as CalendarIcon, CalendarClock, User, X, BarChart } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,6 +28,7 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { cn } from '@/lib/utils';
 import { Calendar } from './ui/calendar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { DepartmentAnalytics } from './department-analytics';
 
 const studentSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -75,6 +76,7 @@ export function TeacherManagementPanel() {
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   const [reportData, setReportData] = useState<DefaulterReportOutput | null>(null);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
 
   // College Data from Context
   const { 
@@ -475,7 +477,29 @@ export function TeacherManagementPanel() {
             </TabsContent>
 
             <TabsContent value="reports">
-              <div className="pt-4 space-y-4 text-center"><Card className="p-6"><CardHeader className="p-0 mb-4"><CardTitle>Attendance Defaulter Report</CardTitle><CardDescription>Generate an AI-summarized report of students with attendance below 75%.</CardDescription></CardHeader><CardContent className="p-0"><Button onClick={handleGenerateReport} disabled={isGeneratingReport}>{isGeneratingReport ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generating...</>) : (<><FileText className="mr-2 h-4 w-4" />Generate Report</>)}</Button></CardContent></Card></div>
+               <div className="grid md:grid-cols-2 gap-6 pt-4">
+                <Card className="p-6 text-center">
+                  <CardHeader className="p-0 mb-4">
+                    <CardTitle>Attendance Defaulter Report</CardTitle>
+                    <CardDescription>Generate an AI-summarized report of students with attendance below 75%.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <Button onClick={handleGenerateReport} disabled={isGeneratingReport}>{isGeneratingReport ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generating...</>) : (<><FileText className="mr-2 h-4 w-4" />Generate Report</>)}</Button>
+                  </CardContent>
+                </Card>
+                <Card className="p-6 text-center">
+                  <CardHeader className="p-0 mb-4">
+                    <CardTitle>Department Analytics</CardTitle>
+                    <CardDescription>View a dashboard of attendance statistics across departments and classes.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <Button onClick={() => setIsAnalyticsOpen(true)}>
+                      <BarChart className="mr-2 h-4 w-4" />
+                      View Analytics
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
           </Tabs>
         </CardContent>
@@ -483,6 +507,20 @@ export function TeacherManagementPanel() {
 
       <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
         <DialogContent className="sm:max-w-2xl"><DialogHeader><DialogTitle>Attendance Defaulter Report</DialogTitle><DialogDescription>An AI-generated summary and list of students with attendance below 75%.</DialogDescription></DialogHeader>{reportData && (<div className="space-y-4 max-h-[60vh] overflow-y-auto pr-4"><blockquote className="mt-2 border-l-2 pl-6 italic">"{reportData.summary}"</blockquote><div className="rounded-md border"><Table><TableHeader><TableRow><TableHead>Roll No.</TableHead><TableHead>Name</TableHead><TableHead>Department</TableHead><TableHead className="text-right">Attendance</TableHead></TableRow></TableHeader><TableBody>{reportData.defaulters.map(student => (<TableRow key={student.id}><TableCell>{student.rollNumber}</TableCell><TableCell className="font-medium">{student.name}</TableCell><TableCell>{student.department}</TableCell><TableCell className="text-right text-destructive font-bold">{student.attendancePercentage}%</TableCell></TableRow>))}</TableBody></Table></div></div>)}<DialogFooter><Button variant="outline" onClick={() => setIsReportDialogOpen(false)}>Close</Button></DialogFooter></DialogContent>
+      </Dialog>
+      
+      <Dialog open={isAnalyticsOpen} onOpenChange={setIsAnalyticsOpen}>
+        <DialogContent className="max-w-4xl w-full">
+          <DialogHeader>
+            <DialogTitle>Department-wise Attendance Analytics</DialogTitle>
+            <DialogDescription>
+              An overview of attendance performance across different departments and classes.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4 max-h-[70vh] overflow-y-auto pr-4">
+            <DepartmentAnalytics />
+          </div>
+        </DialogContent>
       </Dialog>
 
       <Dialog open={isStudentFormDialogOpen} onOpenChange={setIsStudentFormDialogOpen}>
