@@ -1,14 +1,13 @@
-
 'use client';
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { PlusCircle, Trash2 } from 'lucide-react';
+import { PlusCircle, Trash2, Megaphone } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -21,8 +20,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { collegeData } from '@/lib/mock-data';
+import { useAnnouncements } from '@/context/announcements-context';
 
 const studentSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -42,6 +43,10 @@ export function TeacherManagementPanel() {
   const [newDepartment, setNewDepartment] = useState('');
   const [years, setYears] = useState(collegeData.years);
   const [newYear, setNewYear] = useState('');
+
+  const { announcements, addAnnouncement, deleteAnnouncement } = useAnnouncements();
+  const [newAnnouncementTitle, setNewAnnouncementTitle] = useState('');
+  const [newAnnouncementContent, setNewAnnouncementContent] = useState('');
 
   const form = useForm<StudentFormData>({
     resolver: zodResolver(studentSchema),
@@ -81,17 +86,42 @@ export function TeacherManagementPanel() {
     }
   };
 
+  const handleAddAnnouncement = () => {
+    if (newAnnouncementTitle && newAnnouncementContent) {
+      addAnnouncement(newAnnouncementTitle, newAnnouncementContent);
+      toast({ title: 'Announcement Added', description: `Added "${newAnnouncementTitle}".` });
+      setNewAnnouncementTitle('');
+      setNewAnnouncementContent('');
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Title and content cannot be empty.',
+      });
+    }
+  };
+
+  const handleDeleteAnnouncement = (id: string) => {
+    const deletedAnnouncement = announcements.find((a) => a.id === id);
+    if (deletedAnnouncement) {
+      deleteAnnouncement(id);
+      toast({ title: 'Announcement Deleted', description: `Deleted "${deletedAnnouncement.title}".` });
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Management Panel</CardTitle>
+        <CardDescription>Manage students, academic structure, and announcements.</CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="add-student">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="add-student">Add Student</TabsTrigger>
             <TabsTrigger value="departments">Departments</TabsTrigger>
             <TabsTrigger value="years">Years</TabsTrigger>
+            <TabsTrigger value="announcements">Announcements</TabsTrigger>
           </TabsList>
           
           <TabsContent value="add-student">
@@ -256,6 +286,57 @@ export function TeacherManagementPanel() {
                     placeholder="e.g., 4th Year"
                   />
                   <Button onClick={handleAddYear}><PlusCircle /> Add</Button>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="announcements">
+            <div className="pt-4 space-y-6">
+              <div className="space-y-4 p-4 border rounded-lg">
+                <h3 className="font-semibold text-lg flex items-center gap-2"><Megaphone /> Create New Announcement</h3>
+                <div className="space-y-2">
+                  <Label htmlFor="new-announcement-title">Title</Label>
+                  <Input
+                    id="new-announcement-title"
+                    value={newAnnouncementTitle}
+                    onChange={(e) => setNewAnnouncementTitle(e.target.value)}
+                    placeholder="e.g., Mid-term Exams"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="new-announcement-content">Content</Label>
+                  <Textarea
+                    id="new-announcement-content"
+                    value={newAnnouncementContent}
+                    onChange={(e) => setNewAnnouncementContent(e.target.value)}
+                    placeholder="Enter the announcement details here..."
+                  />
+                </div>
+                <Button onClick={handleAddAnnouncement} className="w-full">
+                  <PlusCircle /> Post Announcement
+                </Button>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg">Existing Announcements</h3>
+                <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
+                  {announcements.length > 0 ? (
+                    announcements.map((announcement) => (
+                      <div key={announcement.id} className="flex items-start justify-between gap-4 p-3 rounded-md border bg-card-foreground/5">
+                        <div className="flex-1">
+                          <p className="font-medium">{announcement.title}</p>
+                          <p className="text-sm text-muted-foreground">{announcement.content}</p>
+                          <p className="text-xs text-muted-foreground mt-1">{announcement.date}</p>
+                        </div>
+                        <Button variant="ghost" size="icon" className="text-destructive shrink-0 hover:bg-destructive/10 h-8 w-8" onClick={() => handleDeleteAnnouncement(announcement.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">No announcements yet.</p>
+                  )}
                 </div>
               </div>
             </div>
