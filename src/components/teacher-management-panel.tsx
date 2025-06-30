@@ -1,11 +1,10 @@
-
 'use client';
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { PlusCircle, Trash2, Megaphone, Pencil, Search } from 'lucide-react';
+import { PlusCircle, Trash2, Megaphone, Pencil, Search, FileText, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -52,6 +51,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { getDefaulterReport } from '@/lib/actions';
+import type { DefaulterReportOutput } from '@/ai/flows/defaulter-report-flow';
 
 const studentSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -80,6 +81,10 @@ export function TeacherManagementPanel() {
   const { announcements, addAnnouncement, deleteAnnouncement } = useAnnouncements();
   const [newAnnouncementTitle, setNewAnnouncementTitle] = useState('');
   const [newAnnouncementContent, setNewAnnouncementContent] = useState('');
+
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  const [reportData, setReportData] = useState<DefaulterReportOutput | null>(null);
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
 
   const form = useForm<StudentFormData>({
     resolver: zodResolver(studentSchema),
@@ -205,20 +210,37 @@ export function TeacherManagementPanel() {
     }
   };
 
+  const handleGenerateReport = async () => {
+    setIsGeneratingReport(true);
+    setReportData(null);
+    const result = await getDefaulterReport();
+    if (result.success && result.data) {
+        setReportData(result.data);
+        setIsReportDialogOpen(true);
+        toast({ title: 'Report Generated', description: 'The attendance defaulter report is ready.' });
+    } else {
+        toast({ variant: 'destructive', title: 'Report Failed', description: result.error });
+    }
+    setIsGeneratingReport(false);
+  };
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Management Panel</CardTitle>
-        <CardDescription>Manage students, academic structure, and announcements.</CardDescription>
+        <CardDescription>Manage students, academic structure, announcements, and reports.</CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="add-student">
-          <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+          <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-3">
             <TabsTrigger value="add-student">Add Student</TabsTrigger>
             <TabsTrigger value="manage-students">Manage Students</TabsTrigger>
             <TabsTrigger value="departments">Departments</TabsTrigger>
             <TabsTrigger value="years">Years</TabsTrigger>
             <TabsTrigger value="announcements">Announcements</TabsTrigger>
+            <TabsTrigger value="reports">
+              <FileText className="mr-2 h-4 w-4" /> Reports
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="add-student">
@@ -509,8 +531,78 @@ export function TeacherManagementPanel() {
               </div>
             </div>
           </TabsContent>
+
+          <TabsContent value="reports">
+            <div className="pt-4 space-y-4 text-center">
+                <Card className="p-6">
+                    <CardHeader className="p-0 mb-4">
+                        <CardTitle>Attendance Defaulter Report</CardTitle>
+                        <CardDescription>Generate an AI-summarized report of students with attendance below 75%.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                        <Button onClick={handleGenerateReport} disabled={isGeneratingReport}>
+                            {isGeneratingReport ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Generating...
+                                </>
+                            ) : (
+                                <>
+                                    <FileText className="mr-2 h-4 w-4" />
+                                    Generate Report
+                                </>
+                            )}
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+          </TabsContent>
         </Tabs>
       </CardContent>
+
+      <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Attendance Defaulter Report</DialogTitle>
+            <DialogDescription>
+                An AI-generated summary and list of students with attendance below 75%.
+            </DialogDescription>
+          </DialogHeader>
+          {reportData && (
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-4">
+                <blockquote className="mt-2 border-l-2 pl-6 italic">
+                    "{reportData.summary}"
+                </blockquote>
+
+                <div className="rounded-md border">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Roll No.</TableHead>
+                                <TableHead>Name</TableHead>
+                                <TableHead>Department</TableHead>
+                                <TableHead className="text-right">Attendance</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {reportData.defaulters.map(student => (
+                                <TableRow key={student.id}>
+                                    <TableCell>{student.rollNumber}</TableCell>
+                                    <TableCell className="font-medium">{student.name}</TableCell>
+                                    <TableCell>{student.department}</TableCell>
+                                    <TableCell className="text-right text-destructive font-bold">{student.attendancePercentage}%</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsReportDialogOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-[625px]">
