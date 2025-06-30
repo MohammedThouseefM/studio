@@ -39,20 +39,25 @@ export function AcademicCalendar() {
     event: 'has-event',
   };
 
-  const EventCell = ({ date }: { date: Date }) => {
-    const dateStr = format(date, 'yyyy-MM-dd');
+  const EventCell = (props: { date: Date }) => {
+    const dateStr = format(props.date, 'yyyy-MM-dd');
     const dayEvents = eventsByDate[dateStr];
-    
-    if (dayEvents) {
-      return (
-        <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
-          {dayEvents.slice(0,3).map((event, i) => (
-            <div key={i} className={cn('h-1.5 w-1.5 rounded-full', eventColors[event.type])} />
-          ))}
-        </div>
-      );
-    }
-    return null;
+
+    return (
+      <>
+        {format(props.date, 'd')}
+        {dayEvents && (
+          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
+            {dayEvents.slice(0, 3).map((event, i) => (
+              <div
+                key={i}
+                className={cn('h-1.5 w-1.5 rounded-full', eventColors[event.type])}
+              />
+            ))}
+          </div>
+        )}
+      </>
+    );
   };
 
   return (
