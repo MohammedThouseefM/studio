@@ -83,7 +83,7 @@ export default function LandingPage() {
             <School className="h-10 w-10 text-primary" />
             <div>
               <h1 className="text-xl font-bold text-primary">Merit Haji Ismail Sahib Arts and Science College</h1>
-              <p className="text-xs text-muted-foreground">Accredited Grade 'A' | Anytown, India</p>
+              <p className="text-xs text-muted-foreground">Kondamalli, Pernambut, Tamil Nadu, India</p>
             </div>
           </div>
           <div className="hidden md:flex items-center gap-4">
