@@ -21,9 +21,7 @@ export function AppLayout({ children, navItems, userType }: PropsWithChildren<Ap
         <AppSidebar navItems={navItems} />
         <SidebarInset>
             <DashboardHeader userType={userType} />
-            <main className="flex-1">
-                {children}
-            </main>
+            {children}
         </SidebarInset>
       </div>
     </SidebarProvider>
