@@ -2,7 +2,8 @@
 
 import type { PropsWithChildren } from "react";
 import { useEffect } from "react";
-import { AppHeader } from "@/components/app-header";
+import { AppLayout } from "@/components/app-layout";
+import { teacherNavItems } from "@/lib/nav-links";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { useToast } from "@/hooks/use-toast";
 
@@ -60,9 +61,8 @@ export default function TeacherLayout({ children }: PropsWithChildren) {
   }, [isOnline, toast]);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <AppHeader userType="Teacher" />
-      <main className="flex-1">{children}</main>
-    </div>
+    <AppLayout navItems={teacherNavItems} userType="Teacher">
+      {children}
+    </AppLayout>
   );
 }
