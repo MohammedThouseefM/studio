@@ -9,7 +9,7 @@ import { format, formatDistanceToNow, parseISO } from 'date-fns';
 import { PlusCircle, Trash2, Megaphone, Pencil, Search, FileText, Loader2, Calendar as CalendarIcon, CalendarClock, User, X, BarChart, Users, KeyRound, MailCheck, MailWarning, Eye, EyeOff, Send, Check, History, Edit, UserPlus, UserMinus, FilePlus, FileMinus, MessageSquare, MessageSquareX, ClipboardEdit, Lock, ShieldCheck, ShieldX, CalendarPlus, CalendarCheck, CalendarX, Star, BookCopy, SlidersHorizontal } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
