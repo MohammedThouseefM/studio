@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useTransition } from 'react';
-import { Wand2, Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { Wand2, Loader2, CheckCircle, XCircle, Wifi, WifiOff } from 'lucide-react';
 
 import { getAttendancePrediction } from '@/lib/actions';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { previousAttendanceData, students, type Student } from '@/lib/mock-data';
+import { useOnlineStatus } from '@/hooks/use-online-status';
 
 type AttendanceStatus = 'present' | 'absent';
 type AttendanceState = Record<string, { status: AttendanceStatus; isPredicted: boolean }>;
@@ -28,6 +29,7 @@ export function AttendanceSheet({ classDetails }: AttendanceSheetProps) {
   const [attendance, setAttendance] = useState<AttendanceState>({});
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
+  const isOnline = useOnlineStatus();
 
   useEffect(() => {
     const initialState: AttendanceState = {};
@@ -77,12 +79,37 @@ export function AttendanceSheet({ classDetails }: AttendanceSheetProps) {
   };
 
   const handleSave = () => {
-    // Mock save
-    console.log('Saving attendance:', attendance);
-    toast({
-      title: 'Attendance Saved!',
-      description: 'The attendance has been successfully recorded.',
-    });
+    if (isOnline) {
+      // Mock save - current behavior
+      console.log('Saving attendance online:', attendance);
+      toast({
+        title: 'Attendance Saved!',
+        description: 'The attendance has been successfully recorded.',
+      });
+    } else {
+      // Save to localStorage
+      const key = `offline-attendance-${classDetails.department}-${classDetails.year}-${classDetails.subject}-${classDetails.date}`;
+      try {
+        const pendingSyncs = JSON.parse(localStorage.getItem('pending-attendance-syncs') || '[]');
+        if (!pendingSyncs.includes(key)) {
+          pendingSyncs.push(key);
+          localStorage.setItem('pending-attendance-syncs', JSON.stringify(pendingSyncs));
+        }
+        localStorage.setItem(key, JSON.stringify({ classDetails, attendance }));
+        
+        toast({
+          title: 'Attendance Saved Offline',
+          description: 'This will be synced automatically when you are back online.',
+        });
+      } catch (error) {
+        console.error("Failed to save to localStorage", error);
+        toast({
+          variant: 'destructive',
+          title: 'Error Saving Offline',
+          description: 'Could not save attendance data locally. Your browser storage might be full.',
+        });
+      }
+    }
   };
 
   const getStudentById = (id: string): Student | undefined => students.find(s => s.id === id);
@@ -97,14 +124,20 @@ export function AttendanceSheet({ classDetails }: AttendanceSheetProps) {
               {classDetails.department} - {classDetails.year} | Date: {classDetails.date}
             </CardDescription>
           </div>
-          <Button onClick={handlePrediction} disabled={isPending}>
-            {isPending ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Wand2 className="mr-2 h-4 w-4" />
-            )}
-            Predict Attendance
-          </Button>
+          <div className="flex items-center gap-4">
+             <div className={`flex items-center gap-2 text-sm px-3 py-1.5 rounded-full ${isOnline ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'}`}>
+              {isOnline ? <Wifi className="h-4 w-4" /> : <WifiOff className="h-4 w-4" />}
+              <span>{isOnline ? 'Online' : 'Offline Mode'}</span>
+            </div>
+            <Button onClick={handlePrediction} disabled={isPending || !isOnline}>
+              {isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Wand2 className="mr-2 h-4 w-4" />
+              )}
+              Predict Attendance
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
