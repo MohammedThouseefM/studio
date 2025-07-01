@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format, parseISO } from 'date-fns';
-import { PlusCircle, Trash2, Megaphone, Pencil, Search, FileText, Loader2, Calendar as CalendarIcon, CalendarClock, User, X, BarChart, Users, KeyRound, MailCheck, MailWarning, Eye, EyeOff } from 'lucide-react';
+import { PlusCircle, Trash2, Megaphone, Pencil, Search, FileText, Loader2, Calendar as CalendarIcon, CalendarClock, User, X, BarChart, Users, KeyRound, MailCheck, MailWarning, Eye, EyeOff, Send, Check } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { type Student, type ClassTimeTable, defaultTimetable, type Teacher } from '@/lib/mock-data';
+import { type Student, type ClassTimeTable, defaultTimetable, type Teacher, type LeaveRequest } from '@/lib/mock-data';
 import { useAnnouncements } from '@/context/announcements-context';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -97,6 +97,11 @@ export function TeacherManagementPanel() {
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
 
+  // Leave Management State
+  const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [selectedLeaveRequest, setSelectedLeaveRequest] = useState<LeaveRequest | null>(null);
+
   // College Data from Context
   const { 
     events, addEvent, updateEvent, deleteEvent, 
@@ -106,7 +111,8 @@ export function TeacherManagementPanel() {
     hours, addHour, deleteHour,
     teachers, addTeacher, updateTeacherPassword, deleteTeacher,
     students, setStudents,
-    pendingStudents, approveStudentRegistration, rejectStudentRegistration, updatePendingStudent
+    pendingStudents, approveStudentRegistration, rejectStudentRegistration, updatePendingStudent,
+    leaveRequests, approveLeaveRequest, rejectLeaveRequest
   } = useCollegeData();
 
   // Calendar State
@@ -129,6 +135,8 @@ export function TeacherManagementPanel() {
   const eventForm = useForm<EventFormData>({ resolver: zodResolver(eventSchema) });
   const teacherForm = useForm<TeacherFormData>({ resolver: zodResolver(teacherSchema) });
   const changePasswordForm = useForm<ChangePasswordFormData>({ resolver: zodResolver(changePasswordSchema) });
+
+  const pendingLeaveRequests = leaveRequests.filter(r => r.status === 'pending');
 
   useEffect(() => {
     if (selectedDept && selectedYear) {
@@ -289,6 +297,33 @@ export function TeacherManagementPanel() {
     toast({ variant: 'destructive', title: 'Registration Rejected', description: 'The application has been removed.' });
   };
 
+  // Leave Management functions
+  const handleOpenRejectDialog = (request: LeaveRequest) => {
+    setSelectedLeaveRequest(request);
+    setIsRejectDialogOpen(true);
+  };
+
+  const handleConfirmRejection = () => {
+    if (selectedLeaveRequest && rejectionReason) {
+      rejectLeaveRequest(selectedLeaveRequest.id, rejectionReason);
+      toast({
+        variant: 'destructive',
+        title: 'Leave Rejected',
+        description: `Leave request for ${selectedLeaveRequest.studentName} has been rejected.`,
+      });
+      setIsRejectDialogOpen(false);
+      setRejectionReason('');
+      setSelectedLeaveRequest(null);
+    } else {
+       toast({
+        variant: 'destructive',
+        title: 'Reason Required',
+        description: `Please provide a reason for rejection.`,
+      });
+    }
+  };
+
+
   const StudentFormFields = ({ photoUrlValue }: { photoUrlValue?: string }) => (
     <>
       <div className="grid md:grid-cols-2 gap-4">
@@ -360,8 +395,9 @@ export function TeacherManagementPanel() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="manage-students" className="min-h-[600px]">
-            <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8">
+            <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-5 lg:grid-cols-9">
               <TabsTrigger value="requests">Requests <div className="ml-2 h-5 w-5 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-xs">{pendingStudents.length}</div></TabsTrigger>
+              <TabsTrigger value="leave-requests">Leave Requests <div className="ml-2 h-5 w-5 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-xs">{pendingLeaveRequests.length}</div></TabsTrigger>
               <TabsTrigger value="manage-students">Manage Students</TabsTrigger>
               <TabsTrigger value="manage-staff">Manage Staff</TabsTrigger>
               <TabsTrigger value="academic-structure">Academic Structure</TabsTrigger>
@@ -439,6 +475,52 @@ export function TeacherManagementPanel() {
                     </Table>
                  </div>
                </div>
+            </TabsContent>
+            
+            <TabsContent value="leave-requests">
+              <div className="pt-4 space-y-4">
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Student</TableHead>
+                        <TableHead>Class</TableHead>
+                        <TableHead>Dates</TableHead>
+                        <TableHead>Reason</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {pendingLeaveRequests.length > 0 ? (
+                        pendingLeaveRequests.map((request) => (
+                          <TableRow key={request.id}>
+                            <TableCell className="font-medium">{request.studentName}</TableCell>
+                            <TableCell>{request.department} - {request.year}</TableCell>
+                            <TableCell>{format(parseISO(request.startDate), 'MMM d')} - {format(parseISO(request.endDate), 'MMM d')}</TableCell>
+                            <TableCell className="max-w-[200px] truncate">{request.reason}</TableCell>
+                            <TableCell className="text-right space-x-2">
+                              <Button variant="ghost" size="icon" className="text-green-600 hover:text-green-700 hover:bg-green-100" onClick={() => approveLeaveRequest(request.id)}>
+                                <Check className="h-4 w-4" />
+                                <span className="sr-only">Approve</span>
+                              </Button>
+                              <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" onClick={() => handleOpenRejectDialog(request)}>
+                                <X className="h-4 w-4" />
+                                <span className="sr-only">Reject</span>
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={5} className="h-24 text-center">
+                            No pending leave requests.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
             </TabsContent>
 
             <TabsContent value="manage-students">
@@ -766,6 +848,34 @@ export function TeacherManagementPanel() {
                     </FormItem>
                 )}
             /><DialogFooter><Button type="button" variant="outline" onClick={() => setIsChangePasswordDialogOpen(false)}>Cancel</Button><Button type="submit">Save Password</Button></DialogFooter></form></Form></DialogContent></Dialog>
+      <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+                <DialogTitle>Reject Leave Request</DialogTitle>
+                <DialogDescription>
+                    Please provide a reason for rejecting the leave request for {selectedLeaveRequest?.studentName}. This will be visible to the student.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                    <Label htmlFor="rejection-reason">Rejection Reason</Label>
+                    <Textarea
+                        id="rejection-reason"
+                        placeholder="e.g., Medical certificate not attached, conflicting with exam schedule..."
+                        value={rejectionReason}
+                        onChange={(e) => setRejectionReason(e.target.value)}
+                    />
+                </div>
+            </div>
+            <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setIsRejectDialogOpen(false)}>Cancel</Button>
+                <Button type="button" onClick={handleConfirmRejection} className="bg-destructive hover:bg-destructive/90">
+                    <Send className="mr-2 h-4 w-4" />
+                    Confirm Rejection
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

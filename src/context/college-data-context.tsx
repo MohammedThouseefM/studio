@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
@@ -9,11 +10,13 @@ import {
   teachers as initialTeachers,
   students as initialStudents,
   pendingStudents as initialPendingStudents,
+  leaveRequests as initialLeaveRequests,
   type CalendarEvent as RawCalendarEvent,
   type FullTimeTable,
   type ClassTimeTable,
   type Teacher,
   type Student,
+  type LeaveRequest,
 } from '@/lib/mock-data';
 
 export type CalendarEventWithId = RawCalendarEvent & { id: string };
@@ -50,6 +53,11 @@ type CollegeDataContextType = {
   approveStudentRegistration: (studentId: string) => void;
   rejectStudentRegistration: (studentId: string) => void;
   updatePendingStudent: (studentId: string, updatedStudent: Student) => void;
+  // Leave Requests
+  leaveRequests: LeaveRequest[];
+  addLeaveRequest: (studentId: string, startDate: string, endDate: string, reason: string) => void;
+  approveLeaveRequest: (requestId: string) => void;
+  rejectLeaveRequest: (requestId: string, reason: string) => void;
 };
 
 const CollegeDataContext = createContext<CollegeDataContextType | undefined>(undefined);
@@ -75,6 +83,9 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
   // Student State
   const [students, setStudents] = useState<Student[]>(initialStudents);
   const [pendingStudents, setPendingStudents] = useState<Student[]>(initialPendingStudents);
+
+  // Leave Request State
+  const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>(initialLeaveRequests);
 
   // Event functions
   const addEvent = (eventData: Omit<CalendarEventWithId, 'id'>) => {
@@ -142,6 +153,33 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
     setPendingStudents(prev => prev.map(s => s.id === studentId ? updatedStudent : s));
   };
 
+  // Leave Request functions
+  const addLeaveRequest = (studentId: string, startDate: string, endDate: string, reason: string) => {
+    const student = students.find(s => s.id === studentId);
+    if (!student) return;
+
+    const newRequest: LeaveRequest = {
+      id: `leave-${Date.now()}`,
+      studentId,
+      studentName: student.name,
+      department: student.department,
+      year: student.year,
+      startDate,
+      endDate,
+      reason,
+      status: 'pending',
+    };
+    setLeaveRequests(prev => [newRequest, ...prev]);
+  };
+
+  const approveLeaveRequest = (requestId: string) => {
+    setLeaveRequests(prev => prev.map(r => r.id === requestId ? { ...r, status: 'approved' } : r));
+  };
+
+  const rejectLeaveRequest = (requestId: string, reason: string) => {
+    setLeaveRequests(prev => prev.map(r => r.id === requestId ? { ...r, status: 'rejected', rejectionReason: reason } : r));
+  };
+
   const contextValue = { 
     events, addEvent, updateEvent, deleteEvent, 
     timeTable, updateTimeTable,
@@ -150,7 +188,8 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
     hours, addHour, deleteHour,
     teachers, addTeacher, updateTeacherPassword, deleteTeacher,
     students, setStudents,
-    pendingStudents, addPendingStudent, approveStudentRegistration, rejectStudentRegistration, updatePendingStudent
+    pendingStudents, addPendingStudent, approveStudentRegistration, rejectStudentRegistration, updatePendingStudent,
+    leaveRequests, addLeaveRequest, approveLeaveRequest, rejectLeaveRequest
   };
 
   return (

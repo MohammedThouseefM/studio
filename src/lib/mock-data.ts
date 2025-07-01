@@ -1,4 +1,5 @@
 
+
 // Mock data for the application
 
 export type Student = {
@@ -61,6 +62,19 @@ export type DailyAttendance = {
   hour: string;
   subject: string;
   status: 'present' | 'absent' | 'not-marked';
+};
+
+export type LeaveRequest = {
+  id: string;
+  studentId: string;
+  studentName: string;
+  department: string;
+  year: string;
+  startDate: string; // YYYY-MM-DD
+  endDate: string; // YYYY-MM-DD
+  reason: string;
+  status: 'pending' | 'approved' | 'rejected';
+  rejectionReason?: string;
 };
 
 
@@ -248,4 +262,41 @@ export const dailyAttendanceData: DailyAttendance[] = [
   { hour: '3rd Hour', subject: 'Web Tech', status: 'absent' },
   { hour: '4th Hour', subject: 'OS', status: 'present' },
   { hour: '5th Hour', subject: 'Project Lab', status: 'not-marked' },
+];
+
+export const leaveRequests: LeaveRequest[] = [
+  {
+    id: 'leave-1',
+    studentId: '36623U09015',
+    studentName: 'Priya Verma',
+    department: 'BCA',
+    year: '3rd Year',
+    startDate: '2024-07-29',
+    endDate: '2024-07-30',
+    reason: 'Family function.',
+    status: 'approved',
+  },
+  {
+    id: 'leave-2',
+    studentId: '36623U08007',
+    studentName: 'Ananya Joshi',
+    department: 'BSC',
+    year: '3rd Year',
+    startDate: '2024-08-01',
+    endDate: '2024-08-01',
+    reason: 'Medical appointment.',
+    status: 'pending',
+  },
+   {
+    id: 'leave-3',
+    studentId: '36623U09042',
+    studentName: 'Rahul Desai',
+    department: 'BCA',
+    year: '3rd Year',
+    startDate: '2024-08-02',
+    endDate: '2024-08-03',
+    reason: 'Not feeling well.',
+    status: 'rejected',
+    rejectionReason: 'Medical certificate not provided.',
+  },
 ];
