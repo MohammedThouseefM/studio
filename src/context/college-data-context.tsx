@@ -16,6 +16,7 @@ import {
   auditLogs as initialAuditLogs,
   feedbackSessions as initialFeedbackSessions,
   feedbackData as initialFeedbackData,
+  studentFeeDetails as initialStudentFeeDetails,
   type CalendarEvent as RawCalendarEvent,
   type FullTimeTable,
   type ClassTimeTable,
@@ -28,11 +29,14 @@ import {
   type AuditLog as AuditLogType,
   type FeedbackSession,
   type Feedback,
+  type StudentFeeDetails,
+  type SemesterFee,
 } from '@/lib/mock-data';
 import type { AttendanceState } from '@/components/attendance-sheet';
 
 export type CalendarEventWithId = RawCalendarEvent & { id: string };
 export type AuditLog = AuditLogType;
+export type { SemesterFee };
 
 type CollegeDataContextType = {
   // Events
@@ -88,6 +92,8 @@ type CollegeDataContextType = {
   feedbackSessions: FeedbackSession[];
   feedbackData: Feedback[];
   submitFeedback: (sessionId: string, studentId: string, feedbacks: Array<{ subject: string; rating: number; comment?: string }>) => void;
+  // Fee Details
+  studentFeeDetails: StudentFeeDetails;
 };
 
 const CollegeDataContext = createContext<CollegeDataContextType | undefined>(undefined);
@@ -110,6 +116,7 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(initialAuditLogs);
   const [feedbackSessions, setFeedbackSessions] = useState<FeedbackSession[]>(initialFeedbackSessions);
   const [feedbackData, setFeedbackData] = useState<Feedback[]>(initialFeedbackData);
+  const [studentFeeDetails, setStudentFeeDetails] = useState<StudentFeeDetails>(initialStudentFeeDetails);
 
   const addAuditLog = (user: string, action: string, type: AuditLog['type']) => {
     const newLog: AuditLog = {
@@ -331,6 +338,7 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
     feedbackSessions,
     feedbackData,
     submitFeedback,
+    studentFeeDetails,
   };
 
   return (

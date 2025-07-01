@@ -18,6 +18,7 @@ import {
   History,
   Timer,
   ClipboardList,
+  CreditCard,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -31,6 +32,7 @@ export type NavItem = {
 export const studentNavItems: NavItem[] = [
   { href: '/student/dashboard', label: 'Dashboard', icon: LayoutDashboard, tooltip: 'Dashboard' },
   { href: '/student/profile', label: 'My Profile', icon: User, tooltip: 'Profile' },
+  { href: '/student/fee-details', label: 'Fee Details', icon: CreditCard, tooltip: 'Fee Details' },
   { href: '/student/leave', label: 'Leave Requests', icon: CalendarPlus, tooltip: 'Leave Requests' },
   { href: '/student/feedback', label: 'Course Feedback', icon: Star, tooltip: 'Course Feedback' },
   { href: '/student/calendar', label: 'Calendar', icon: Calendar, tooltip: 'Full Calendar' },

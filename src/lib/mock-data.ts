@@ -120,6 +120,19 @@ export type Feedback = {
     comment?: string;
 };
 
+export type SemesterFee = {
+  semester: string;
+  totalFee: number;
+  paid: number;
+  balance: number;
+  status: 'Paid' | 'Pending' | 'Overdue';
+  dueDate: string; // YYYY-MM-DD
+};
+
+export type StudentFeeDetails = {
+  [studentId: string]: SemesterFee[];
+};
+
 
 export const teachers: Teacher[] = [
     { id: 'TEACHER01', password: 'password', name: 'Dr. Evelyn Reed' },
@@ -382,4 +395,33 @@ export const examTimeTable: FullExamTimeTable = {
   'BCOM': {
       '3rd Year': [], '1st Year': [], '2nd Year': [],
   }
+};
+
+export const studentFeeDetails: StudentFeeDetails = {
+  // Mohammed Thouseef (BCA)
+  '36623U09028': [
+    { semester: '1st', totalFee: 25000, paid: 25000, balance: 0, status: 'Paid', dueDate: '2022-08-15' },
+    { semester: '2nd', totalFee: 25000, paid: 25000, balance: 0, status: 'Paid', dueDate: '2023-01-15' },
+    { semester: '3rd', totalFee: 25000, paid: 25000, balance: 0, status: 'Paid', dueDate: '2023-08-15' },
+    { semester: '4th', totalFee: 25000, paid: 25000, balance: 0, status: 'Paid', dueDate: '2024-01-15' },
+    { semester: '5th', totalFee: 25000, paid: 15000, balance: 10000, status: 'Pending', dueDate: '2024-08-15' },
+    { semester: '6th', totalFee: 25000, paid: 0, balance: 25000, status: 'Pending', dueDate: '2025-01-15' },
+  ],
+  // Priya Verma (BCA)
+  '36623U09015': [
+    { semester: '5th', totalFee: 25000, paid: 25000, balance: 0, status: 'Paid', dueDate: '2024-08-15' },
+  ],
+  // Ananya Joshi (BSC)
+  '36623U08007': [
+     { semester: '5th', totalFee: 22000, paid: 22000, balance: 0, status: 'Paid', dueDate: '2024-08-15' },
+     { semester: '6th', totalFee: 22000, paid: 0, balance: 22000, status: 'Pending', dueDate: '2025-01-15' },
+  ],
+  // Aditya Rao (BBA)
+  '36623U07012': [
+     { semester: '5th', totalFee: 28000, paid: 10000, balance: 18000, status: 'Overdue', dueDate: '2024-07-15' },
+  ],
+  // Neha Gupta (BCOM)
+  '36623U06005': [
+     { semester: '5th', totalFee: 20000, paid: 20000, balance: 0, status: 'Paid', dueDate: '2024-08-15' },
+  ],
 };
