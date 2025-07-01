@@ -46,10 +46,10 @@ export default function ExamScheduleEditorPage() {
     if (!editableSchedule) return;
     const newExam: Exam = {
       id: nanoid(),
+      subjectCode: '',
       subject: '',
       date: '',
       time: '',
-      room: '',
     };
     setEditableSchedule([...editableSchedule, newExam]);
   };
@@ -62,7 +62,7 @@ export default function ExamScheduleEditorPage() {
   const handleSaveChanges = () => {
     if (selectedDept && selectedYear && editableSchedule) {
       // Basic validation
-      if (editableSchedule.some(e => !e.subject || !e.date || !e.time || !e.room)) {
+      if (editableSchedule.some(e => !e.subjectCode || !e.subject || !e.date || !e.time)) {
           toast({ variant: 'destructive', title: 'Incomplete Details', description: 'Please fill out all fields for each exam entry.' });
           return;
       }
@@ -109,16 +109,23 @@ export default function ExamScheduleEditorPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead>Subject Code</TableHead>
                       <TableHead>Subject</TableHead>
                       <TableHead>Date (YYYY-MM-DD)</TableHead>
                       <TableHead>Time</TableHead>
-                      <TableHead>Room No.</TableHead>
                       <TableHead className="w-[50px]"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {editableSchedule.map((exam) => (
                       <TableRow key={exam.id}>
+                        <TableCell>
+                          <Input
+                            value={exam.subjectCode}
+                            onChange={(e) => handleScheduleChange(exam.id, 'subjectCode', e.target.value)}
+                            placeholder="e.g., BCA301"
+                          />
+                        </TableCell>
                         <TableCell>
                           <Input
                             value={exam.subject}
@@ -138,13 +145,6 @@ export default function ExamScheduleEditorPage() {
                             value={exam.time}
                             onChange={(e) => handleScheduleChange(exam.id, 'time', e.target.value)}
                             placeholder="e.g., 10AM - 1PM"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            value={exam.room}
-                            onChange={(e) => handleScheduleChange(exam.id, 'room', e.target.value)}
-                            placeholder="e.g., A-101"
                           />
                         </TableCell>
                         <TableCell>

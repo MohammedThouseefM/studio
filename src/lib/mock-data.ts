@@ -56,10 +56,10 @@ export type FullTimeTable = {
 
 export type Exam = {
   id: string;
+  subjectCode: string;
   subject: string;
   date: string;
   time: string;
-  room: string;
 };
 
 export type DepartmentExamTimeTable = {
@@ -365,10 +365,10 @@ export const feedbackData: Feedback[] = [
 export const examTimeTable: FullExamTimeTable = {
   'BCA': {
     '3rd Year': [
-      { id: 'exam-bca-3-1', subject: 'Data Structures', date: '2024-11-10', time: '10:00 AM - 01:00 PM', room: 'A-101' },
-      { id: 'exam-bca-3-2', subject: 'Algorithms', date: '2024-11-12', time: '10:00 AM - 01:00 PM', room: 'A-102' },
-      { id: 'exam-bca-3-3', subject: 'Operating Systems', date: '2024-11-14', time: '10:00 AM - 01:00 PM', room: 'A-101' },
-      { id: 'exam-bca-3-4', subject: 'Database Management', date: '2024-11-16', time: '10:00 AM - 01:00 PM', room: 'A-102' },
+      { id: 'exam-bca-3-1', subjectCode: 'BCA301', subject: 'Data Structures', date: '2024-11-10', time: '10:00 AM - 01:00 PM' },
+      { id: 'exam-bca-3-2', subjectCode: 'BCA302', subject: 'Algorithms', date: '2024-11-12', time: '10:00 AM - 01:00 PM' },
+      { id: 'exam-bca-3-3', subjectCode: 'BCA303', subject: 'Operating Systems', date: '2024-11-14', time: '10:00 AM - 01:00 PM' },
+      { id: 'exam-bca-3-4', subjectCode: 'BCA304', subject: 'Database Management', date: '2024-11-16', time: '10:00 AM - 01:00 PM' },
     ],
     '1st Year': [],
     '2nd Year': [],

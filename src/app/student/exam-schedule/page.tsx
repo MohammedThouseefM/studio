@@ -34,7 +34,7 @@ export default function ExamSchedulePage() {
             Final Exam Timetable for {student.department} - {student.year}
           </CardTitle>
           <CardDescription>
-            Please check the date, time, and room for your upcoming exams carefully.
+            Please check the date, time, and subject for your upcoming exams carefully.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -43,9 +43,9 @@ export default function ExamSchedulePage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Date</TableHead>
+                  <TableHead>Subject Code</TableHead>
                   <TableHead>Subject</TableHead>
                   <TableHead>Time</TableHead>
-                  <TableHead>Room</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -53,9 +53,9 @@ export default function ExamSchedulePage() {
                   schedule.map((exam) => (
                     <TableRow key={exam.id}>
                       <TableCell className="font-medium">{format(parseISO(exam.date), 'PPP')}</TableCell>
+                      <TableCell>{exam.subjectCode}</TableCell>
                       <TableCell>{exam.subject}</TableCell>
                       <TableCell>{exam.time}</TableCell>
-                      <TableCell>{exam.room}</TableCell>
                     </TableRow>
                   ))
                 ) : (
