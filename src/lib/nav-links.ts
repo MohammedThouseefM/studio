@@ -15,6 +15,7 @@ import {
   BookCopy,
   FileText,
   History,
+  Timer,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -30,7 +31,8 @@ export const studentNavItems: NavItem[] = [
   { href: '/student/profile', label: 'My Profile', icon: User, tooltip: 'Profile' },
   { href: '/student/leave', label: 'Leave Requests', icon: CalendarPlus, tooltip: 'Leave Requests' },
   { href: '/student/feedback', label: 'Course Feedback', icon: Star, tooltip: 'Course Feedback' },
-  { href: '/student/calendar', label: 'Full Calendar', icon: Calendar, tooltip: 'Full Calendar' },
+  { href: '/student/calendar', label: 'Calendar', icon: Calendar, tooltip: 'Full Calendar' },
+  { href: '/student/timetable', label: 'Timetable', icon: CalendarClock, tooltip: 'Class Timetable' },
 ];
 
 export const teacherNavItems: NavItem[] = [
