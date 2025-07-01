@@ -21,13 +21,13 @@ const RoomSchema = z.object({
   capacity: z.number().int().positive(),
 });
 
-export const SeatingArrangementInputSchema = z.object({
+const SeatingArrangementInputSchema = z.object({
   students: z.array(StudentSchema).describe("An array of students to be seated."),
   rooms: z.array(RoomSchema).describe("An array of available rooms with their capacities."),
 });
 export type SeatingArrangementInput = z.infer<typeof SeatingArrangementInputSchema>;
 
-export const SeatingArrangementOutputSchema = z.object({
+const SeatingArrangementOutputSchema = z.object({
   arrangement: z.record(
     z.string(),
     z.array(
