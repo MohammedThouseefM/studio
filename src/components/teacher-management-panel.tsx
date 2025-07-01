@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format, formatDistanceToNow, parseISO } from 'date-fns';
-import { PlusCircle, Trash2, Megaphone, Pencil, Search, FileText, Loader2, Calendar as CalendarIcon, CalendarClock, User, X, BarChart, Users, KeyRound, MailCheck, MailWarning, Eye, EyeOff, Send, Check, History, Edit, UserPlus, UserMinus, FilePlus, FileMinus, MessageSquare, MessageSquareX, ClipboardEdit, Lock, ShieldCheck, ShieldX, CalendarPlus, CalendarCheck, CalendarX, Star } from 'lucide-react';
+import { PlusCircle, Trash2, Megaphone, Pencil, Search, FileText, Loader2, Calendar as CalendarIcon, CalendarClock, User, X, BarChart, Users, KeyRound, MailCheck, MailWarning, Eye, EyeOff, Send, Check, History, Edit, UserPlus, UserMinus, FilePlus, FileMinus, MessageSquare, MessageSquareX, ClipboardEdit, Lock, ShieldCheck, ShieldX, CalendarPlus, CalendarCheck, CalendarX, Star, BookCopy } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,6 +31,7 @@ import { Calendar } from './ui/calendar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DepartmentAnalytics } from './department-analytics';
 import { FeedbackAnalytics } from './feedback-analytics';
+import { SeatingArrangementGenerator } from './seating-arrangement-generator';
 
 const studentSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -411,7 +412,7 @@ export function TeacherManagementPanel() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="manage-students" className="min-h-[600px]">
-            <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-5 lg:grid-cols-11">
+            <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-5 lg:grid-cols-12">
               <TabsTrigger value="requests">Requests <div className="ml-2 h-5 w-5 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-xs">{pendingStudents.length}</div></TabsTrigger>
               <TabsTrigger value="leave-requests">Leave Requests <div className="ml-2 h-5 w-5 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-xs">{pendingLeaveRequests.length}</div></TabsTrigger>
               <TabsTrigger value="manage-students">Manage Students</TabsTrigger>
@@ -420,6 +421,7 @@ export function TeacherManagementPanel() {
               <TabsTrigger value="announcements">Announcements</TabsTrigger>
               <TabsTrigger value="academic-settings">Academic Settings</TabsTrigger>
               <TabsTrigger value="timetable">Timetable</TabsTrigger>
+              <TabsTrigger value="seating-plan"><BookCopy className="mr-2 h-4 w-4" />Seating Plan</TabsTrigger>
               <TabsTrigger value="reports"><FileText className="mr-2 h-4 w-4" />Reports</TabsTrigger>
               <TabsTrigger value="feedback"><Star className="mr-2 h-4 w-4" />Feedback</TabsTrigger>
               <TabsTrigger value="audit-logs"><History className="mr-2 h-4 w-4" />Audit Logs</TabsTrigger>
@@ -719,6 +721,10 @@ export function TeacherManagementPanel() {
                   <p className="text-center text-muted-foreground py-8">Select a department and year to edit the timetable.</p>
                 )}
               </div>
+            </TabsContent>
+
+            <TabsContent value="seating-plan">
+              <SeatingArrangementGenerator />
             </TabsContent>
 
             <TabsContent value="reports">

@@ -3,6 +3,7 @@
 import { predictAttendance, type AttendancePredictionInput } from '@/ai/flows/attendance-prediction';
 import { generateDefaulterReport } from '@/ai/flows/defaulter-report-flow';
 import { getMotivationalQuote as getQuoteFlow } from '@/ai/flows/quote-flow';
+import { generateSeatingArrangement, type SeatingArrangementInput } from '@/ai/flows/seating-arrangement-flow';
 import { students, previousAttendanceData } from '@/lib/mock-data';
 
 export async function getAttendancePrediction(input: AttendancePredictionInput) {
@@ -38,4 +39,14 @@ export async function getQuote() {
     // Return a fallback quote on error
     return { success: false, data: "Believe you can and you're halfway there." };
   }
+}
+
+export async function getSeatingPlan(input: SeatingArrangementInput) {
+    try {
+        const plan = await generateSeatingArrangement(input);
+        return { success: true, data: plan };
+    } catch (error) {
+        console.error('Error generating seating plan:', error);
+        return { success: false, error: 'Failed to generate seating plan.' };
+    }
 }
