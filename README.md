@@ -7,7 +7,7 @@ Built with Next.js, React, and Genkit, this application offers a clean, responsi
 ## Key Features
 
 ### For Students:
-- **Secure Login:** Students can log in using their university number and roll number.
+- **Secure Login:** Students can log in using their university number and date of birth.
 - **Attendance Dashboard:** A comprehensive view of their attendance, including:
     - Overall percentage with a progress bar.
     - Subject-wise attendance breakdown.
@@ -43,5 +43,5 @@ Built with Next.js, React, and Genkit, this application offers a clean, responsi
 ## Getting Started
 To explore the application, navigate to the main page and log in using either a student or teacher account.
 
-- **Student Login:** Use a `university_number` as the ID and the corresponding `roll_no` as the password (e.g., ID: `36623U09028`, Pass: `3BCA-28`).
+- **Student Login:** Use a `university_number` as the ID and their **Date of Birth** in `YYYY-MM-DD` format as the password (e.g., ID: `36623U09028`, Pass: `2005-12-12`).
 - **Teacher Login:** Use a pre-defined teacher ID and password (e.g., ID: `TEACHER01`, Pass: `password`).

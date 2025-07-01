@@ -190,8 +190,8 @@ export default function LandingPage() {
             <DialogTitle className="text-2xl">Welcome Back!</DialogTitle>
             <DialogDescription>
               {loginTab === 'student'
-                ? "Student ID is your University Number. Password is your Date of Birth (YYYY-MM-DD)."
-                : "Teacher ID is your Staff ID. Password is provided by the admin."
+                ? "Student ID is your University Number. The password is your Date of Birth."
+                : "Teacher ID is your Staff ID. For demo, use ID: TEACHER01 / Pass: password"
               }
             </DialogDescription>
           </DialogHeader>
@@ -218,11 +218,11 @@ export default function LandingPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="student-password">Password (DOB: YYYY-MM-DD)</Label>
+                    <Label htmlFor="student-password">Password (Date of Birth)</Label>
                     <Input 
                       id="student-password" 
                       type="password" 
-                      placeholder="Enter your date of birth"
+                      placeholder="YYYY-MM-DD"
                       value={studentPassword}
                       onChange={(e) => setStudentPassword(e.target.value)} 
                       required />
