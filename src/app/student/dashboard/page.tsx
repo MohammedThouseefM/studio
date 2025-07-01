@@ -1,6 +1,7 @@
 import { AcademicCalendarCard } from "@/components/academic-calendar-card";
 import { Announcements } from "@/components/announcements";
 import { DailyAttendanceCard } from "@/components/daily-attendance-card";
+import { FeedbackCard } from "@/components/feedback-card";
 import { LeaveRequestCard } from "@/components/leave-request-card";
 import { MotivationalQuote } from "@/components/motivational-quote";
 import { StudentAttendanceSummary } from "@/components/student-attendance-summary";
@@ -26,6 +27,7 @@ export default function StudentDashboardPage() {
         </div>
         <div className="lg:col-span-1 space-y-8">
           <MotivationalQuote />
+          <FeedbackCard />
           <LeaveRequestCard />
           <AcademicCalendarCard />
           <TimetableCard />

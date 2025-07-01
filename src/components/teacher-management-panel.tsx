@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format, formatDistanceToNow, parseISO } from 'date-fns';
-import { PlusCircle, Trash2, Megaphone, Pencil, Search, FileText, Loader2, Calendar as CalendarIcon, CalendarClock, User, X, BarChart, Users, KeyRound, MailCheck, MailWarning, Eye, EyeOff, Send, Check, History, Edit, UserPlus, UserMinus, FilePlus, FileMinus, MessageSquare, MessageSquareX, ClipboardEdit, Lock, ShieldCheck, ShieldX, CalendarPlus, CalendarCheck, CalendarX } from 'lucide-react';
+import { PlusCircle, Trash2, Megaphone, Pencil, Search, FileText, Loader2, Calendar as CalendarIcon, CalendarClock, User, X, BarChart, Users, KeyRound, MailCheck, MailWarning, Eye, EyeOff, Send, Check, History, Edit, UserPlus, UserMinus, FilePlus, FileMinus, MessageSquare, MessageSquareX, ClipboardEdit, Lock, ShieldCheck, ShieldX, CalendarPlus, CalendarCheck, CalendarX, Star } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,6 +30,7 @@ import { cn } from '@/lib/utils';
 import { Calendar } from './ui/calendar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DepartmentAnalytics } from './department-analytics';
+import { FeedbackAnalytics } from './feedback-analytics';
 
 const studentSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -410,7 +411,7 @@ export function TeacherManagementPanel() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="manage-students" className="min-h-[600px]">
-            <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-5 lg:grid-cols-10">
+            <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-5 lg:grid-cols-11">
               <TabsTrigger value="requests">Requests <div className="ml-2 h-5 w-5 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-xs">{pendingStudents.length}</div></TabsTrigger>
               <TabsTrigger value="leave-requests">Leave Requests <div className="ml-2 h-5 w-5 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-xs">{pendingLeaveRequests.length}</div></TabsTrigger>
               <TabsTrigger value="manage-students">Manage Students</TabsTrigger>
@@ -420,6 +421,7 @@ export function TeacherManagementPanel() {
               <TabsTrigger value="academic-settings">Academic Settings</TabsTrigger>
               <TabsTrigger value="timetable">Timetable</TabsTrigger>
               <TabsTrigger value="reports"><FileText className="mr-2 h-4 w-4" />Reports</TabsTrigger>
+              <TabsTrigger value="feedback"><Star className="mr-2 h-4 w-4" />Feedback</TabsTrigger>
               <TabsTrigger value="audit-logs"><History className="mr-2 h-4 w-4" />Audit Logs</TabsTrigger>
             </TabsList>
 
@@ -745,6 +747,12 @@ export function TeacherManagementPanel() {
               </div>
             </TabsContent>
 
+            <TabsContent value="feedback">
+              <div className="pt-4 space-y-4">
+                <FeedbackAnalytics />
+              </div>
+            </TabsContent>
+
             <TabsContent value="audit-logs">
               <div className="pt-4 space-y-4">
                 <h3 className="font-semibold text-lg">Administrator Activity</h3>
@@ -840,8 +848,7 @@ export function TeacherManagementPanel() {
       </Dialog>
       <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}><DialogContent className="sm:max-w-2xl"><DialogHeader><DialogTitle>Attendance Defaulter Report</DialogTitle><DialogDescription>An AI-generated summary and list of students with attendance below 75%.</DialogDescription></DialogHeader>{reportData && (<div className="space-y-4 max-h-[60vh] overflow-y-auto pr-4"><blockquote className="mt-2 border-l-2 pl-6 italic">"{reportData.summary}"</blockquote><div className="rounded-md border"><Table><TableHeader><TableRow><TableHead>Roll No.</TableHead><TableHead>Name</TableHead><TableHead>Department</TableHead><TableHead className="text-right">Attendance</TableHead></TableRow></TableHeader><TableBody>{reportData.defaulters.map(student => (<TableRow key={student.id}><TableCell>{student.rollNumber}</TableCell><TableCell className="font-medium">{student.name}</TableCell><TableCell>{student.department}</TableCell><TableCell className="text-right text-destructive font-bold">{student.attendancePercentage}%</TableCell></TableRow>))}</TableBody></Table></div></div>)}<DialogFooter><Button variant="outline" onClick={() => setIsReportDialogOpen(false)}>Close</Button></DialogFooter></DialogContent></Dialog>
       <Dialog open={isAnalyticsOpen} onOpenChange={setIsAnalyticsOpen}><DialogContent className="max-w-4xl w-full"><DialogHeader><DialogTitle>Department-wise Attendance Analytics</DialogTitle><DialogDescription>An overview of attendance performance across different departments and classes.</DialogDescription></DialogHeader><div className="mt-4 max-h-[70vh] overflow-y-auto pr-4"><DepartmentAnalytics /></div></DialogContent></Dialog>
-      <Dialog open={isEventFormDialogOpen} onOpenChange={setIsEventFormDialogOpen}><DialogContent className="sm:max-w-[425px]"><DialogHeader><DialogTitle>{editingEvent ? 'Edit Event' : 'Add New Event'}</DialogTitle><DialogDescription>Fill in the details for the academic event.</DialogDescription></DialogHeader><Form {...eventForm}><form onSubmit={eventForm.handleSubmit(onEventSubmit)} className="space-y-4 py-4"><FormField control={eventForm.control} name="title" render={({ field }) => (<FormItem><FormLabel>Title</FormLabel><FormControl><Input placeholder="e.g., Mid-term Exams" {...field} /></FormControl><FormMessage /></FormItem>)}/><FormField control={eventForm.control} name="date" render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>Date</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}><CalendarIcon className="mr-2 h-4 w-4" />{field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}</Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus /></PopoverContent></Popover><FormMessage /></FormItem>)}/>
-              <FormField control={eventForm.control} name="type" render={({ field }) => (<FormItem><FormLabel>Type</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select event type" /></SelectTrigger></FormControl><SelectContent><SelectItem value="exam">Exam</SelectItem><SelectItem value="holiday">Holiday</SelectItem><SelectItem value="assignment">Assignment</SelectItem><SelectItem value="event">Event</SelectItem></SelectContent></Select><FormMessage /></FormItem>)}/><FormField control={eventForm.control} name="description" render={({ field }) => (<FormItem><FormLabel>Description (Optional)</FormLabel><FormControl><Textarea placeholder="Add a short description..." {...field} /></FormControl><FormMessage /></FormItem>)}/><DialogFooter><Button type="button" variant="outline" onClick={() => setIsEventFormDialogOpen(false)}>Cancel</Button><Button type="submit">Save</Button></DialogFooter></form></Form></DialogContent></Dialog>
+      <Dialog open={isEventFormDialogOpen} onOpenChange={setIsEventFormDialogOpen}><DialogContent className="sm:max-w-[425px]"><DialogHeader><DialogTitle>{editingEvent ? 'Edit Event' : 'Add New Event'}</DialogTitle><DialogDescription>Fill in the details for the academic event.</DialogDescription></DialogHeader><Form {...eventForm}><form onSubmit={eventForm.handleSubmit(onEventSubmit)} className="space-y-4 py-4"><FormField control={eventForm.control} name="title" render={({ field }) => (<FormItem><FormLabel>Title</FormLabel><FormControl><Input placeholder="e.g., Mid-term Exams" {...field} /></FormControl><FormMessage /></FormItem>)}/><FormField control={eventForm.control} name="date" render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>Date</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}><CalendarIcon className="mr-2 h-4 w-4" />{field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}</Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus /></PopoverContent></Popover><FormMessage /></FormItem>)}/><FormField control={eventForm.control} name="type" render={({ field }) => (<FormItem><FormLabel>Type</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select event type" /></SelectTrigger></FormControl><SelectContent><SelectItem value="exam">Exam</SelectItem><SelectItem value="holiday">Holiday</SelectItem><SelectItem value="assignment">Assignment</SelectItem><SelectItem value="event">Event</SelectItem></SelectContent></Select><FormMessage /></FormItem>)}/><FormField control={eventForm.control} name="description" render={({ field }) => (<FormItem><FormLabel>Description (Optional)</FormLabel><FormControl><Textarea placeholder="Add a short description..." {...field} /></FormControl><FormMessage /></FormItem>)}/><DialogFooter><Button type="button" variant="outline" onClick={() => setIsEventFormDialogOpen(false)}>Cancel</Button><Button type="submit">Save</Button></DialogFooter></form></Form></DialogContent></Dialog>
       <Dialog open={isAddTeacherDialogOpen} onOpenChange={setIsAddTeacherDialogOpen}><DialogContent className="sm:max-w-[425px]"><DialogHeader><DialogTitle>Add New Staff Member</DialogTitle><DialogDescription>Create a new account for a teacher.</DialogDescription></DialogHeader><Form {...teacherForm}><form onSubmit={teacherForm.handleSubmit(onAddTeacherSubmit)} className="space-y-4 py-4"><FormField control={teacherForm.control} name="name" render={({ field }) => (<FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="e.g., Dr. Evelyn Reed" {...field} /></FormControl><FormMessage /></FormItem>)}/><FormField control={teacherForm.control} name="id" render={({ field }) => (<FormItem><FormLabel>Staff ID</FormLabel><FormControl><Input placeholder="e.g., TEACHER03" {...field} /></FormControl><FormMessage /></FormItem>)}/><FormField
                 control={teacherForm.control}
                 name="password"

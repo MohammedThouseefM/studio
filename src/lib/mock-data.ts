@@ -87,6 +87,23 @@ export type AuditLog = {
     type: 'student' | 'teacher' | 'announcement' | 'attendance' | 'leave' | 'academic';
 };
 
+export type FeedbackSession = {
+    id: string;
+    name: string;
+    startDate: string;
+    endDate: string;
+    status: 'open' | 'closed';
+};
+
+export type Feedback = {
+    id: string;
+    sessionId: string;
+    studentId: string; // Kept for preventing duplicate submissions, but not shown in analytics
+    subject: string;
+    rating: number; // 1 to 5
+    comment?: string;
+};
+
 
 export const teachers: Teacher[] = [
     { id: 'TEACHER01', password: 'password', name: 'Dr. Evelyn Reed' },
@@ -315,4 +332,16 @@ export const auditLogs: AuditLog[] = [
     { id: 'log-1', timestamp: subDays(new Date(), 1), user: 'TEACHER01', action: 'Posted announcement: "Mid-term Exams Schedule"', type: 'announcement' },
     { id: 'log-2', timestamp: subDays(new Date(), 2), user: 'TEACHER02', action: 'Approved registration for Aarav Sharma (ID: PENDING-001)', type: 'student' },
     { id: 'log-3', timestamp: subDays(new Date(), 3), user: 'TEACHER01', action: 'Saved attendance for BCA - 3rd Year (Data Structures) on 2024-07-24', type: 'attendance' },
+];
+
+export const feedbackSessions: FeedbackSession[] = [
+    { id: 'session-1', name: 'Semester End Feedback (Even 2024)', startDate: '2024-07-20', endDate: '2024-08-20', status: 'open' },
+    { id: 'session-2', name: 'Mid-Semester Feedback (Even 2024)', startDate: '2024-05-01', endDate: '2024-05-15', status: 'closed' },
+];
+
+export const feedbackData: Feedback[] = [
+    // Example closed session data
+    { id: 'fb-1', sessionId: 'session-2', studentId: '36623U09015', subject: 'Algorithms', rating: 4, comment: 'The professor explains concepts very clearly.' },
+    { id: 'fb-2', sessionId: 'session-2', studentId: '36623U09042', subject: 'Algorithms', rating: 5, comment: 'Great examples and practical sessions.' },
+    { id: 'fb-3', sessionId: 'session-2', studentId: '36623U09015', subject: 'Data Structures', rating: 3, comment: 'Could use more real-world examples.' },
 ];

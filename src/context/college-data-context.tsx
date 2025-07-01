@@ -13,6 +13,8 @@ import {
   leaveRequests as initialLeaveRequests,
   announcements as initialAnnouncements,
   auditLogs as initialAuditLogs,
+  feedbackSessions as initialFeedbackSessions,
+  feedbackData as initialFeedbackData,
   type CalendarEvent as RawCalendarEvent,
   type FullTimeTable,
   type ClassTimeTable,
@@ -21,6 +23,8 @@ import {
   type LeaveRequest,
   type Announcement,
   type AuditLog as AuditLogType,
+  type FeedbackSession,
+  type Feedback,
 } from '@/lib/mock-data';
 import type { AttendanceState } from '@/components/attendance-sheet';
 
@@ -74,6 +78,10 @@ type CollegeDataContextType = {
   auditLogs: AuditLog[];
   // Attendance
   saveAttendance: (classDetails: any, attendance: AttendanceState, user: string, isOnline: boolean) => void;
+  // Feedback
+  feedbackSessions: FeedbackSession[];
+  feedbackData: Feedback[];
+  submitFeedback: (sessionId: string, studentId: string, feedbacks: Array<{ subject: string; rating: number; comment?: string }>) => void;
 };
 
 const CollegeDataContext = createContext<CollegeDataContextType | undefined>(undefined);
@@ -93,6 +101,8 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>(initialLeaveRequests);
   const [announcements, setAnnouncements] = useState<Announcement[]>(initialAnnouncements);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(initialAuditLogs);
+  const [feedbackSessions, setFeedbackSessions] = useState<FeedbackSession[]>(initialFeedbackSessions);
+  const [feedbackData, setFeedbackData] = useState<Feedback[]>(initialFeedbackData);
 
   const addAuditLog = (user: string, action: string, type: AuditLog['type']) => {
     const newLog: AuditLog = {
@@ -272,6 +282,19 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
         }
     }
   };
+  
+  const submitFeedback = (sessionId: string, studentId: string, feedbacks: Array<{ subject: string; rating: number; comment?: string }>) => {
+    const newFeedbacks: Feedback[] = feedbacks.map((fb, index) => ({
+        id: `fb-${Date.now()}-${index}`,
+        sessionId,
+        studentId,
+        subject: fb.subject,
+        rating: fb.rating,
+        comment: fb.comment,
+    }));
+    setFeedbackData(prev => [...prev, ...newFeedbacks]);
+    // NOTE: No audit log for anonymous feedback submission to protect student privacy.
+  };
 
   const contextValue = { 
     events, addEvent, updateEvent, deleteEvent, 
@@ -285,7 +308,10 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
     leaveRequests, addLeaveRequest, approveLeaveRequest, rejectLeaveRequest,
     announcements, addAnnouncement, deleteAnnouncement,
     auditLogs,
-    saveAttendance
+    saveAttendance,
+    feedbackSessions,
+    feedbackData,
+    submitFeedback,
   };
 
   return (
