@@ -16,6 +16,7 @@ import { Button } from './ui/button';
 import { useCollegeData } from '@/context/college-data-context';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AcademicCalendar } from '@/components/academic-calendar';
+import { DownloadPdfButton } from './download-pdf-button';
 
 // Helper function to calculate attendance
 const calculateAttendancePercentage = (studentId: string) => {
@@ -35,6 +36,7 @@ export function StudentSearch() {
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
 
   const { departments, years } = useCollegeData();
+  const reportId = selectedStudent ? `teacher-view-report-${selectedStudent.id}` : '';
 
   const filteredStudents = useMemo(() => {
     if (!searchTerm && !department && !year && !attendanceRange) {
@@ -200,10 +202,15 @@ export function StudentSearch() {
       <Dialog open={!!selectedStudent} onOpenChange={(isOpen) => !isOpen && setSelectedStudent(null)}>
         <DialogContent className="max-w-5xl w-full">
             <DialogHeader>
-                <DialogTitle>Full Attendance Report for {selectedStudent?.name}</DialogTitle>
-                <DialogDescription>
-                    {selectedStudent?.department} - {selectedStudent?.year} | Roll No: {selectedStudent?.rollNumber}
-                </DialogDescription>
+                <div className="flex justify-between items-start">
+                    <div>
+                        <DialogTitle>Full Attendance Report for {selectedStudent?.name}</DialogTitle>
+                        <DialogDescription>
+                            {selectedStudent?.department} - {selectedStudent?.year} | Roll No: {selectedStudent?.rollNumber}
+                        </DialogDescription>
+                    </div>
+                    {selectedStudent && <DownloadPdfButton student={selectedStudent} elementId={reportId} />}
+                </div>
             </DialogHeader>
             <div className="mt-4 max-h-[70vh] overflow-y-auto pr-4">
                 <Tabs defaultValue="summary">
@@ -212,7 +219,9 @@ export function StudentSearch() {
                         <TabsTrigger value="daily"><Calendar className="mr-2 h-4 w-4" />Daily Attendance</TabsTrigger>
                     </TabsList>
                     <TabsContent value="summary" className="mt-4">
-                        <StudentAttendanceSummary attendanceData={studentAttendance} />
+                        <div id={reportId}>
+                            {selectedStudent && <StudentAttendanceSummary student={selectedStudent} attendanceData={studentAttendance} />}
+                        </div>
                     </TabsContent>
                     <TabsContent value="daily" className="mt-4">
                         <AcademicCalendar />

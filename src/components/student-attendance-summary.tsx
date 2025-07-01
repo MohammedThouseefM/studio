@@ -7,14 +7,15 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Progress } from '@/components/ui/progress';
-import type { studentAttendance } from '@/lib/mock-data';
+import type { studentAttendance, Student } from '@/lib/mock-data';
 
 type StudentAttendanceSummaryProps = {
+  student: Student;
   attendanceData: typeof studentAttendance;
   showLowAttendanceWarning?: boolean;
 }
 
-export function StudentAttendanceSummary({ attendanceData, showLowAttendanceWarning = false }: StudentAttendanceSummaryProps) {
+export function StudentAttendanceSummary({ student, attendanceData, showLowAttendanceWarning = false }: StudentAttendanceSummaryProps) {
   const chartConfig = {
     present: {
       label: 'Present',
