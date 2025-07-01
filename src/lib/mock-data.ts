@@ -204,6 +204,44 @@ export const academicCalendarEvents: CalendarEvent[] = [
   { date: '2024-10-15', title: 'Final Project Submissions', type: 'assignment', description: 'Final project reports and demos are due.' },
 ];
 
+export type DailyAttendanceLog = {
+  date: string; // YYYY-MM-DD
+  schedule: DailyAttendance[];
+};
+
+export const studentDailyAttendanceHistory: DailyAttendanceLog[] = [
+  {
+    date: '2024-07-22', // A Monday
+    schedule: [
+      { hour: '1st Hour', subject: 'Data Structures', status: 'present' },
+      { hour: '2nd Hour', subject: 'Algorithms', status: 'present' },
+      { hour: '3rd Hour', subject: 'Web Tech', status: 'absent' },
+      { hour: '4th Hour', subject: 'OS', status: 'present' },
+      { hour: '5th Hour', subject: 'Project Lab', status: 'present' },
+    ]
+  },
+  {
+    date: '2024-07-23', // A Tuesday
+    schedule: [
+      { hour: '1st Hour', subject: 'Algorithms', status: 'present' },
+      { hour: '2nd Hour', subject: 'OS', status: 'present' },
+      { hour: '3rd Hour', subject: 'DS', status: 'present' },
+      { hour: '4th Hour', subject: 'Web Tech', status: 'present' },
+      { hour: '5th Hour', subject: 'DBMS', status: 'present' },
+    ]
+  },
+  {
+    date: '2024-07-24', // A Wednesday
+    schedule: [
+      { hour: '1st Hour', subject: 'DBMS', status: 'present' },
+      { hour: '2nd Hour', subject: 'DS', status: 'absent' },
+      { hour: '3rd Hour', subject: 'OS', status: 'absent' },
+      { hour: '4th Hour', subject: 'Algorithms', status: 'present' },
+      { hour: '5th Hour', subject: 'Web Tech', status: 'not-marked' },
+    ]
+  },
+];
+
 export const dailyAttendanceData: DailyAttendance[] = [
   { hour: '1st Hour', subject: 'Data Structures', status: 'present' },
   { hour: '2nd Hour', subject: 'Algorithms', status: 'present' },

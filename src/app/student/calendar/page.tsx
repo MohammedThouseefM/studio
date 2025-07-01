@@ -13,7 +13,7 @@ export default function CalendarPage() {
             <span className="sr-only">Back</span>
           </Link>
         </Button>
-        <h1 className="text-3xl font-bold">Academic Calendar</h1>
+        <h1 className="text-3xl font-bold">Academic & Attendance Calendar</h1>
       </div>
       <AcademicCalendar />
     </div>
