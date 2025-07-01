@@ -6,6 +6,7 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { 
   academicCalendarEvents as initialEventsData,
   timeTable as initialTimeTable,
+  examTimeTable as initialExamTimeTable,
   collegeData as initialCollegeData,
   teachers as initialTeachers,
   students as initialStudents,
@@ -18,6 +19,8 @@ import {
   type CalendarEvent as RawCalendarEvent,
   type FullTimeTable,
   type ClassTimeTable,
+  type FullExamTimeTable,
+  type Exam,
   type Teacher,
   type Student,
   type LeaveRequest,
@@ -40,6 +43,9 @@ type CollegeDataContextType = {
   // Timetable
   timeTable: FullTimeTable;
   updateTimeTable: (department: string, year: string, newTimeTable: ClassTimeTable, user: string) => void;
+  // Exam Timetable
+  examTimeTable: FullExamTimeTable;
+  updateExamTimeTable: (department: string, year: string, newExams: Exam[], user: string) => void;
   // Academic Structure
   departments: string[];
   addDepartment: (department: string, user: string) => void;
@@ -92,6 +98,7 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
   );
   const [timeTable, setTimeTable] = useState<FullTimeTable>(initialTimeTable);
+  const [examTimeTable, setExamTimeTable] = useState<FullExamTimeTable>(initialExamTimeTable);
   const [departments, setDepartments] = useState<string[]>(initialCollegeData.departments);
   const [years, setYears] = useState<string[]>(initialCollegeData.years);
   const [hours, setHours] = useState<string[]>(initialCollegeData.hours);
@@ -135,6 +142,17 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
     addAuditLog(user, `Updated timetable for ${department} - ${year}`, 'academic');
   };
   
+  const updateExamTimeTable = (department: string, year: string, newExams: Exam[], user: string) => {
+      setExamTimeTable(prev => ({
+        ...prev,
+        [department]: {
+          ...(prev[department] || {}),
+          [year]: newExams,
+        }
+      }));
+      addAuditLog(user, `Updated exam timetable for ${department} - ${year}`, 'academic');
+    };
+
   const addDepartment = (department: string, user: string) => { 
     if (department && !departments.includes(department)) {
       setDepartments(prev => [...prev, department]); 
@@ -299,6 +317,7 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
   const contextValue = { 
     events, addEvent, updateEvent, deleteEvent, 
     timeTable, updateTimeTable,
+    examTimeTable, updateExamTimeTable,
     departments, addDepartment, deleteDepartment,
     years, addYear, deleteYear,
     hours, addHour, deleteHour,

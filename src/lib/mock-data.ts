@@ -54,6 +54,22 @@ export type FullTimeTable = {
   [department: string]: DepartmentTimeTable;
 };
 
+export type Exam = {
+  id: string;
+  subject: string;
+  date: string;
+  time: string;
+  room: string;
+};
+
+export type DepartmentExamTimeTable = {
+  [year: string]: Exam[];
+};
+
+export type FullExamTimeTable = {
+  [department: string]: DepartmentExamTimeTable;
+};
+
 export type Teacher = {
   id: string;
   password: string;
@@ -345,3 +361,25 @@ export const feedbackData: Feedback[] = [
     { id: 'fb-2', sessionId: 'session-2', studentId: '36623U09042', subject: 'Algorithms', rating: 5, comment: 'Great examples and practical sessions.' },
     { id: 'fb-3', sessionId: 'session-2', studentId: '36623U09015', subject: 'Data Structures', rating: 3, comment: 'Could use more real-world examples.' },
 ];
+
+export const examTimeTable: FullExamTimeTable = {
+  'BCA': {
+    '3rd Year': [
+      { id: 'exam-bca-3-1', subject: 'Data Structures', date: '2024-11-10', time: '10:00 AM - 01:00 PM', room: 'A-101' },
+      { id: 'exam-bca-3-2', subject: 'Algorithms', date: '2024-11-12', time: '10:00 AM - 01:00 PM', room: 'A-102' },
+      { id: 'exam-bca-3-3', subject: 'Operating Systems', date: '2024-11-14', time: '10:00 AM - 01:00 PM', room: 'A-101' },
+      { id: 'exam-bca-3-4', subject: 'Database Management', date: '2024-11-16', time: '10:00 AM - 01:00 PM', room: 'A-102' },
+    ],
+    '1st Year': [],
+    '2nd Year': [],
+  },
+  'BSC': {
+      '3rd Year': [], '1st Year': [], '2nd Year': [],
+  },
+  'BBA': {
+      '3rd Year': [], '1st Year': [], '2nd Year': [],
+  },
+  'BCOM': {
+      '3rd Year': [], '1st Year': [], '2nd Year': [],
+  }
+};

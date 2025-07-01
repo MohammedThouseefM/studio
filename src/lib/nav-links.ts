@@ -1,3 +1,4 @@
+
 import {
   LayoutDashboard,
   User,
@@ -16,6 +17,7 @@ import {
   FileText,
   History,
   Timer,
+  ClipboardList,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -33,6 +35,7 @@ export const studentNavItems: NavItem[] = [
   { href: '/student/feedback', label: 'Course Feedback', icon: Star, tooltip: 'Course Feedback' },
   { href: '/student/calendar', label: 'Calendar', icon: Calendar, tooltip: 'Full Calendar' },
   { href: '/student/timetable', label: 'Timetable', icon: CalendarClock, tooltip: 'Class Timetable' },
+  { href: '/student/exam-schedule', label: 'Exam Schedule', icon: ClipboardList, tooltip: 'Exam Schedule' },
 ];
 
 export const teacherNavItems: NavItem[] = [
@@ -45,6 +48,7 @@ export const teacherNavItems: NavItem[] = [
   { href: '/teacher/announcements', label: 'Announcements', icon: Megaphone, tooltip: 'Announcements' },
   { href: '/teacher/academic-settings', label: 'Calendar Settings', icon: Settings, tooltip: 'Academic Settings' },
   { href: '/teacher/timetable', label: 'Timetable', icon: CalendarClock, tooltip: 'Timetable Editor' },
+  { href: '/teacher/exam-schedule', label: 'Exam Schedule', icon: ClipboardEdit, tooltip: 'Exam Schedule Editor' },
   { href: '/teacher/seating-plan', label: 'Seating Plan', icon: BookCopy, tooltip: 'Exam Seating Plan' },
   { href: '/teacher/reports', label: 'Reports', icon: FileText, tooltip: 'Reports & Analytics' },
   { href: '/teacher/feedback', label: 'Feedback', icon: Star, tooltip: 'Student Feedback' },
