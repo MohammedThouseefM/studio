@@ -1,5 +1,6 @@
 import { AcademicCalendarCard } from "@/components/academic-calendar-card";
 import { Announcements } from "@/components/announcements";
+import { DailyAttendanceCard } from "@/components/daily-attendance-card";
 import { MotivationalQuote } from "@/components/motivational-quote";
 import { StudentAttendanceSummary } from "@/components/student-attendance-summary";
 import { TimetableCard } from "@/components/timetable-card";
@@ -18,7 +19,8 @@ export default function StudentDashboardPage() {
         </p>
       </div>
       <div className="grid gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-8">
+          <DailyAttendanceCard />
           <StudentAttendanceSummary attendanceData={studentAttendance} showLowAttendanceWarning={true} />
         </div>
         <div className="lg:col-span-1 space-y-8">

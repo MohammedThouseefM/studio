@@ -57,6 +57,13 @@ export type Teacher = {
   name: string;
 };
 
+export type DailyAttendance = {
+  hour: string;
+  subject: string;
+  status: 'present' | 'absent' | 'not-marked';
+};
+
+
 export const teachers: Teacher[] = [
     { id: 'TEACHER01', password: 'password', name: 'Dr. Evelyn Reed' },
     { id: 'TEACHER02', password: 'password123', name: 'Prof. Samuel Cruz' }
@@ -195,4 +202,12 @@ export const academicCalendarEvents: CalendarEvent[] = [
   { date: '2024-09-15', title: 'OS Assignment Due', type: 'assignment', description: 'Submit the report on process scheduling.' },
   { date: '2024-10-02', title: 'Gandhi Jayanti', type: 'holiday', description: 'College will be closed.' },
   { date: '2024-10-15', title: 'Final Project Submissions', type: 'assignment', description: 'Final project reports and demos are due.' },
+];
+
+export const dailyAttendanceData: DailyAttendance[] = [
+  { hour: '1st Hour', subject: 'Data Structures', status: 'present' },
+  { hour: '2nd Hour', subject: 'Algorithms', status: 'present' },
+  { hour: '3rd Hour', subject: 'Web Tech', status: 'absent' },
+  { hour: '4th Hour', subject: 'OS', status: 'present' },
+  { hour: '5th Hour', subject: 'Project Lab', status: 'not-marked' },
 ];
