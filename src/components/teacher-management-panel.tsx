@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -411,391 +410,399 @@ export function TeacherManagementPanel() {
           <CardDescription>Manage students, academic structure, announcements, and reports.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="manage-students" className="min-h-[600px]">
-            <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-5 lg:grid-cols-12">
-              <TabsTrigger value="requests">Requests <div className="ml-2 h-5 w-5 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-xs">{pendingStudents.length}</div></TabsTrigger>
-              <TabsTrigger value="leave-requests">Leave Requests <div className="ml-2 h-5 w-5 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-xs">{pendingLeaveRequests.length}</div></TabsTrigger>
-              <TabsTrigger value="manage-students">Manage Students</TabsTrigger>
-              <TabsTrigger value="manage-staff">Manage Staff</TabsTrigger>
-              <TabsTrigger value="academic-structure">Academic Structure</TabsTrigger>
-              <TabsTrigger value="announcements">Announcements</TabsTrigger>
-              <TabsTrigger value="academic-settings">Academic Settings</TabsTrigger>
-              <TabsTrigger value="timetable">Timetable</TabsTrigger>
-              <TabsTrigger value="seating-plan"><BookCopy className="mr-2 h-4 w-4" />Seating Plan</TabsTrigger>
-              <TabsTrigger value="reports"><FileText className="mr-2 h-4 w-4" />Reports</TabsTrigger>
-              <TabsTrigger value="feedback"><Star className="mr-2 h-4 w-4" />Feedback</TabsTrigger>
-              <TabsTrigger value="audit-logs"><History className="mr-2 h-4 w-4" />Audit Logs</TabsTrigger>
+          <Tabs defaultValue="requests" orientation="vertical" className="flex flex-col sm:flex-row gap-6 min-h-[600px]">
+            <TabsList className="flex flex-row sm:flex-col sm:h-auto w-full sm:w-56 shrink-0 overflow-x-auto sm:overflow-visible">
+              <TabsTrigger value="requests" className="justify-start shrink-0 sm:w-full">
+                Requests 
+                <div className="ml-auto h-5 w-5 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-xs">{pendingStudents.length}</div>
+              </TabsTrigger>
+              <TabsTrigger value="leave-requests" className="justify-start shrink-0 sm:w-full">
+                Leave Requests 
+                <div className="ml-auto h-5 w-5 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-xs">{pendingLeaveRequests.length}</div>
+              </TabsTrigger>
+              <TabsTrigger value="manage-students" className="justify-start shrink-0 sm:w-full">Manage Students</TabsTrigger>
+              <TabsTrigger value="manage-staff" className="justify-start shrink-0 sm:w-full">Manage Staff</TabsTrigger>
+              <TabsTrigger value="academic-structure" className="justify-start shrink-0 sm:w-full">Academic Structure</TabsTrigger>
+              <TabsTrigger value="announcements" className="justify-start shrink-0 sm:w-full">Announcements</TabsTrigger>
+              <TabsTrigger value="academic-settings" className="justify-start shrink-0 sm:w-full">Academic Settings</TabsTrigger>
+              <TabsTrigger value="timetable" className="justify-start shrink-0 sm:w-full">Timetable</TabsTrigger>
+              <TabsTrigger value="seating-plan" className="justify-start shrink-0 sm:w-full"><BookCopy className="mr-2 h-4 w-4" />Seating Plan</TabsTrigger>
+              <TabsTrigger value="reports" className="justify-start shrink-0 sm:w-full"><FileText className="mr-2 h-4 w-4" />Reports</TabsTrigger>
+              <TabsTrigger value="feedback" className="justify-start shrink-0 sm:w-full"><Star className="mr-2 h-4 w-4" />Feedback</TabsTrigger>
+              <TabsTrigger value="audit-logs" className="justify-start shrink-0 sm:w-full"><History className="mr-2 h-4 w-4" />Audit Logs</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="requests">
-               <div className="pt-4 space-y-4">
-                 <div className="rounded-md border">
+            <div className="flex-1">
+              <TabsContent value="requests">
+                <div className="pt-4 space-y-4">
+                  <div className="rounded-md border">
+                      <Table>
+                          <TableHeader>
+                              <TableRow>
+                                  <TableHead>Name</TableHead>
+                                  <TableHead>Email</TableHead>
+                                  <TableHead>Department</TableHead>
+                                  <TableHead className="text-right">Actions</TableHead>
+                              </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                              {pendingStudents.length > 0 ? (
+                                  pendingStudents.map((student) => (
+                                      <TableRow key={student.id}>
+                                          <TableCell className="font-medium flex items-center gap-2">
+                                              <Avatar className="h-8 w-8 border">
+                                                  <AvatarImage src={student.photoUrl} alt={student.name} data-ai-hint="student portrait" />
+                                                  <AvatarFallback><User /></AvatarFallback>
+                                              </Avatar>
+                                              {student.name}
+                                          </TableCell>
+                                          <TableCell>{student.email}</TableCell>
+                                          <TableCell>{student.department} - {student.year}</TableCell>
+                                          <TableCell className="text-right space-x-1">
+                                              <Button variant="ghost" size="icon" className="text-green-600 hover:text-green-700 hover:bg-green-100" onClick={() => handleApproveRegistration(student)}>
+                                                  <MailCheck className="h-4 w-4" />
+                                                  <span className="sr-only">Accept</span>
+                                              </Button>
+                                              <Button variant="ghost" size="icon" onClick={() => handleEditPendingStudentClick(student)}>
+                                                  <Pencil className="h-4 w-4" />
+                                                  <span className="sr-only">Edit</span>
+                                              </Button>
+                                              <AlertDialog>
+                                                  <AlertDialogTrigger asChild>
+                                                      <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10">
+                                                          <Trash2 className="h-4 w-4" />
+                                                          <span className="sr-only">Deny</span>
+                                                      </Button>
+                                                  </AlertDialogTrigger>
+                                                  <AlertDialogContent>
+                                                      <AlertDialogHeader>
+                                                          <AlertDialogTitle>Are you sure you want to deny this application?</AlertDialogTitle>
+                                                          <AlertDialogDescription>
+                                                              This action cannot be undone. This will permanently delete the registration request for {student.name}.
+                                                          </AlertDialogDescription>
+                                                      </AlertDialogHeader>
+                                                      <AlertDialogFooter>
+                                                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                          <AlertDialogAction onClick={() => handleRejectRegistration(student)}>Deny Application</AlertDialogAction>
+                                                      </AlertDialogFooter>
+                                                  </AlertDialogContent>
+                                              </AlertDialog>
+                                          </TableCell>
+                                      </TableRow>
+                                  ))
+                              ) : (
+                                  <TableRow>
+                                      <TableCell colSpan={4} className="h-24 text-center">
+                                          No pending registration requests.
+                                      </TableCell>
+                                  </TableRow>
+                              )}
+                          </TableBody>
+                      </Table>
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="leave-requests">
+                <div className="pt-4 space-y-4">
+                  <div className="rounded-md border">
                     <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Email</TableHead>
-                                <TableHead>Department</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Student</TableHead>
+                          <TableHead>Class</TableHead>
+                          <TableHead>Dates</TableHead>
+                          <TableHead>Reason</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {pendingLeaveRequests.length > 0 ? (
+                          pendingLeaveRequests.map((request) => (
+                            <TableRow key={request.id}>
+                              <TableCell className="font-medium">{request.studentName}</TableCell>
+                              <TableCell>{request.department} - {request.year}</TableCell>
+                              <TableCell>{format(parseISO(request.startDate), 'MMM d')} - {format(parseISO(request.endDate), 'MMM d')}</TableCell>
+                              <TableCell className="max-w-[200px] truncate">{request.reason}</TableCell>
+                              <TableCell className="text-right space-x-2">
+                                <Button variant="ghost" size="icon" className="text-green-600 hover:text-green-700 hover:bg-green-100" onClick={() => handleApproveLeave(request)}>
+                                  <Check className="h-4 w-4" />
+                                  <span className="sr-only">Approve</span>
+                                </Button>
+                                <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" onClick={() => handleOpenRejectDialog(request)}>
+                                  <X className="h-4 w-4" />
+                                  <span className="sr-only">Reject</span>
+                                </Button>
+                              </TableCell>
                             </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {pendingStudents.length > 0 ? (
-                                pendingStudents.map((student) => (
-                                    <TableRow key={student.id}>
-                                        <TableCell className="font-medium flex items-center gap-2">
-                                            <Avatar className="h-8 w-8 border">
-                                                <AvatarImage src={student.photoUrl} alt={student.name} data-ai-hint="student portrait" />
-                                                <AvatarFallback><User /></AvatarFallback>
-                                            </Avatar>
-                                            {student.name}
-                                        </TableCell>
-                                        <TableCell>{student.email}</TableCell>
-                                        <TableCell>{student.department} - {student.year}</TableCell>
-                                        <TableCell className="text-right space-x-1">
-                                            <Button variant="ghost" size="icon" className="text-green-600 hover:text-green-700 hover:bg-green-100" onClick={() => handleApproveRegistration(student)}>
-                                                <MailCheck className="h-4 w-4" />
-                                                <span className="sr-only">Accept</span>
-                                            </Button>
-                                            <Button variant="ghost" size="icon" onClick={() => handleEditPendingStudentClick(student)}>
-                                                <Pencil className="h-4 w-4" />
-                                                <span className="sr-only">Edit</span>
-                                            </Button>
-                                            <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10">
-                                                        <Trash2 className="h-4 w-4" />
-                                                        <span className="sr-only">Deny</span>
-                                                    </Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>Are you sure you want to deny this application?</AlertDialogTitle>
-                                                        <AlertDialogDescription>
-                                                            This action cannot be undone. This will permanently delete the registration request for {student.name}.
-                                                        </AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                        <AlertDialogAction onClick={() => handleRejectRegistration(student)}>Deny Application</AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell colSpan={4} className="h-24 text-center">
-                                        No pending registration requests.
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                 </div>
-               </div>
-            </TabsContent>
-            
-            <TabsContent value="leave-requests">
-              <div className="pt-4 space-y-4">
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Student</TableHead>
-                        <TableHead>Class</TableHead>
-                        <TableHead>Dates</TableHead>
-                        <TableHead>Reason</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {pendingLeaveRequests.length > 0 ? (
-                        pendingLeaveRequests.map((request) => (
-                          <TableRow key={request.id}>
-                            <TableCell className="font-medium">{request.studentName}</TableCell>
-                            <TableCell>{request.department} - {request.year}</TableCell>
-                            <TableCell>{format(parseISO(request.startDate), 'MMM d')} - {format(parseISO(request.endDate), 'MMM d')}</TableCell>
-                            <TableCell className="max-w-[200px] truncate">{request.reason}</TableCell>
-                            <TableCell className="text-right space-x-2">
-                              <Button variant="ghost" size="icon" className="text-green-600 hover:text-green-700 hover:bg-green-100" onClick={() => handleApproveLeave(request)}>
-                                <Check className="h-4 w-4" />
-                                <span className="sr-only">Approve</span>
-                              </Button>
-                              <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" onClick={() => handleOpenRejectDialog(request)}>
-                                <X className="h-4 w-4" />
-                                <span className="sr-only">Reject</span>
-                              </Button>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={5} className="h-24 text-center">
+                              No pending leave requests.
                             </TableCell>
                           </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={5} className="h-24 text-center">
-                            No pending leave requests.
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="manage-students">
-              <div className="pt-4 space-y-4">
-                <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
-                  <div className="relative w-full sm:w-auto sm:flex-1"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><Input placeholder="Search students..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9 w-full"/></div>
-                  <Button onClick={handleAddStudentClick} className="w-full sm:w-auto">
-                    <PlusCircle /> Add New Student
-                  </Button>
-                </div>
-                <div className="rounded-md border"><Table><TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Roll No.</TableHead><TableHead>Department</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader><TableBody>{filteredStudents.length > 0 ? (filteredStudents.map((student) => (<TableRow key={student.id}><TableCell className="font-medium">{student.name}</TableCell><TableCell>{student.rollNumber}</TableCell><TableCell>{student.department}</TableCell><TableCell className="text-right space-x-2"><Button variant="ghost" size="icon" onClick={() => handleEditStudentClick(student)}><Pencil className="h-4 w-4" /><span className="sr-only">Edit</span></Button><AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10"><Trash2 className="h-4 w-4" /><span className="sr-only">Delete</span></Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle><AlertDialogDescription>This action cannot be undone. This will permanently delete the student record for {student.name}.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteStudentSubmit(student)}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog></TableCell></TableRow>))) : (<TableRow><TableCell colSpan={4} className="h-24 text-center">No results found.</TableCell></TableRow>)}</TableBody></Table></div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="manage-staff">
-              <div className="pt-4 space-y-4">
-                <div className="flex justify-end">
-                  <Button onClick={() => { teacherForm.reset(); setIsAddTeacherDialogOpen(true); }}>
-                    <PlusCircle /> Add New Staff
-                  </Button>
-                </div>
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Staff ID</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
-                    <TableBody>
-                      {teachers.map((teacher) => (
-                        <TableRow key={teacher.id}>
-                          <TableCell className="font-medium">{teacher.name}</TableCell>
-                          <TableCell>{teacher.id}</TableCell>
-                          <TableCell className="text-right space-x-2">
-                            <Button variant="ghost" size="icon" onClick={() => { setEditingTeacher(teacher); changePasswordForm.reset(); setIsChangePasswordDialogOpen(true); }}>
-                              <KeyRound className="h-4 w-4" /><span className="sr-only">Change Password</span>
-                            </Button>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" disabled={teacher.id === currentTeacherId}><Trash2 className="h-4 w-4" /><span className="sr-only">Delete</span></Button></AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader><AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle><AlertDialogDescription>This will permanently delete the staff account for {teacher.name}. They will lose all access.</AlertDialogDescription></AlertDialogHeader>
-                                <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteTeacher(teacher.id, currentTeacherId)}>Delete</AlertDialogAction></AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="academic-structure">
-              <div className="grid md:grid-cols-3 gap-8 pt-4">
-                <div className="space-y-4">
-                    <Label>Existing Departments</Label>
-                    <div className="flex flex-wrap gap-2">
-                        {departments.map(dept => (
-                        <div key={dept} className="flex items-center gap-1.5 bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm">
-                            <span>{dept}</span>
-                            <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <button className="flex items-center justify-center h-4 w-4 rounded-full bg-secondary-foreground/20 text-secondary-foreground hover:bg-destructive hover:text-destructive-foreground transition-colors"><X className="h-3 w-3" /></button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>Deleting "{dept}" will remove it from the list of available departments.</AlertDialogDescription></AlertDialogHeader>
-                                <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteDepartment(dept, currentTeacherId)}>Delete</AlertDialogAction></AlertDialogFooter>
-                            </AlertDialogContent>
-                            </AlertDialog>
-                        </div>
-                        ))}
-                    </div>
-                    <div className="space-y-2"><Label htmlFor="new-department">Add New Department</Label><div className="flex gap-2"><Input id="new-department" value={newDepartment} onChange={e => setNewDepartment(e.target.value)} placeholder="e.g., B.Tech"/><Button onClick={handleAddDepartmentSubmit}><PlusCircle /> Add</Button></div></div>
-                </div>
-                <div className="space-y-4">
-                    <Label>Existing Years</Label>
-                    <div className="flex flex-wrap gap-2">
-                        {years.map(year => (
-                           <div key={year} className="flex items-center gap-1.5 bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm">
-                           <span>{year}</span>
-                           <AlertDialog>
-                           <AlertDialogTrigger asChild>
-                                <button className="flex items-center justify-center h-4 w-4 rounded-full bg-secondary-foreground/20 text-secondary-foreground hover:bg-destructive hover:text-destructive-foreground transition-colors"><X className="h-3 w-3" /></button>
-                           </AlertDialogTrigger>
-                           <AlertDialogContent>
-                               <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>Deleting "{year}" will remove it from the list of available years.</AlertDialogDescription></AlertDialogHeader>
-                               <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteYear(year, currentTeacherId)}>Delete</AlertDialogAction></AlertDialogFooter>
-                           </AlertDialogContent>
-                           </AlertDialog>
-                       </div>
-                        ))}
-                    </div>
-                    <div className="space-y-2"><Label htmlFor="new-year">Add New Year</Label><div className="flex gap-2"><Input id="new-year" value={newYear} onChange={e => setNewYear(e.target.value)} placeholder="e.g., 4th Year"/><Button onClick={handleAddYearSubmit}><PlusCircle /> Add</Button></div></div>
-                </div>
-                <div className="space-y-4">
-                    <Label>Class Hours</Label>
-                    <div className="flex flex-wrap gap-2">
-                        {hours.map(hour => (
-                            <div key={hour} className="flex items-center gap-1.5 bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm">
-                            <span>{hour}</span>
-                            <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                 <button className="flex items-center justify-center h-4 w-4 rounded-full bg-secondary-foreground/20 text-secondary-foreground hover:bg-destructive hover:text-destructive-foreground transition-colors"><X className="h-3 w-3" /></button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>Deleting "{hour}" will remove it from the list of available class hours.</AlertDialogDescription></AlertDialogHeader>
-                                <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteHour(hour, currentTeacherId)}>Delete</AlertDialogAction></AlertDialogFooter>
-                            </AlertDialogContent>
-                            </AlertDialog>
-                        </div>
-                        ))}
-                    </div>
-                    <div className="space-y-2"><Label htmlFor="new-hour">Add New Hour</Label><div className="flex gap-2"><Input id="new-hour" value={newHour} onChange={e => setNewHour(e.target.value)} placeholder="e.g., 6th Hour"/><Button onClick={handleAddHourSubmit}><PlusCircle /> Add</Button></div></div>
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="announcements">
-              <div className="pt-4 space-y-6"><div className="space-y-4 p-4 border rounded-lg"><h3 className="font-semibold text-lg flex items-center gap-2"><Megaphone /> Create New Announcement</h3><div className="space-y-2"><Label htmlFor="new-announcement-title">Title</Label><Input id="new-announcement-title" value={newAnnouncementTitle} onChange={(e) => setNewAnnouncementTitle(e.target.value)} placeholder="e.g., Mid-term Exams"/></div><div className="space-y-2"><Label htmlFor="new-announcement-content">Content</Label><Textarea id="new-announcement-content" value={newAnnouncementContent} onChange={(e) => setNewAnnouncementContent(e.target.value)} placeholder="Enter the announcement details here..."/></div><Button onClick={handleAddAnnouncementSubmit} className="w-full"><PlusCircle /> Post Announcement</Button></div><div className="space-y-4"><h3 className="font-semibold text-lg">Existing Announcements</h3><div className="space-y-2 max-h-96 overflow-y-auto pr-2">{announcements.length > 0 ? (announcements.map((announcement) => (<div key={announcement.id} className="flex items-start justify-between gap-4 p-3 rounded-md border bg-card-foreground/5"><div className="flex-1"><p className="font-medium">{announcement.title}</p><p className="text-sm text-muted-foreground">{announcement.content}</p><p className="text-xs text-muted-foreground mt-1">{announcement.date}</p></div><Button variant="ghost" size="icon" className="text-destructive shrink-0 hover:bg-destructive/10 h-8 w-8" onClick={() => deleteAnnouncement(announcement.id, currentTeacherId)}><Trash2 className="h-4 w-4" /></Button></div>))) : (<p className="text-sm text-muted-foreground text-center py-4">No announcements yet.</p>)}</div></div></div>
-            </TabsContent>
-
-            <TabsContent value="academic-settings">
-              <div className="pt-4 space-y-4">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-semibold">Manage Academic Calendar</h3>
-                  <Button onClick={handleAddEventClick}><PlusCircle /> Add Event</Button>
-                </div>
-                <div className="rounded-md border"><Table><TableHeader><TableRow><TableHead>Title</TableHead><TableHead>Date</TableHead><TableHead>Type</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader><TableBody>{events.map((event) => (<TableRow key={event.id}><TableCell className="font-medium">{event.title}</TableCell><TableCell>{format(parseISO(event.date), 'PPP')}</TableCell><TableCell><span className="capitalize">{event.type}</span></TableCell><TableCell className="text-right space-x-2"><Button variant="ghost" size="icon" onClick={() => handleEditEventClick(event)}><Pencil className="h-4 w-4" /></Button><AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="text-destructive"><Trash2 className="h-4 w-4" /></Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>This will permanently delete the event "{event.title}".</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteEventSubmit(event.id, event.title)}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog></TableCell></TableRow>))}</TableBody></Table></div>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="timetable">
-              <div className="pt-4 space-y-4">
-                <div className="flex items-center gap-2">
-                  <CalendarClock className="h-6 w-6" />
-                  <h3 className="font-semibold text-lg">Manage Class Timetables</h3>
-                </div>
-                <div className="grid md:grid-cols-2 gap-4 p-4 border rounded-lg">
-                  <div>
-                    <Label>Department</Label>
-                    <Select value={selectedDept} onValueChange={setSelectedDept}>
-                      <SelectTrigger><SelectValue placeholder="Select Department" /></SelectTrigger>
-                      <SelectContent>{departments.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label>Year</Label>
-                    <Select value={selectedYear} onValueChange={setSelectedYear}>
-                      <SelectTrigger><SelectValue placeholder="Select Year" /></SelectTrigger>
-                      <SelectContent>{years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}</SelectContent>
-                    </Select>
+                        )}
+                      </TableBody>
+                    </Table>
                   </div>
                 </div>
+              </TabsContent>
 
-                {editableTimetable ? (
-                  <div className="space-y-4">
-                    <div className="rounded-md border">
+              <TabsContent value="manage-students">
+                <div className="pt-4 space-y-4">
+                  <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
+                    <div className="relative w-full sm:w-auto sm:flex-1"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><Input placeholder="Search students..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9 w-full"/></div>
+                    <Button onClick={handleAddStudentClick} className="w-full sm:w-auto">
+                      <PlusCircle /> Add New Student
+                    </Button>
+                  </div>
+                  <div className="rounded-md border"><Table><TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Roll No.</TableHead><TableHead>Department</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader><TableBody>{filteredStudents.length > 0 ? (filteredStudents.map((student) => (<TableRow key={student.id}><TableCell className="font-medium">{student.name}</TableCell><TableCell>{student.rollNumber}</TableCell><TableCell>{student.department}</TableCell><TableCell className="text-right space-x-2"><Button variant="ghost" size="icon" onClick={() => handleEditStudentClick(student)}><Pencil className="h-4 w-4" /><span className="sr-only">Edit</span></Button><AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10"><Trash2 className="h-4 w-4" /><span className="sr-only">Delete</span></Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle><AlertDialogDescription>This action cannot be undone. This will permanently delete the student record for {student.name}.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteStudentSubmit(student)}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog></TableCell></TableRow>))) : (<TableRow><TableCell colSpan={4} className="h-24 text-center">No results found.</TableCell></TableRow>)}</TableBody></Table></div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="manage-staff">
+                <div className="pt-4 space-y-4">
+                  <div className="flex justify-end">
+                    <Button onClick={() => { teacherForm.reset(); setIsAddTeacherDialogOpen(true); }}>
+                      <PlusCircle /> Add New Staff
+                    </Button>
+                  </div>
+                  <div className="rounded-md border">
                     <Table>
-                      <TableHeader><TableRow><TableHead>Day</TableHead>{hours.map(h => <TableHead key={h}>{h}</TableHead>)}</TableRow></TableHeader>
+                      <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Staff ID</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
                       <TableBody>
-                        {daysOfWeek.map((day) => (
-                          <TableRow key={day}>
-                            <TableCell className="font-medium">{day}</TableCell>
-                            {hours.map((_, hourIndex) => (
-                              <TableCell key={hourIndex}>
-                                <Input
-                                  value={editableTimetable[day]?.[hourIndex] || ''}
-                                  onChange={(e) => handleTimetableChange(day, hourIndex, e.target.value)}
-                                  className="h-8"
-                                />
-                              </TableCell>
-                            ))}
+                        {teachers.map((teacher) => (
+                          <TableRow key={teacher.id}>
+                            <TableCell className="font-medium">{teacher.name}</TableCell>
+                            <TableCell>{teacher.id}</TableCell>
+                            <TableCell className="text-right space-x-2">
+                              <Button variant="ghost" size="icon" onClick={() => { setEditingTeacher(teacher); changePasswordForm.reset(); setIsChangePasswordDialogOpen(true); }}>
+                                <KeyRound className="h-4 w-4" /><span className="sr-only">Change Password</span>
+                              </Button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" disabled={teacher.id === currentTeacherId}><Trash2 className="h-4 w-4" /><span className="sr-only">Delete</span></Button></AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader><AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle><AlertDialogDescription>This will permanently delete the staff account for {teacher.name}. They will lose all access.</AlertDialogDescription></AlertDialogHeader>
+                                  <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteTeacher(teacher.id, currentTeacherId)}>Delete</AlertDialogAction></AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
                     </Table>
-                    </div>
-                    <Button onClick={handleSaveTimetable} className="w-full md:w-auto">Save Timetable</Button>
                   </div>
-                ) : (
-                  <p className="text-center text-muted-foreground py-8">Select a department and year to edit the timetable.</p>
-                )}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="seating-plan">
-              <SeatingArrangementGenerator />
-            </TabsContent>
-
-            <TabsContent value="reports">
-               <div className="grid md:grid-cols-2 gap-6 pt-4">
-                <Card className="p-6 text-center">
-                  <CardHeader className="p-0 mb-4">
-                    <CardTitle>Attendance Defaulter Report</CardTitle>
-                    <CardDescription>Generate an AI-summarized report of students with attendance below 75%.</CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    <Button onClick={handleGenerateReport} disabled={isGeneratingReport}>{isGeneratingReport ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generating...</>) : (<><FileText className="mr-2 h-4 w-4" />Generate Report</>)}</Button>
-                  </CardContent>
-                </Card>
-                <Card className="p-6 text-center">
-                  <CardHeader className="p-0 mb-4">
-                    <CardTitle>Department Analytics</CardTitle>
-                    <CardDescription>View a dashboard of attendance statistics across departments and classes.</CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    <Button onClick={() => setIsAnalyticsOpen(true)}>
-                      <BarChart className="mr-2 h-4 w-4" />
-                      View Analytics
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="feedback">
-              <div className="pt-4 space-y-4">
-                <FeedbackAnalytics />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="audit-logs">
-              <div className="pt-4 space-y-4">
-                <h3 className="font-semibold text-lg">Administrator Activity</h3>
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[180px]">Timestamp</TableHead>
-                        <TableHead className="w-[120px]">User</TableHead>
-                        <TableHead>Action</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {auditLogs.length > 0 ? (
-                        auditLogs.map(log => (
-                          <TableRow key={log.id}>
-                            <TableCell className="text-muted-foreground">
-                              {format(log.timestamp, 'MMM d, yyyy, h:mm a')}
-                              <p className="text-xs">({formatDistanceToNow(log.timestamp, { addSuffix: true })})</p>
-                            </TableCell>
-                            <TableCell className="font-medium">{log.user}</TableCell>
-                            <TableCell className="flex items-start gap-2">
-                              <span className="text-muted-foreground mt-0.5">{logIcons[log.type]}</span>
-                              <span>{log.action}</span>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={3} className="h-24 text-center">No audit logs found.</TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
                 </div>
-              </div>
-            </TabsContent>
+              </TabsContent>
+              
+              <TabsContent value="academic-structure">
+                <div className="grid md:grid-cols-3 gap-8 pt-4">
+                  <div className="space-y-4">
+                      <Label>Existing Departments</Label>
+                      <div className="flex flex-wrap gap-2">
+                          {departments.map(dept => (
+                          <div key={dept} className="flex items-center gap-1.5 bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm">
+                              <span>{dept}</span>
+                              <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                  <button className="flex items-center justify-center h-4 w-4 rounded-full bg-secondary-foreground/20 text-secondary-foreground hover:bg-destructive hover:text-destructive-foreground transition-colors"><X className="h-3 w-3" /></button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                  <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>Deleting "{dept}" will remove it from the list of available departments.</AlertDialogDescription></AlertDialogHeader>
+                                  <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteDepartment(dept, currentTeacherId)}>Delete</AlertDialogAction></AlertDialogFooter>
+                              </AlertDialogContent>
+                              </AlertDialog>
+                          </div>
+                          ))}
+                      </div>
+                      <div className="space-y-2"><Label htmlFor="new-department">Add New Department</Label><div className="flex gap-2"><Input id="new-department" value={newDepartment} onChange={e => setNewDepartment(e.target.value)} placeholder="e.g., B.Tech"/><Button onClick={handleAddDepartmentSubmit}><PlusCircle /> Add</Button></div></div>
+                  </div>
+                  <div className="space-y-4">
+                      <Label>Existing Years</Label>
+                      <div className="flex flex-wrap gap-2">
+                          {years.map(year => (
+                            <div key={year} className="flex items-center gap-1.5 bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm">
+                            <span>{year}</span>
+                            <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                  <button className="flex items-center justify-center h-4 w-4 rounded-full bg-secondary-foreground/20 text-secondary-foreground hover:bg-destructive hover:text-destructive-foreground transition-colors"><X className="h-3 w-3" /></button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>Deleting "{year}" will remove it from the list of available years.</AlertDialogDescription></AlertDialogHeader>
+                                <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteYear(year, currentTeacherId)}>Delete</AlertDialogAction></AlertDialogFooter>
+                            </AlertDialogContent>
+                            </AlertDialog>
+                        </div>
+                          ))}
+                      </div>
+                      <div className="space-y-2"><Label htmlFor="new-year">Add New Year</Label><div className="flex gap-2"><Input id="new-year" value={newYear} onChange={e => setNewYear(e.target.value)} placeholder="e.g., 4th Year"/><Button onClick={handleAddYearSubmit}><PlusCircle /> Add</Button></div></div>
+                  </div>
+                  <div className="space-y-4">
+                      <Label>Class Hours</Label>
+                      <div className="flex flex-wrap gap-2">
+                          {hours.map(hour => (
+                              <div key={hour} className="flex items-center gap-1.5 bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm">
+                              <span>{hour}</span>
+                              <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                  <button className="flex items-center justify-center h-4 w-4 rounded-full bg-secondary-foreground/20 text-secondary-foreground hover:bg-destructive hover:text-destructive-foreground transition-colors"><X className="h-3 w-3" /></button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                  <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>Deleting "{hour}" will remove it from the list of available class hours.</AlertDialogDescription></AlertDialogHeader>
+                                  <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteHour(hour, currentTeacherId)}>Delete</AlertDialogAction></AlertDialogFooter>
+                              </AlertDialogContent>
+                              </AlertDialog>
+                          </div>
+                          ))}
+                      </div>
+                      <div className="space-y-2"><Label htmlFor="new-hour">Add New Hour</Label><div className="flex gap-2"><Input id="new-hour" value={newHour} onChange={e => setNewHour(e.target.value)} placeholder="e.g., 6th Hour"/><Button onClick={handleAddHourSubmit}><PlusCircle /> Add</Button></div></div>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="announcements">
+                <div className="pt-4 space-y-6"><div className="space-y-4 p-4 border rounded-lg"><h3 className="font-semibold text-lg flex items-center gap-2"><Megaphone /> Create New Announcement</h3><div className="space-y-2"><Label htmlFor="new-announcement-title">Title</Label><Input id="new-announcement-title" value={newAnnouncementTitle} onChange={(e) => setNewAnnouncementTitle(e.target.value)} placeholder="e.g., Mid-term Exams"/></div><div className="space-y-2"><Label htmlFor="new-announcement-content">Content</Label><Textarea id="new-announcement-content" value={newAnnouncementContent} onChange={(e) => setNewAnnouncementContent(e.target.value)} placeholder="Enter the announcement details here..."/></div><Button onClick={handleAddAnnouncementSubmit} className="w-full"><PlusCircle /> Post Announcement</Button></div><div className="space-y-4"><h3 className="font-semibold text-lg">Existing Announcements</h3><div className="space-y-2 max-h-96 overflow-y-auto pr-2">{announcements.length > 0 ? (announcements.map((announcement) => (<div key={announcement.id} className="flex items-start justify-between gap-4 p-3 rounded-md border bg-card-foreground/5"><div className="flex-1"><p className="font-medium">{announcement.title}</p><p className="text-sm text-muted-foreground">{announcement.content}</p><p className="text-xs text-muted-foreground mt-1">{announcement.date}</p></div><Button variant="ghost" size="icon" className="text-destructive shrink-0 hover:bg-destructive/10 h-8 w-8" onClick={() => deleteAnnouncement(announcement.id, currentTeacherId)}><Trash2 className="h-4 w-4" /></Button></div>))) : (<p className="text-sm text-muted-foreground text-center py-4">No announcements yet.</p>)}</div></div></div>
+              </TabsContent>
+
+              <TabsContent value="academic-settings">
+                <div className="pt-4 space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">Manage Academic Calendar</h3>
+                    <Button onClick={handleAddEventClick}><PlusCircle /> Add Event</Button>
+                  </div>
+                  <div className="rounded-md border"><Table><TableHeader><TableRow><TableHead>Title</TableHead><TableHead>Date</TableHead><TableHead>Type</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader><TableBody>{events.map((event) => (<TableRow key={event.id}><TableCell className="font-medium">{event.title}</TableCell><TableCell>{format(parseISO(event.date), 'PPP')}</TableCell><TableCell><span className="capitalize">{event.type}</span></TableCell><TableCell className="text-right space-x-2"><Button variant="ghost" size="icon" onClick={() => handleEditEventClick(event)}><Pencil className="h-4 w-4" /></Button><AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="text-destructive"><Trash2 className="h-4 w-4" /></Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>This will permanently delete the event "{event.title}".</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteEventSubmit(event.id, event.title)}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog></TableCell></TableRow>))}</TableBody></Table></div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="timetable">
+                <div className="pt-4 space-y-4">
+                  <div className="flex items-center gap-2">
+                    <CalendarClock className="h-6 w-6" />
+                    <h3 className="font-semibold text-lg">Manage Class Timetables</h3>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-4 p-4 border rounded-lg">
+                    <div>
+                      <Label>Department</Label>
+                      <Select value={selectedDept} onValueChange={setSelectedDept}>
+                        <SelectTrigger><SelectValue placeholder="Select Department" /></SelectTrigger>
+                        <SelectContent>{departments.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Year</Label>
+                      <Select value={selectedYear} onValueChange={setSelectedYear}>
+                        <SelectTrigger><SelectValue placeholder="Select Year" /></SelectTrigger>
+                        <SelectContent>{years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}</SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {editableTimetable ? (
+                    <div className="space-y-4">
+                      <div className="rounded-md border">
+                      <Table>
+                        <TableHeader><TableRow><TableHead>Day</TableHead>{hours.map(h => <TableHead key={h}>{h}</TableHead>)}</TableRow></TableHeader>
+                        <TableBody>
+                          {daysOfWeek.map((day) => (
+                            <TableRow key={day}>
+                              <TableCell className="font-medium">{day}</TableCell>
+                              {hours.map((_, hourIndex) => (
+                                <TableCell key={hourIndex}>
+                                  <Input
+                                    value={editableTimetable[day]?.[hourIndex] || ''}
+                                    onChange={(e) => handleTimetableChange(day, hourIndex, e.target.value)}
+                                    className="h-8"
+                                  />
+                                </TableCell>
+                              ))}
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                      </div>
+                      <Button onClick={handleSaveTimetable} className="w-full md:w-auto">Save Timetable</Button>
+                    </div>
+                  ) : (
+                    <p className="text-center text-muted-foreground py-8">Select a department and year to edit the timetable.</p>
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="seating-plan">
+                <SeatingArrangementGenerator />
+              </TabsContent>
+
+              <TabsContent value="reports">
+                <div className="grid md:grid-cols-2 gap-6 pt-4">
+                  <Card className="p-6 text-center">
+                    <CardHeader className="p-0 mb-4">
+                      <CardTitle>Attendance Defaulter Report</CardTitle>
+                      <CardDescription>Generate an AI-summarized report of students with attendance below 75%.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                      <Button onClick={handleGenerateReport} disabled={isGeneratingReport}>{isGeneratingReport ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generating...</>) : (<><FileText className="mr-2 h-4 w-4" />Generate Report</>)}</Button>
+                    </CardContent>
+                  </Card>
+                  <Card className="p-6 text-center">
+                    <CardHeader className="p-0 mb-4">
+                      <CardTitle>Department Analytics</CardTitle>
+                      <CardDescription>View a dashboard of attendance statistics across departments and classes.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                      <Button onClick={() => setIsAnalyticsOpen(true)}>
+                        <BarChart className="mr-2 h-4 w-4" />
+                        View Analytics
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="feedback">
+                <div className="pt-4 space-y-4">
+                  <FeedbackAnalytics />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="audit-logs">
+                <div className="pt-4 space-y-4">
+                  <h3 className="font-semibold text-lg">Administrator Activity</h3>
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[180px]">Timestamp</TableHead>
+                          <TableHead className="w-[120px]">User</TableHead>
+                          <TableHead>Action</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {auditLogs.length > 0 ? (
+                          auditLogs.map(log => (
+                            <TableRow key={log.id}>
+                              <TableCell className="text-muted-foreground">
+                                {format(log.timestamp, 'MMM d, yyyy, h:mm a')}
+                                <p className="text-xs">({formatDistanceToNow(log.timestamp, { addSuffix: true })})</p>
+                              </TableCell>
+                              <TableCell className="font-medium">{log.user}</TableCell>
+                              <TableCell className="flex items-start gap-2">
+                                <span className="text-muted-foreground mt-0.5">{logIcons[log.type]}</span>
+                                <span>{log.action}</span>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={3} className="h-24 text-center">No audit logs found.</TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              </TabsContent>
+            </div>
           </Tabs>
         </CardContent>
       </Card>
@@ -946,3 +953,5 @@ export function TeacherManagementPanel() {
     </>
   );
 }
+
+    
