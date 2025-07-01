@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { School, Building, GraduationCap, RefreshCw, UserPlus } from 'lucide-react';
+import { School, Building, GraduationCap, RefreshCw, UserPlus, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -33,6 +33,8 @@ export default function LandingPage() {
   const [teacherCaptchaInput, setTeacherCaptchaInput] = useState('');
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [loginTab, setLoginTab] = useState<'student' | 'teacher'>('student');
+  const [showStudentPassword, setShowStudentPassword] = useState(false);
+  const [showTeacherPassword, setShowTeacherPassword] = useState(false);
 
   const generateCaptcha = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -219,13 +221,29 @@ export default function LandingPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="student-password">Password (Date of Birth)</Label>
-                    <Input 
-                      id="student-password" 
-                      type="password" 
-                      placeholder="YYYY-MM-DD"
-                      value={studentPassword}
-                      onChange={(e) => setStudentPassword(e.target.value)} 
-                      required />
+                    <div className="relative">
+                      <Input
+                        id="student-password"
+                        type={showStudentPassword ? 'text' : 'password'}
+                        placeholder="YYYY-MM-DD"
+                        value={studentPassword}
+                        onChange={(e) => setStudentPassword(e.target.value)}
+                        required
+                        className="pr-10"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute inset-y-0 right-0"
+                        onClick={() => setShowStudentPassword((prev) => !prev)}
+                      >
+                        {showStudentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        <span className="sr-only">
+                          {showStudentPassword ? 'Hide password' : 'Show password'}
+                        </span>
+                      </Button>
+                    </div>
                   </div>
                    <div className="space-y-2">
                     <Label htmlFor="student-captcha">Captcha</Label>
@@ -273,13 +291,29 @@ export default function LandingPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="teacher-password">Password</Label>
-                    <Input 
-                      id="teacher-password" 
-                      type="password" 
-                      placeholder="Enter your password" 
-                      value={teacherPassword}
-                      onChange={(e) => setTeacherPassword(e.target.value)}
-                      required />
+                    <div className="relative">
+                      <Input
+                        id="teacher-password"
+                        type={showTeacherPassword ? 'text' : 'password'}
+                        placeholder="Enter your password"
+                        value={teacherPassword}
+                        onChange={(e) => setTeacherPassword(e.target.value)}
+                        required
+                        className="pr-10"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute inset-y-0 right-0"
+                        onClick={() => setShowTeacherPassword((prev) => !prev)}
+                      >
+                        {showTeacherPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        <span className="sr-only">
+                          {showTeacherPassword ? 'Hide password' : 'Show password'}
+                        </span>
+                      </Button>
+                    </div>
                   </div>
                    <div className="space-y-2">
                     <Label htmlFor="teacher-captcha">Captcha</Label>

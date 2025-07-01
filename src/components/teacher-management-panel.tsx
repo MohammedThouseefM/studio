@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format, parseISO } from 'date-fns';
-import { PlusCircle, Trash2, Megaphone, Pencil, Search, FileText, Loader2, Calendar as CalendarIcon, CalendarClock, User, X, BarChart, Users, KeyRound, MailCheck, MailWarning } from 'lucide-react';
+import { PlusCircle, Trash2, Megaphone, Pencil, Search, FileText, Loader2, Calendar as CalendarIcon, CalendarClock, User, X, BarChart, Users, KeyRound, MailCheck, MailWarning, Eye, EyeOff } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -122,6 +122,8 @@ export function TeacherManagementPanel() {
   const [isAddTeacherDialogOpen, setIsAddTeacherDialogOpen] = useState(false);
   const [isChangePasswordDialogOpen, setIsChangePasswordDialogOpen] = useState(false);
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
+  const [showAddTeacherPassword, setShowAddTeacherPassword] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
   
   const studentForm = useForm<StudentFormData>({ resolver: zodResolver(studentSchema) });
   const eventForm = useForm<EventFormData>({ resolver: zodResolver(eventSchema) });
@@ -704,8 +706,66 @@ export function TeacherManagementPanel() {
       <Dialog open={isAnalyticsOpen} onOpenChange={setIsAnalyticsOpen}><DialogContent className="max-w-4xl w-full"><DialogHeader><DialogTitle>Department-wise Attendance Analytics</DialogTitle><DialogDescription>An overview of attendance performance across different departments and classes.</DialogDescription></DialogHeader><div className="mt-4 max-h-[70vh] overflow-y-auto pr-4"><DepartmentAnalytics /></div></DialogContent></Dialog>
       <Dialog open={isEventFormDialogOpen} onOpenChange={setIsEventFormDialogOpen}><DialogContent className="sm:max-w-[425px]"><DialogHeader><DialogTitle>{editingEvent ? 'Edit Event' : 'Add New Event'}</DialogTitle><DialogDescription>Fill in the details for the academic event.</DialogDescription></DialogHeader><Form {...eventForm}><form onSubmit={eventForm.handleSubmit(onEventSubmit)} className="space-y-4 py-4"><FormField control={eventForm.control} name="title" render={({ field }) => (<FormItem><FormLabel>Title</FormLabel><FormControl><Input placeholder="e.g., Mid-term Exams" {...field} /></FormControl><FormMessage /></FormItem>)}/><FormField control={eventForm.control} name="date" render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>Date</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}><CalendarIcon className="mr-2 h-4 w-4" />{field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}</Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus /></PopoverContent></Popover><FormMessage /></FormItem>)}/>
               <FormField control={eventForm.control} name="type" render={({ field }) => (<FormItem><FormLabel>Type</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select event type" /></SelectTrigger></FormControl><SelectContent><SelectItem value="exam">Exam</SelectItem><SelectItem value="holiday">Holiday</SelectItem><SelectItem value="assignment">Assignment</SelectItem><SelectItem value="event">Event</SelectItem></SelectContent></Select><FormMessage /></FormItem>)}/><FormField control={eventForm.control} name="description" render={({ field }) => (<FormItem><FormLabel>Description (Optional)</FormLabel><FormControl><Textarea placeholder="Add a short description..." {...field} /></FormControl><FormMessage /></FormItem>)}/><DialogFooter><Button type="button" variant="outline" onClick={() => setIsEventFormDialogOpen(false)}>Cancel</Button><Button type="submit">Save</Button></DialogFooter></form></Form></DialogContent></Dialog>
-      <Dialog open={isAddTeacherDialogOpen} onOpenChange={setIsAddTeacherDialogOpen}><DialogContent className="sm:max-w-[425px]"><DialogHeader><DialogTitle>Add New Staff Member</DialogTitle><DialogDescription>Create a new account for a teacher.</DialogDescription></DialogHeader><Form {...teacherForm}><form onSubmit={teacherForm.handleSubmit(onAddTeacherSubmit)} className="space-y-4 py-4"><FormField control={teacherForm.control} name="name" render={({ field }) => (<FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="e.g., Dr. Evelyn Reed" {...field} /></FormControl><FormMessage /></FormItem>)}/><FormField control={teacherForm.control} name="id" render={({ field }) => (<FormItem><FormLabel>Staff ID</FormLabel><FormControl><Input placeholder="e.g., TEACHER03" {...field} /></FormControl><FormMessage /></FormItem>)}/><FormField control={teacherForm.control} name="password" render={({ field }) => (<FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" placeholder="Min. 6 characters" {...field} /></FormControl><FormMessage /></FormItem>)}/><DialogFooter><Button type="button" variant="outline" onClick={() => setIsAddTeacherDialogOpen(false)}>Cancel</Button><Button type="submit">Add Staff</Button></DialogFooter></form></Form></DialogContent></Dialog>
-      <Dialog open={isChangePasswordDialogOpen} onOpenChange={setIsChangePasswordDialogOpen}><DialogContent className="sm:max-w-[425px]"><DialogHeader><DialogTitle>Change Password for {editingTeacher?.name}</DialogTitle><DialogDescription>Enter a new password for Staff ID: {editingTeacher?.id}</DialogDescription></DialogHeader><Form {...changePasswordForm}><form onSubmit={changePasswordForm.handleSubmit(onChangePasswordSubmit)} className="space-y-4 py-4"><FormField control={changePasswordForm.control} name="password" render={({ field }) => (<FormItem><FormLabel>New Password</FormLabel><FormControl><Input type="password" placeholder="Min. 6 characters" {...field} /></FormControl><FormMessage /></FormItem>)}/><DialogFooter><Button type="button" variant="outline" onClick={() => setIsChangePasswordDialogOpen(false)}>Cancel</Button><Button type="submit">Save Password</Button></DialogFooter></form></Form></DialogContent></Dialog>
+      <Dialog open={isAddTeacherDialogOpen} onOpenChange={setIsAddTeacherDialogOpen}><DialogContent className="sm:max-w-[425px]"><DialogHeader><DialogTitle>Add New Staff Member</DialogTitle><DialogDescription>Create a new account for a teacher.</DialogDescription></DialogHeader><Form {...teacherForm}><form onSubmit={teacherForm.handleSubmit(onAddTeacherSubmit)} className="space-y-4 py-4"><FormField control={teacherForm.control} name="name" render={({ field }) => (<FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="e.g., Dr. Evelyn Reed" {...field} /></FormControl><FormMessage /></FormItem>)}/><FormField control={teacherForm.control} name="id" render={({ field }) => (<FormItem><FormLabel>Staff ID</FormLabel><FormControl><Input placeholder="e.g., TEACHER03" {...field} /></FormControl><FormMessage /></FormItem>)}/><FormField
+                control={teacherForm.control}
+                name="password"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                            <div className="relative">
+                                <Input
+                                    type={showAddTeacherPassword ? 'text' : 'password'}
+                                    placeholder="Min. 6 characters"
+                                    className="pr-10"
+                                    {...field}
+                                />
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="absolute inset-y-0 right-0"
+                                    onClick={() => setShowAddTeacherPassword((prev) => !prev)}
+                                >
+                                    {showAddTeacherPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                    <span className="sr-only">{showAddTeacherPassword ? "Hide password" : "Show password"}</span>
+                                </Button>
+                            </div>
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            /><DialogFooter><Button type="button" variant="outline" onClick={() => setIsAddTeacherDialogOpen(false)}>Cancel</Button><Button type="submit">Add Staff</Button></DialogFooter></form></Form></DialogContent></Dialog>
+      <Dialog open={isChangePasswordDialogOpen} onOpenChange={setIsChangePasswordDialogOpen}><DialogContent className="sm:max-w-[425px]"><DialogHeader><DialogTitle>Change Password for {editingTeacher?.name}</DialogTitle><DialogDescription>Enter a new password for Staff ID: {editingTeacher?.id}</DialogDescription></DialogHeader><Form {...changePasswordForm}><form onSubmit={changePasswordForm.handleSubmit(onChangePasswordSubmit)} className="space-y-4 py-4"><FormField
+                control={changePasswordForm.control}
+                name="password"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>New Password</FormLabel>
+                        <FormControl>
+                            <div className="relative">
+                                <Input
+                                    type={showChangePassword ? 'text' : 'password'}
+                                    placeholder="Min. 6 characters"
+                                    className="pr-10"
+                                    {...field}
+                                />
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="absolute inset-y-0 right-0"
+                                    onClick={() => setShowChangePassword((prev) => !prev)}
+                                >
+                                    {showChangePassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                    <span className="sr-only">{showChangePassword ? "Hide password" : "Show password"}</span>
+                                </Button>
+                            </div>
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            /><DialogFooter><Button type="button" variant="outline" onClick={() => setIsChangePasswordDialogOpen(false)}>Cancel</Button><Button type="submit">Save Password</Button></DialogFooter></form></Form></DialogContent></Dialog>
     </>
   );
 }
