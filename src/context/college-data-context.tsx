@@ -33,6 +33,7 @@ import {
   type StudentFeeDetails,
   type SemesterFee,
   type StudentResults,
+  type SubjectResult,
 } from '@/lib/mock-data';
 import type { AttendanceState } from '@/components/attendance-sheet';
 import { parseISO } from 'date-fns';
@@ -100,6 +101,7 @@ type CollegeDataContextType = {
   updateStudentFeeDetails: (studentId: string, semester: string, updatedFee: Pick<SemesterFee, 'totalFee' | 'paid'>, user: string) => void;
   // Results
   studentResults: StudentResults;
+  updateStudentResults: (studentId: string, semester: string, subjectCode: string, updatedResult: Partial<SubjectResult>, user: string) => void;
 };
 
 const CollegeDataContext = createContext<CollegeDataContextType | undefined>(undefined);
@@ -349,6 +351,33 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
 
     addAuditLog(user, `Updated fee for ${student.name} (Sem: ${semester}, Paid: ${updatedFee.paid}, Total: ${updatedFee.totalFee})`, 'student');
   };
+  
+  const updateStudentResults = (studentId: string, semester: string, subjectCode: string, updatedResult: Partial<SubjectResult>, user: string) => {
+    const student = students.find(s => s.id === studentId);
+    if (!student) return;
+
+    setStudentResults(prev => {
+        const studentSemesters = prev[studentId] ? [...prev[studentId]] : [];
+        
+        const updatedSemesters = studentSemesters.map(sem => {
+            if (sem.semester === semester) {
+                const updatedSubjects = sem.results.map(subj => {
+                    if (subj.subjectCode === subjectCode) {
+                        return { ...subj, ...updatedResult };
+                    }
+                    return subj;
+                });
+                return { ...sem, results: updatedSubjects };
+            }
+            return sem;
+        });
+
+        return { ...prev, [studentId]: updatedSemesters };
+    });
+
+    addAuditLog(user, `Updated results for ${student.name} (Sem: ${semester}, Subject: ${subjectCode})`, 'student');
+  };
+
 
   const contextValue = { 
     events, addEvent, updateEvent, deleteEvent, 
@@ -370,6 +399,7 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
     studentFeeDetails,
     updateStudentFeeDetails,
     studentResults,
+    updateStudentResults,
   };
 
   return (
