@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format, parseISO } from 'date-fns';
-import { PlusCircle, Pencil, Search, BarChart, User, Calendar as CalendarIcon, SlidersHorizontal, Users } from 'lucide-react';
+import { PlusCircle, Pencil, Search, BarChart, User, Calendar as CalendarIcon, SlidersHorizontal, Users, Send } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -54,6 +54,10 @@ const calculateAttendancePercentage = (studentId: string) => {
   return Math.round((presentCount / studentRecords.length) * 100);
 };
 
+const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
+};
+
 export default function StudentManagementPage() {
     const { toast } = useToast();
     const currentTeacherId = 'TEACHER01';
@@ -70,7 +74,8 @@ export default function StudentManagementPage() {
 
     const { 
         departments, years,
-        students, addStudent, updateStudent
+        students, addStudent, updateStudent,
+        studentFeeDetails, studentResults
     } = useCollegeData();
   
     const studentForm = useForm<StudentFormData>({ resolver: zodResolver(studentSchema) });
@@ -149,6 +154,44 @@ export default function StudentManagementPage() {
         toast({ title: 'Student Updated', description: `Successfully updated ${data.name}.` });
         setIsEditStudentDialogOpen(false);
         setEditingStudent(null);
+    };
+
+    const handleSendToParent = (student: Student) => {
+        const attendance = calculateAttendancePercentage(student.id);
+        const fees = studentFeeDetails[student.id] || [];
+        const totalBalance = fees.reduce((acc, fee) => acc + fee.balance, 0);
+        const results = studentResults[student.id] || [];
+        const latestResult = results.length > 0 ? results[0] : null;
+
+        const message = `*Student Progress Report*
+*Merit Haji Ismail Sahib Arts and Science College*
+
+Dear Parent,
+Here is a summary of your child's progress:
+
+*Student Details*
+- Name: ${student.name}
+- Roll No: ${student.rollNumber}
+- Department: ${student.department} - ${student.year}
+
+*Academic Performance*
+- Overall Attendance: ${attendance}%
+- Latest Semester GPA: ${latestResult ? latestResult.gpa.toFixed(2) : 'N/A'}
+- Latest Semester Result: ${latestResult ? latestResult.overallResult : 'N/A'}
+
+*Financials*
+- Outstanding Balance: ${formatCurrency(totalBalance)}
+
+Please contact the college administration for further details.`;
+
+        const encodedMessage = encodeURIComponent(message);
+        const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
+
+        window.open(whatsappUrl, '_blank');
+        toast({
+            title: "Redirecting to WhatsApp",
+            description: "A new tab has been opened to share the report.",
+        });
     };
 
     const StudentFormFields = ({ photoUrlValue }: { photoUrlValue?: string }) => (
@@ -280,12 +323,15 @@ export default function StudentManagementPage() {
                                                     </div>
                                                 </CardContent>
                                             </div>
-                                            <CardFooter className="p-2 pt-0 grid grid-cols-2 gap-2">
-                                                <Button variant="outline" className="w-full" onClick={() => setSelectedStudent(student)}>
+                                            <CardFooter className="p-2 pt-0 grid grid-cols-3 gap-2">
+                                                <Button variant="outline" className="w-full text-xs px-2" onClick={() => setSelectedStudent(student)}>
                                                     <BarChart className="mr-2 h-4 w-4" /> Report
                                                 </Button>
-                                                <Button variant="outline" className="w-full" onClick={() => handleEditStudentClick(student)}>
+                                                <Button variant="outline" className="w-full text-xs px-2" onClick={() => handleEditStudentClick(student)}>
                                                     <Pencil className="mr-2 h-4 w-4" /> Edit
+                                                </Button>
+                                                <Button variant="outline" className="w-full text-xs px-2" onClick={() => handleSendToParent(student)}>
+                                                    <Send className="mr-2 h-4 w-4" /> WhatsApp
                                                 </Button>
                                             </CardFooter>
                                         </Card>
