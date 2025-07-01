@@ -1,4 +1,4 @@
-import { AcademicCalendarCard } from "@/components/academic-calendar-card";
+
 import { Announcements } from "@/components/announcements";
 import { DailyAttendanceCard } from "@/components/daily-attendance-card";
 import { DownloadPdfButton } from "@/components/download-pdf-button";
@@ -8,6 +8,7 @@ import { MotivationalQuote } from "@/components/motivational-quote";
 import { StudentAttendanceSummary } from "@/components/student-attendance-summary";
 import { TimetableCard } from "@/components/timetable-card";
 import { studentAttendance, students } from "@/lib/mock-data";
+import { AcademicCalendarCard } from "@/components/academic-calendar-card";
 
 export default function StudentDashboardPage() {
   // In a real app, this would come from a user session
@@ -16,18 +17,19 @@ export default function StudentDashboardPage() {
 
   return (
     <div className="p-4 md:p-8">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold">Welcome, {student.name}!</h1>
           <p className="text-muted-foreground">
-            {student.department} - {student.year} | Roll No: {student.rollNumber}
+            Here's your complete attendance summary and latest updates.
           </p>
         </div>
         <DownloadPdfButton student={student} elementId={reportId} />
       </div>
+
       <div className="grid gap-8 lg:grid-cols-3">
+        {/* Main Content: Attendance */}
         <div className="lg:col-span-2 space-y-8">
-          <DailyAttendanceCard />
           <div id={reportId}>
             <StudentAttendanceSummary
               student={student}
@@ -36,13 +38,16 @@ export default function StudentDashboardPage() {
             />
           </div>
         </div>
+
+        {/* Side Column: Quick Info & Actions */}
         <div className="lg:col-span-1 space-y-8">
+          <DailyAttendanceCard />
+          <Announcements />
           <MotivationalQuote />
-          <FeedbackCard />
           <LeaveRequestCard />
+          <FeedbackCard />
           <AcademicCalendarCard />
           <TimetableCard />
-          <Announcements />
         </div>
       </div>
     </div>

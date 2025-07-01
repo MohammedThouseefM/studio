@@ -1,12 +1,12 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format, formatDistanceToNow, parseISO } from 'date-fns';
-import { PlusCircle, Trash2, Megaphone, Pencil, Search, FileText, Loader2, Calendar as CalendarIcon, CalendarClock, User, X, BarChart, Users, KeyRound, MailCheck, MailWarning, Eye, EyeOff, Send, Check, History, Edit, UserPlus, UserMinus, FilePlus, FileMinus, MessageSquare, MessageSquareX, ClipboardEdit, Lock, ShieldCheck, ShieldX, CalendarPlus, CalendarCheck, CalendarX, Star, BookCopy } from 'lucide-react';
+import { PlusCircle, Trash2, Megaphone, Pencil, Search, FileText, Loader2, Calendar as CalendarIcon, CalendarClock, User, X, BarChart, Users, KeyRound, MailCheck, MailWarning, Eye, EyeOff, Send, Check, History, Edit, UserPlus, UserMinus, FilePlus, FileMinus, MessageSquare, MessageSquareX, ClipboardEdit, Lock, ShieldCheck, ShieldX, CalendarPlus, CalendarCheck, CalendarX, Star, BookCopy, SlidersHorizontal } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { type Student, type ClassTimeTable, defaultTimetable, type Teacher, type LeaveRequest } from '@/lib/mock-data';
+import { type Student, type ClassTimeTable, defaultTimetable, type Teacher, type LeaveRequest, previousAttendanceData, studentAttendance } from '@/lib/mock-data';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -31,6 +31,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DepartmentAnalytics } from './department-analytics';
 import { FeedbackAnalytics } from './feedback-analytics';
 import { SeatingArrangementGenerator } from './seating-arrangement-generator';
+import { Progress } from './ui/progress';
+import { StudentAttendanceSummary } from './student-attendance-summary';
+import { AcademicCalendar } from './academic-calendar';
+import { DownloadPdfButton } from './download-pdf-button';
 
 const studentSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -81,6 +85,14 @@ const logIcons: Record<AuditLog['type'], React.ReactNode> = {
   academic: <ClipboardEdit className="h-4 w-4" />,
 };
 
+// Helper function to calculate attendance
+const calculateAttendancePercentage = (studentId: string) => {
+  const studentRecords = previousAttendanceData.filter(record => record.studentId === studentId);
+  if (studentRecords.length === 0) return 0;
+  const presentCount = studentRecords.filter(record => record.attendanceStatus === 'present').length;
+  return Math.round((presentCount / studentRecords.length) * 100);
+};
+
 export function TeacherManagementPanel() {
   const { toast } = useToast();
   // Academic Structure State
@@ -93,7 +105,13 @@ export function TeacherManagementPanel() {
   const [isAddStudentDialogOpen, setIsAddStudentDialogOpen] = useState(false);
   const [isEditStudentDialogOpen, setIsEditStudentDialogOpen] = useState(false);
   const [isEditPendingStudentDialogOpen, setIsEditPendingStudentDialogOpen] = useState(false);
+  
+  // Student Search/Filter State
   const [searchTerm, setSearchTerm] = useState('');
+  const [departmentFilter, setDepartmentFilter] = useState('');
+  const [yearFilter, setYearFilter] = useState('');
+  const [attendanceRangeFilter, setAttendanceRangeFilter] = useState('');
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
 
   // Announcements State
   const [newAnnouncementTitle, setNewAnnouncementTitle] = useState('');
@@ -148,7 +166,8 @@ export function TeacherManagementPanel() {
   const eventForm = useForm<EventFormData>({ resolver: zodResolver(eventSchema) });
   const teacherForm = useForm<TeacherFormData>({ resolver: zodResolver(teacherSchema) });
   const changePasswordForm = useForm<ChangePasswordFormData>({ resolver: zodResolver(changePasswordSchema) });
-
+  
+  const reportId = selectedStudent ? `teacher-view-report-${selectedStudent.id}` : '';
   const pendingLeaveRequests = leaveRequests.filter(r => r.status === 'pending');
 
   useEffect(() => {
@@ -159,12 +178,40 @@ export function TeacherManagementPanel() {
     }
   }, [selectedDept, selectedYear, timeTable]);
 
-  const filteredStudents = students.filter(
-    (student) =>
-      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.rollNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.university_number.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredStudents = useMemo(() => {
+    return students.filter(student => {
+      const searchLower = searchTerm.toLowerCase();
+      const matchesSearchTerm =
+        !searchTerm ||
+        student.name.toLowerCase().includes(searchLower) ||
+        student.rollNumber.toLowerCase().includes(searchLower) ||
+        student.university_number.toLowerCase().includes(searchLower);
+
+      const matchesDepartment = !departmentFilter || student.department === departmentFilter;
+      const matchesYear = !yearFilter || student.year === yearFilter;
+
+      const matchesAttendance = (() => {
+        if (!attendanceRangeFilter) return true;
+        const attendance = calculateAttendancePercentage(student.id);
+        if (attendanceRangeFilter === "0") return attendance === 0;
+        if (attendanceRangeFilter === 'all') return true;
+        const [min, max] = attendanceRangeFilter.split('-').map(Number);
+        return attendance >= min && attendance <= max;
+      })();
+
+      return matchesSearchTerm && matchesDepartment && matchesYear && matchesAttendance;
+    });
+  }, [searchTerm, departmentFilter, yearFilter, attendanceRangeFilter, students]);
+  
+  const attendanceRanges = [
+    { label: "All Attendance", value: "all" },
+    { label: "Long Absentees (0%)", value: "0" },
+    { label: "1% - 20%", value: "1-20" },
+    { label: "21% - 40%", value: "21-40" },
+    { label: "41% - 60%", value: "41-60" },
+    { label: "61% - 75%", value: "61-75" },
+    { label: "76% - 100%", value: "76-100" },
+  ];
 
   const onStudentSubmit = (data: StudentFormData) => {
     addStudent({
@@ -339,7 +386,6 @@ export function TeacherManagementPanel() {
     }
   };
 
-
   const StudentFormFields = ({ photoUrlValue }: { photoUrlValue?: string }) => (
     <>
       <div className="grid md:grid-cols-2 gap-4">
@@ -413,14 +459,14 @@ export function TeacherManagementPanel() {
           <Tabs defaultValue="requests" orientation="vertical" className="flex flex-col sm:flex-row gap-6 min-h-[600px]">
             <TabsList className="flex flex-row sm:flex-col sm:h-auto w-full sm:w-56 shrink-0 overflow-x-auto sm:overflow-visible">
               <TabsTrigger value="requests" className="justify-start shrink-0 sm:w-full">
-                Requests 
+                Registrations
                 <div className="ml-auto h-5 w-5 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-xs">{pendingStudents.length}</div>
               </TabsTrigger>
               <TabsTrigger value="leave-requests" className="justify-start shrink-0 sm:w-full">
                 Leave Requests 
                 <div className="ml-auto h-5 w-5 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-xs">{pendingLeaveRequests.length}</div>
               </TabsTrigger>
-              <TabsTrigger value="manage-students" className="justify-start shrink-0 sm:w-full">Manage Students</TabsTrigger>
+              <TabsTrigger value="student-management" className="justify-start shrink-0 sm:w-full">Student Management</TabsTrigger>
               <TabsTrigger value="manage-staff" className="justify-start shrink-0 sm:w-full">Manage Staff</TabsTrigger>
               <TabsTrigger value="academic-structure" className="justify-start shrink-0 sm:w-full">Academic Structure</TabsTrigger>
               <TabsTrigger value="announcements" className="justify-start shrink-0 sm:w-full">Announcements</TabsTrigger>
@@ -549,15 +595,103 @@ export function TeacherManagementPanel() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="manage-students">
-                <div className="pt-4 space-y-4">
-                  <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
-                    <div className="relative w-full sm:w-auto sm:flex-1"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><Input placeholder="Search students..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9 w-full"/></div>
-                    <Button onClick={handleAddStudentClick} className="w-full sm:w-auto">
-                      <PlusCircle /> Add New Student
-                    </Button>
-                  </div>
-                  <div className="rounded-md border"><Table><TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Roll No.</TableHead><TableHead>Department</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader><TableBody>{filteredStudents.length > 0 ? (filteredStudents.map((student) => (<TableRow key={student.id}><TableCell className="font-medium">{student.name}</TableCell><TableCell>{student.rollNumber}</TableCell><TableCell>{student.department}</TableCell><TableCell className="text-right space-x-2"><Button variant="ghost" size="icon" onClick={() => handleEditStudentClick(student)}><Pencil className="h-4 w-4" /><span className="sr-only">Edit</span></Button><AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10"><Trash2 className="h-4 w-4" /><span className="sr-only">Delete</span></Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle><AlertDialogDescription>This action cannot be undone. This will permanently delete the student record for {student.name}.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteStudentSubmit(student)}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog></TableCell></TableRow>))) : (<TableRow><TableCell colSpan={4} className="h-24 text-center">No results found.</TableCell></TableRow>)}</TableBody></Table></div>
+              <TabsContent value="student-management">
+                <div className="pt-4 space-y-6">
+                    <div className="space-y-4 p-4 border rounded-lg">
+                        <h3 className="font-semibold text-lg flex items-center gap-2"><SlidersHorizontal /> Filters & Search</h3>
+                         <div className="space-y-2">
+                            <Label htmlFor="student-search">Search Student</Label>
+                            <Input
+                                id="student-search"
+                                placeholder="Enter name, roll no, or university no..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <Label>Department</Label>
+                                <Select value={departmentFilter} onValueChange={(value) => setDepartmentFilter(value === 'all' ? '' : value)}>
+                                <SelectTrigger><SelectValue placeholder="All Departments" /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Departments</SelectItem>
+                                    {departments.map((dept) => (<SelectItem key={dept} value={dept}>{dept}</SelectItem>))}
+                                </SelectContent>
+                                </Select>
+                            </div>
+                            <div>
+                                <Label>Year</Label>
+                                <Select value={yearFilter} onValueChange={(value) => setYearFilter(value === 'all' ? '' : value)}>
+                                <SelectTrigger><SelectValue placeholder="All Years" /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Years</SelectItem>
+                                    {years.map((y) => (<SelectItem key={y} value={y}>{y}</SelectItem>))}
+                                </SelectContent>
+                                </Select>
+                            </div>
+                            <div>
+                                <Label>Attendance Range</Label>
+                                <Select value={attendanceRangeFilter} onValueChange={(value) => setAttendanceRangeFilter(value === 'all' ? '' : value)}>
+                                    <SelectTrigger><SelectValue placeholder="All Attendance" /></SelectTrigger>
+                                    <SelectContent>
+                                        {attendanceRanges.map((range) => (<SelectItem key={range.value} value={range.value}>{range.label}</SelectItem>))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="flex justify-between items-center">
+                        <h3 className="font-semibold text-lg">Student Roster ({filteredStudents.length} results)</h3>
+                        <Button onClick={handleAddStudentClick}><PlusCircle /> Add New Student</Button>
+                    </div>
+
+                    <div className="space-y-4">
+                        {filteredStudents.length > 0 ? (
+                            <div className="grid gap-4 md:grid-cols-2">
+                            {filteredStudents.map(student => {
+                                const attendance = calculateAttendancePercentage(student.id);
+                                return (
+                                <Card key={student.id} className="flex flex-col justify-between">
+                                    <div>
+                                        <CardHeader className="flex flex-row items-center gap-4 p-4">
+                                            <Avatar className="h-12 w-12 border">
+                                            <AvatarImage src={student.photoUrl || `https://placehold.co/100x100.png`} alt={student.name} data-ai-hint="student portrait" className="object-cover" />
+                                            <AvatarFallback><User /></AvatarFallback>
+                                            </Avatar>
+                                            <div>
+                                            <CardTitle className="text-lg">{student.name}</CardTitle>
+                                            <CardDescription>{student.university_number}</CardDescription>
+                                            </div>
+                                        </CardHeader>
+                                        <CardContent className="space-y-3 text-sm pt-0 p-4">
+                                            <p><strong>Roll No:</strong> {student.rollNumber}</p>
+                                            <p><strong>Class:</strong> {student.department} - {student.year}</p>
+                                            <div>
+                                            <div className="flex justify-between mb-1">
+                                                <p className="font-medium">Overall Attendance</p>
+                                                <p className="text-muted-foreground">{attendance}%</p>
+                                            </div>
+                                            <Progress value={attendance} />
+                                            </div>
+                                        </CardContent>
+                                    </div>
+                                    <CardFooter className="p-2 pt-0 grid grid-cols-2 gap-2">
+                                        <Button variant="outline" className="w-full" onClick={() => setSelectedStudent(student)}>
+                                            <BarChart className="mr-2 h-4 w-4" /> Report
+                                        </Button>
+                                         <Button variant="outline" className="w-full" onClick={() => handleEditStudentClick(student)}>
+                                            <Pencil className="mr-2 h-4 w-4" /> Edit
+                                        </Button>
+                                    </CardFooter>
+                                </Card>
+                                )
+                            })}
+                            </div>
+                        ) : (
+                            <p className="text-center text-muted-foreground py-8">No students found matching your criteria.</p>
+                        )}
+                    </div>
                 </div>
               </TabsContent>
 
@@ -950,8 +1084,37 @@ export function TeacherManagementPanel() {
             </DialogFooter>
         </DialogContent>
       </Dialog>
+      <Dialog open={!!selectedStudent} onOpenChange={(isOpen) => !isOpen && setSelectedStudent(null)}>
+        <DialogContent className="max-w-5xl w-full">
+            <DialogHeader>
+                <div className="flex justify-between items-start">
+                    <div>
+                        <DialogTitle>Full Attendance Report for {selectedStudent?.name}</DialogTitle>
+                        <DialogDescription>
+                            {selectedStudent?.department} - {selectedStudent?.year} | Roll No: {selectedStudent?.rollNumber}
+                        </DialogDescription>
+                    </div>
+                    {selectedStudent && <DownloadPdfButton student={selectedStudent} elementId={reportId} />}
+                </div>
+            </DialogHeader>
+            <div className="mt-4 max-h-[70vh] overflow-y-auto pr-4">
+                <Tabs defaultValue="summary">
+                    <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="summary"><BarChart className="mr-2 h-4 w-4" />Summary Report</TabsTrigger>
+                        <TabsTrigger value="daily"><Calendar className="mr-2 h-4 w-4" />Daily Attendance</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="summary" className="mt-4">
+                        <div id={reportId}>
+                            {selectedStudent && <StudentAttendanceSummary student={selectedStudent} attendanceData={studentAttendance} />}
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="daily" className="mt-4">
+                        <AcademicCalendar />
+                    </TabsContent>
+                </Tabs>
+            </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
-
-    
