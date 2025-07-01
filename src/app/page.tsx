@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { School, Building, GraduationCap, Volume2, RefreshCw, UserPlus } from 'lucide-react';
+import { School, Building, GraduationCap, RefreshCw, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,6 +19,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { validateStudent, validateTeacher } from '@/lib/auth';
 import Link from 'next/link';
+import { ModeToggle } from '@/components/mode-toggle';
 
 export default function LandingPage() {
   const router = useRouter();
@@ -30,7 +31,6 @@ export default function LandingPage() {
   const [captcha, setCaptcha] = useState('');
   const [studentCaptchaInput, setStudentCaptchaInput] = useState('');
   const [teacherCaptchaInput, setTeacherCaptchaInput] = useState('');
-  const [fontSize, setFontSize] = useState('base');
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [loginTab, setLoginTab] = useState<'student' | 'teacher'>('student');
 
@@ -54,18 +54,6 @@ export default function LandingPage() {
         setTeacherCaptchaInput('');
     }
   }, [isLoginOpen]);
-
-
-  useEffect(() => {
-    const html = document.documentElement;
-    html.classList.remove('text-sm', 'text-base', 'text-lg');
-    // The text-base class is applied by default in tailwind, so we just need to handle sm and lg
-    if (fontSize === 'sm') {
-      html.classList.add('text-sm');
-    } else if (fontSize === 'lg') {
-      html.classList.add('text-lg');
-    }
-  }, [fontSize]);
 
   const handleStudentLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,20 +126,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="hidden md:flex items-center gap-4">
-             <div className="flex items-center gap-1 rounded-full border bg-secondary p-1">
-                <Button variant={fontSize === 'sm' ? 'default' : 'ghost'} size="icon" className="h-7 w-7 rounded-full" onClick={() => setFontSize('sm')} aria-label="Decrease font size">
-                   A-
-                </Button>
-                <Button variant={fontSize === 'base' ? 'default' : 'ghost'} size="icon" className="h-7 w-7 rounded-full" onClick={() => setFontSize('base')} aria-label="Default font size">
-                   A
-                </Button>
-                <Button variant={fontSize === 'lg' ? 'default' : 'ghost'} size="icon" className="h-7 w-7 rounded-full" onClick={() => setFontSize('lg')} aria-label="Increase font size">
-                   A+
-                </Button>
-            </div>
-            <Button variant="outline" size="icon" aria-label="Enable screen reader">
-              <Volume2 className="h-5 w-5" />
-            </Button>
+             <ModeToggle />
             <div className="flex items-center gap-2">
                 <Button variant="outline" onClick={() => handleLoginClick('student')}>
                     Student Login

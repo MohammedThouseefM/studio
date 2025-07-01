@@ -14,6 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { ModeToggle } from './mode-toggle';
 
 type AppHeaderProps = {
   userType: 'Student' | 'Teacher';
@@ -40,6 +41,7 @@ export function AppHeader({ userType }: AppHeaderProps) {
           </Link>
         </div>
         <div className="flex flex-1 items-center justify-end space-x-4">
+          <ModeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
