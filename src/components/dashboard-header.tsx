@@ -36,6 +36,7 @@ export function DashboardHeader({ userType }: DashboardHeaderProps) {
   return (
     <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between gap-4 border-b bg-background px-4 md:px-6">
       <div className="flex items-center gap-4">
+        {isMobile && <SidebarTrigger />}
         <Link href="/" className="hidden items-center space-x-2 md:flex">
             <School className="h-6 w-6 text-primary" />
             <span className="font-bold text-primary sm:inline-block">AttendEase</span>
@@ -77,7 +78,6 @@ export function DashboardHeader({ userType }: DashboardHeaderProps) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        {isMobile && <SidebarTrigger />}
       </div>
     </header>
   );

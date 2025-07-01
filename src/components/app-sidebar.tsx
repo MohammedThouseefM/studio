@@ -23,7 +23,7 @@ export function AppSidebar({ navItems }: AppSidebarProps) {
   const pathname = usePathname();
 
   return (
-    <Sidebar side="right" collapsible="icon">
+    <Sidebar side="left" collapsible="icon">
       <SidebarHeader>
         {!isMobile && <SidebarTrigger />}
       </SidebarHeader>
@@ -34,7 +34,7 @@ export function AppSidebar({ navItems }: AppSidebarProps) {
               <SidebarMenuButton
                 asChild
                 isActive={pathname === item.href}
-                tooltip={{ children: item.tooltip, side: 'left' }}
+                tooltip={{ children: item.tooltip, side: 'right' }}
               >
                 <Link href={item.href}>
                   <item.icon />

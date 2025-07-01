@@ -17,7 +17,7 @@ type AppLayoutProps = {
 export function AppLayout({ children, navItems, userType }: PropsWithChildren<AppLayoutProps>) {
   return (
     <SidebarProvider>
-      <div className="flex flex-row-reverse">
+      <div className="flex flex-row">
         <AppSidebar navItems={navItems} />
         <SidebarInset>
             <DashboardHeader userType={userType} />
