@@ -1,7 +1,8 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
-import { User, BarChart } from 'lucide-react';
+import { User, BarChart, Calendar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -13,6 +14,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { StudentAttendanceSummary } from './student-attendance-summary';
 import { Button } from './ui/button';
 import { useCollegeData } from '@/context/college-data-context';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AcademicCalendar } from '@/components/academic-calendar';
 
 // Helper function to calculate attendance
 const calculateAttendancePercentage = (studentId: string) => {
@@ -195,7 +198,7 @@ export function StudentSearch() {
       </Card>
       
       <Dialog open={!!selectedStudent} onOpenChange={(isOpen) => !isOpen && setSelectedStudent(null)}>
-        <DialogContent className="max-w-4xl w-full">
+        <DialogContent className="max-w-5xl w-full">
             <DialogHeader>
                 <DialogTitle>Full Attendance Report for {selectedStudent?.name}</DialogTitle>
                 <DialogDescription>
@@ -203,7 +206,18 @@ export function StudentSearch() {
                 </DialogDescription>
             </DialogHeader>
             <div className="mt-4 max-h-[70vh] overflow-y-auto pr-4">
-                <StudentAttendanceSummary attendanceData={studentAttendance} />
+                <Tabs defaultValue="summary">
+                    <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="summary"><BarChart className="mr-2 h-4 w-4" />Summary Report</TabsTrigger>
+                        <TabsTrigger value="daily"><Calendar className="mr-2 h-4 w-4" />Daily Attendance</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="summary" className="mt-4">
+                        <StudentAttendanceSummary attendanceData={studentAttendance} />
+                    </TabsContent>
+                    <TabsContent value="daily" className="mt-4">
+                        <AcademicCalendar />
+                    </TabsContent>
+                </Tabs>
             </div>
         </DialogContent>
       </Dialog>
