@@ -1,19 +1,19 @@
+
 'use client';
 
 import { useState } from 'react';
 import { FileDown, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { type Student } from '@/lib/mock-data';
-import { generatePdfReport } from '@/lib/generate-pdf-report';
+import { generateStudentPdfReport } from '@/lib/generate-pdf-report';
 
 type DownloadPdfButtonProps = {
-  student: Student;
   elementId: string;
+  studentName: string;
   className?: string;
 };
 
-export function DownloadPdfButton({ student, elementId, className }: DownloadPdfButtonProps) {
+export function DownloadPdfButton({ elementId, studentName, className }: DownloadPdfButtonProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
 
@@ -25,11 +25,11 @@ export function DownloadPdfButton({ student, elementId, className }: DownloadPdf
     });
 
     try {
-      const pdfBlob = await generatePdfReport(student, elementId);
+      const pdfBlob = await generateStudentPdfReport(elementId);
       const url = URL.createObjectURL(pdfBlob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Attendance-Report-${student.name.replace(/\s/g, '_')}.pdf`;
+      link.download = `Progress-Report-${studentName.replace(/\s/g, '_')}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

@@ -28,6 +28,7 @@ import { StudentAttendanceSummary } from '@/components/student-attendance-summar
 import { AcademicCalendar } from '@/components/academic-calendar';
 import { DownloadPdfButton } from '@/components/download-pdf-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PrintableReport } from '@/components/printable-report';
 
 const studentSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -80,6 +81,7 @@ export default function StudentManagementPage() {
   
     const studentForm = useForm<StudentFormData>({ resolver: zodResolver(studentSchema) });
     const reportId = selectedStudent ? `teacher-view-report-${selectedStudent.id}` : '';
+    const printableReportId = selectedStudent ? `printable-report-${selectedStudent.id}` : '';
 
     const filteredStudents = useMemo(() => {
         return students.filter(student => {
@@ -163,6 +165,11 @@ export default function StudentManagementPage() {
         const results = studentResults[student.id] || [];
         const latestResult = results.length > 0 ? results[0] : null;
 
+        let resultSummary = "Latest Semester Result: N/A";
+        if (latestResult) {
+            resultSummary = `Latest Result (${latestResult.semester} Sem): GPA ${latestResult.gpa.toFixed(2)} (${latestResult.overallResult})`;
+        }
+
         const message = `*Student Progress Report*
 *Merit Haji Ismail Sahib Arts and Science College*
 
@@ -176,8 +183,7 @@ Here is a summary of your child's progress:
 
 *Academic Performance*
 - Overall Attendance: ${attendance}%
-- Latest Semester GPA: ${latestResult ? latestResult.gpa.toFixed(2) : 'N/A'}
-- Latest Semester Result: ${latestResult ? latestResult.overallResult : 'N/A'}
+- ${resultSummary}
 
 *Financials*
 - Outstanding Balance: ${formatCurrency(totalBalance)}
@@ -391,7 +397,7 @@ Please contact the college administration for further details.`;
                                     {selectedStudent?.department} - {selectedStudent?.year} | Roll No: {selectedStudent?.rollNumber}
                                 </DialogDescription>
                             </div>
-                            {selectedStudent && <DownloadPdfButton student={selectedStudent} elementId={reportId} />}
+                            {selectedStudent && <DownloadPdfButton elementId={printableReportId} studentName={selectedStudent.name} />}
                         </div>
                     </DialogHeader>
                     <div className="mt-4 max-h-[70vh] overflow-y-auto pr-4">
@@ -410,6 +416,17 @@ Please contact the college administration for further details.`;
                             </TabsContent>
                         </Tabs>
                     </div>
+                    {selectedStudent && (
+                        <div className="absolute -left-[9999px] top-0">
+                           <PrintableReport
+                                id={printableReportId}
+                                student={selectedStudent}
+                                attendanceData={studentAttendance}
+                                feeHistory={studentFeeDetails[selectedStudent.id] || []}
+                                latestResult={(studentResults[selectedStudent.id] || [])[0] || null}
+                           />
+                        </div>
+                    )}
                 </DialogContent>
             </Dialog>
         </div>
