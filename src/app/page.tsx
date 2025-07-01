@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { School, Building, GraduationCap, Volume2, RefreshCw } from 'lucide-react';
+import { School, Building, GraduationCap, Volume2, RefreshCw, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { validateStudent, validateTeacher } from '@/lib/auth';
+import Link from 'next/link';
 
 export default function LandingPage() {
   const router = useRouter();
@@ -157,6 +158,12 @@ export default function LandingPage() {
                 </Button>
                 <Button onClick={() => handleLoginClick('teacher')}>
                     Teacher Login
+                </Button>
+                 <Button variant="secondary" asChild>
+                    <Link href="/register">
+                      <UserPlus className="mr-2 h-4 w-4" />
+                      Register
+                    </Link>
                 </Button>
             </div>
           </div>

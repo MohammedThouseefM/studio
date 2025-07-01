@@ -7,10 +7,13 @@ import {
   timeTable as initialTimeTable,
   collegeData as initialCollegeData,
   teachers as initialTeachers,
+  students as initialStudents,
+  pendingStudents as initialPendingStudents,
   type CalendarEvent as RawCalendarEvent,
   type FullTimeTable,
   type ClassTimeTable,
   type Teacher,
+  type Student,
 } from '@/lib/mock-data';
 
 export type CalendarEventWithId = RawCalendarEvent & { id: string };
@@ -39,6 +42,14 @@ type CollegeDataContextType = {
   addTeacher: (name: string, id: string, password: string) => void;
   updateTeacherPassword: (teacherId: string, newPassword: string) => void;
   deleteTeacher: (teacherId: string) => void;
+  // Students
+  students: Student[];
+  setStudents: React.Dispatch<React.SetStateAction<Student[]>>;
+  pendingStudents: Student[];
+  addPendingStudent: (student: Student) => void;
+  approveStudentRegistration: (studentId: string) => void;
+  rejectStudentRegistration: (studentId: string) => void;
+  updatePendingStudent: (studentId: string, updatedStudent: Student) => void;
 };
 
 const CollegeDataContext = createContext<CollegeDataContextType | undefined>(undefined);
@@ -60,6 +71,10 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
 
   // Teacher State
   const [teachers, setTeachers] = useState<Teacher[]>(initialTeachers);
+  
+  // Student State
+  const [students, setStudents] = useState<Student[]>(initialStudents);
+  const [pendingStudents, setPendingStudents] = useState<Student[]>(initialPendingStudents);
 
   // Event functions
   const addEvent = (eventData: Omit<CalendarEventWithId, 'id'>) => {
@@ -109,13 +124,33 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
     setTeachers(prev => prev.filter(t => t.id !== teacherId));
   };
 
+  // Student registration functions
+  const addPendingStudent = (student: Student) => {
+    setPendingStudents(prev => [student, ...prev]);
+  };
+  const approveStudentRegistration = (studentId: string) => {
+    const studentToApprove = pendingStudents.find(s => s.id === studentId);
+    if (studentToApprove) {
+      setStudents(prev => [studentToApprove, ...prev]);
+      setPendingStudents(prev => prev.filter(s => s.id !== studentId));
+    }
+  };
+  const rejectStudentRegistration = (studentId: string) => {
+    setPendingStudents(prev => prev.filter(s => s.id !== studentId));
+  };
+  const updatePendingStudent = (studentId: string, updatedStudent: Student) => {
+    setPendingStudents(prev => prev.map(s => s.id === studentId ? updatedStudent : s));
+  };
+
   const contextValue = { 
     events, addEvent, updateEvent, deleteEvent, 
     timeTable, updateTimeTable,
     departments, addDepartment, deleteDepartment,
     years, addYear, deleteYear,
     hours, addHour, deleteHour,
-    teachers, addTeacher, updateTeacherPassword, deleteTeacher
+    teachers, addTeacher, updateTeacherPassword, deleteTeacher,
+    students, setStudents,
+    pendingStudents, addPendingStudent, approveStudentRegistration, rejectStudentRegistration, updatePendingStudent
   };
 
   return (

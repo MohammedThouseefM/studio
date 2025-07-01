@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format, parseISO } from 'date-fns';
-import { PlusCircle, Trash2, Megaphone, Pencil, Search, FileText, Loader2, Calendar as CalendarIcon, CalendarClock, User, X, BarChart, Users, KeyRound } from 'lucide-react';
+import { PlusCircle, Trash2, Megaphone, Pencil, Search, FileText, Loader2, Calendar as CalendarIcon, CalendarClock, User, X, BarChart, Users, KeyRound, MailCheck, MailWarning } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { students as initialStudents, type Student, type ClassTimeTable, defaultTimetable, type Teacher } from '@/lib/mock-data';
+import { type Student, type ClassTimeTable, defaultTimetable, type Teacher } from '@/lib/mock-data';
 import { useAnnouncements } from '@/context/announcements-context';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -80,10 +80,10 @@ export function TeacherManagementPanel() {
   const [newHour, setNewHour] = useState('');
   
   // Student Management State
-  const [students, setStudents] = useState<Student[]>(initialStudents);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [isAddStudentDialogOpen, setIsAddStudentDialogOpen] = useState(false);
   const [isEditStudentDialogOpen, setIsEditStudentDialogOpen] = useState(false);
+  const [isEditPendingStudentDialogOpen, setIsEditPendingStudentDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Announcements State
@@ -104,7 +104,9 @@ export function TeacherManagementPanel() {
     departments, addDepartment, deleteDepartment,
     years, addYear, deleteYear,
     hours, addHour, deleteHour,
-    teachers, addTeacher, updateTeacherPassword, deleteTeacher
+    teachers, addTeacher, updateTeacherPassword, deleteTeacher,
+    students, setStudents,
+    pendingStudents, approveStudentRegistration, rejectStudentRegistration, updatePendingStudent
   } = useCollegeData();
 
   // Calendar State
@@ -181,12 +183,43 @@ export function TeacherManagementPanel() {
     });
     setIsEditStudentDialogOpen(true);
   };
+   const handleEditPendingStudentClick = (student: Student) => {
+    setEditingStudent(student);
+    studentForm.reset({
+      name: student.name,
+      email: student.email,
+      phone: student.phone,
+      rollNumber: student.rollNumber,
+      university_number: student.university_number,
+      department: student.department,
+      year: student.year,
+      photoUrl: student.photoUrl || '',
+      dob: parseISO(student.dob),
+      gender: student.gender,
+      currentSemester: student.currentSemester,
+      academicYear: student.academicYear,
+      address: student.address,
+    });
+    setIsEditPendingStudentDialogOpen(true);
+  };
   
   const onEditStudentSubmit = (data: StudentFormData) => {
     if (!editingStudent) return;
     setStudents(prev => prev.map(s => s.id === editingStudent.id ? { ...s, ...data, id: data.university_number, dob: format(data.dob, 'yyyy-MM-dd') } : s));
     toast({ title: 'Student Updated', description: `Successfully updated ${data.name}.` });
     setIsEditStudentDialogOpen(false);
+    setEditingStudent(null);
+  };
+
+   const onEditPendingStudentSubmit = (data: StudentFormData) => {
+    if (!editingStudent) return;
+    updatePendingStudent(editingStudent.id, {
+        ...data,
+        id: data.university_number,
+        dob: format(data.dob, 'yyyy-MM-dd'),
+    });
+    toast({ title: 'Registration Updated', description: `Successfully updated application for ${data.name}.` });
+    setIsEditPendingStudentDialogOpen(false);
     setEditingStudent(null);
   };
 
@@ -242,6 +275,16 @@ export function TeacherManagementPanel() {
       toast({ title: 'Password Updated', description: `Password for ${editingTeacher.name} has been changed.` });
       setIsChangePasswordDialogOpen(false);
     }
+  };
+
+  const handleApprove = (studentId: string) => {
+    approveStudentRegistration(studentId);
+    toast({ title: 'Registration Approved', description: 'The student has been added to the roster.' });
+  };
+  
+  const handleReject = (studentId: string) => {
+    rejectStudentRegistration(studentId);
+    toast({ variant: 'destructive', title: 'Registration Rejected', description: 'The application has been removed.' });
   };
 
   const StudentFormFields = ({ photoUrlValue }: { photoUrlValue?: string }) => (
@@ -315,7 +358,8 @@ export function TeacherManagementPanel() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="manage-students" className="min-h-[600px]">
-            <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-7">
+            <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8">
+              <TabsTrigger value="requests">Requests <div className="ml-2 h-5 w-5 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-xs">{pendingStudents.length}</div></TabsTrigger>
               <TabsTrigger value="manage-students">Manage Students</TabsTrigger>
               <TabsTrigger value="manage-staff">Manage Staff</TabsTrigger>
               <TabsTrigger value="academic-structure">Academic Structure</TabsTrigger>
@@ -324,6 +368,76 @@ export function TeacherManagementPanel() {
               <TabsTrigger value="timetable">Timetable</TabsTrigger>
               <TabsTrigger value="reports"><FileText className="mr-2 h-4 w-4" />Reports</TabsTrigger>
             </TabsList>
+
+            <TabsContent value="requests">
+               <div className="pt-4 space-y-4">
+                 <div className="rounded-md border">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Name</TableHead>
+                                <TableHead>Email</TableHead>
+                                <TableHead>Department</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {pendingStudents.length > 0 ? (
+                                pendingStudents.map((student) => (
+                                    <TableRow key={student.id}>
+                                        <TableCell className="font-medium flex items-center gap-2">
+                                            <Avatar className="h-8 w-8 border">
+                                                <AvatarImage src={student.photoUrl} alt={student.name} data-ai-hint="student portrait" />
+                                                <AvatarFallback><User /></AvatarFallback>
+                                            </Avatar>
+                                            {student.name}
+                                        </TableCell>
+                                        <TableCell>{student.email}</TableCell>
+                                        <TableCell>{student.department} - {student.year}</TableCell>
+                                        <TableCell className="text-right space-x-1">
+                                            <Button variant="ghost" size="icon" className="text-green-600 hover:text-green-700 hover:bg-green-100" onClick={() => handleApprove(student.id)}>
+                                                <MailCheck className="h-4 w-4" />
+                                                <span className="sr-only">Accept</span>
+                                            </Button>
+                                            <Button variant="ghost" size="icon" onClick={() => handleEditPendingStudentClick(student)}>
+                                                <Pencil className="h-4 w-4" />
+                                                <span className="sr-only">Edit</span>
+                                            </Button>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10">
+                                                        <Trash2 className="h-4 w-4" />
+                                                        <span className="sr-only">Deny</span>
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Are you sure you want to deny this application?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            This action cannot be undone. This will permanently delete the registration request for {student.name}.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => handleReject(student.id)}>Deny Application</AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={4} className="h-24 text-center">
+                                        No pending registration requests.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                 </div>
+               </div>
+            </TabsContent>
 
             <TabsContent value="manage-students">
               <div className="pt-4 space-y-4">
@@ -563,6 +677,23 @@ export function TeacherManagementPanel() {
                 <StudentFormFields photoUrlValue={studentForm.watch('photoUrl')} />
                 <DialogFooter>
                     <Button type="button" variant="outline" onClick={() => setIsEditStudentDialogOpen(false)}>Cancel</Button>
+                    <Button type="submit">Save Changes</Button>
+                </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+       <Dialog open={isEditPendingStudentDialogOpen} onOpenChange={setIsEditPendingStudentDialogOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit Pending Application: {editingStudent?.name}</DialogTitle>
+            <DialogDescription>Update the student's registration details below.</DialogDescription>
+          </DialogHeader>
+          <Form {...studentForm}>
+            <form onSubmit={studentForm.handleSubmit(onEditPendingStudentSubmit)} className="space-y-6 pt-4 max-h-[70vh] overflow-y-auto pr-4">
+                <StudentFormFields photoUrlValue={studentForm.watch('photoUrl')} />
+                <DialogFooter>
+                    <Button type="button" variant="outline" onClick={() => setIsEditPendingStudentDialogOpen(false)}>Cancel</Button>
                     <Button type="submit">Save Changes</Button>
                 </DialogFooter>
             </form>

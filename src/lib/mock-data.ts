@@ -84,6 +84,16 @@ export const students: Student[] = rawStudents.map(s => ({
   photoUrl: '',
 }));
 
+export const pendingStudents: Student[] = [
+    { "id": "PENDING-001", "roll_no": "1BCA-NEW", "name": "Aarav Sharma", "dob": "2006-05-20", "university_number": "APP-2024-001", "department": "BCA", "year": "1st Year", "email": "aarav.sharma.new@example.com", "phone": "9123456789", "gender": "Male" as const, "currentSemester": "1st", "academicYear": "2024-2025", "address": "15 Cherry Blossom Lane, New Delhi" },
+    { "id": "PENDING-002", "roll_no": "1BSC-NEW", "name": "Isha Singh", "dob": "2006-04-11", "university_number": "APP-2024-002", "department": "BSC", "year": "1st Year", "email": "isha.singh.new@example.com", "phone": "9234567890", "gender": "Female" as const, "currentSemester": "1st", "academicYear": "2024-2025", "address": "22 Rosewood Drive, Mumbai" }
+].map(s => ({
+  ...s,
+  rollNumber: s.roll_no,
+  photoUrl: '',
+}));
+
+
 export const studentUsers = students.map(student => ({
   id: student.university_number,
   password: student.dob,
