@@ -19,6 +19,7 @@ import {
   Timer,
   ClipboardList,
   CreditCard,
+  DollarSign,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -45,6 +46,7 @@ export const teacherNavItems: NavItem[] = [
   { href: '/teacher/registrations', label: 'Registrations', icon: MailCheck, tooltip: 'Student Registrations' },
   { href: '/teacher/leave-requests', label: 'Leave Requests', icon: CalendarX, tooltip: 'Leave Requests' },
   { href: '/teacher/student-management', label: 'Students', icon: Users, tooltip: 'Student Management' },
+  { href: '/teacher/fee-management', label: 'Fee Management', icon: DollarSign, tooltip: 'Fee Management' },
   { href: '/teacher/staff-management', label: 'Staff', icon: Shield, tooltip: 'Staff Management' },
   { href: '/teacher/academic-structure', label: 'Structure', icon: ClipboardEdit, tooltip: 'Academic Structure' },
   { href: '/teacher/announcements', label: 'Announcements', icon: Megaphone, tooltip: 'Announcements' },

@@ -33,6 +33,7 @@ import {
   type SemesterFee,
 } from '@/lib/mock-data';
 import type { AttendanceState } from '@/components/attendance-sheet';
+import { parseISO } from 'date-fns';
 
 export type CalendarEventWithId = RawCalendarEvent & { id: string };
 export type AuditLog = AuditLogType;
@@ -94,6 +95,7 @@ type CollegeDataContextType = {
   submitFeedback: (sessionId: string, studentId: string, feedbacks: Array<{ subject: string; rating: number; comment?: string }>) => void;
   // Fee Details
   studentFeeDetails: StudentFeeDetails;
+  updateStudentFeeDetails: (studentId: string, semester: string, updatedFee: Pick<SemesterFee, 'totalFee' | 'paid'>, user: string) => void;
 };
 
 const CollegeDataContext = createContext<CollegeDataContextType | undefined>(undefined);
@@ -321,6 +323,28 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
     // NOTE: No audit log for anonymous feedback submission to protect student privacy.
   };
 
+  const updateStudentFeeDetails = (studentId: string, semester: string, updatedFee: Pick<SemesterFee, 'totalFee' | 'paid'>, user: string) => {
+    const student = students.find(s => s.id === studentId);
+    if (!student) return;
+
+    setStudentFeeDetails(prev => {
+        const studentFees = prev[studentId] ? [...prev[studentId]] : [];
+        const updatedFees = studentFees.map(fee => {
+            if (fee.semester === semester) {
+                const newPaid = updatedFee.paid;
+                const newTotal = updatedFee.totalFee;
+                const balance = newTotal - newPaid;
+                const status = balance <= 0 ? 'Paid' : (new Date() > parseISO(fee.dueDate) ? 'Overdue' : 'Pending');
+                return { ...fee, totalFee: newTotal, paid: newPaid, balance, status };
+            }
+            return fee;
+        });
+        return { ...prev, [studentId]: updatedFees };
+    });
+
+    addAuditLog(user, `Updated fee for ${student.name} (Sem: ${semester}, Paid: ${updatedFee.paid}, Total: ${updatedFee.totalFee})`, 'student');
+  };
+
   const contextValue = { 
     events, addEvent, updateEvent, deleteEvent, 
     timeTable, updateTimeTable,
@@ -339,6 +363,7 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
     feedbackData,
     submitFeedback,
     studentFeeDetails,
+    updateStudentFeeDetails,
   };
 
   return (
