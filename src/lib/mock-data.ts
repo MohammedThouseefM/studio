@@ -133,6 +133,26 @@ export type StudentFeeDetails = {
   [studentId: string]: SemesterFee[];
 };
 
+export type SubjectResult = {
+  subjectCode: string;
+  subjectName: string;
+  ciaMarks: number;
+  semesterMarks: number;
+  totalMarks: number;
+  grade: string;
+  resultStatus: 'Pass' | 'Fail';
+};
+
+export type SemesterResult = {
+  semester: string; // e.g., '5th'
+  results: SubjectResult[];
+  gpa: number;
+  overallResult: 'Pass' | 'Fail';
+};
+
+export type StudentResults = {
+  [studentId: string]: SemesterResult[];
+};
 
 export const teachers: Teacher[] = [
     { id: 'TEACHER01', password: 'password', name: 'Dr. Evelyn Reed' },
@@ -423,5 +443,45 @@ export const studentFeeDetails: StudentFeeDetails = {
   // Neha Gupta (BCOM)
   '36623U06005': [
      { semester: '5th', totalFee: 20000, paid: 20000, balance: 0, status: 'Paid', dueDate: '2024-08-15' },
+  ],
+};
+
+export const studentResults: StudentResults = {
+  // Mohammed Thouseef (BCA)
+  '36623U09028': [
+    {
+      semester: '5th',
+      gpa: 8.8,
+      overallResult: 'Pass',
+      results: [
+        { subjectCode: 'BCA501', subjectName: 'Computer Networks', ciaMarks: 22, semesterMarks: 65, totalMarks: 87, grade: 'A', resultStatus: 'Pass' },
+        { subjectCode: 'BCA502', subjectName: 'Software Engineering', ciaMarks: 24, semesterMarks: 70, totalMarks: 94, grade: 'O', resultStatus: 'Pass' },
+        { subjectCode: 'BCA503', subjectName: 'Cloud Computing', ciaMarks: 20, semesterMarks: 55, totalMarks: 75, grade: 'B', resultStatus: 'Pass' },
+        { subjectCode: 'BCA504', subjectName: 'Python Programming', ciaMarks: 25, semesterMarks: 68, totalMarks: 93, grade: 'O', resultStatus: 'Pass' },
+      ],
+    },
+    {
+      semester: '4th',
+      gpa: 8.5,
+      overallResult: 'Pass',
+      results: [
+        { subjectCode: 'BCA401', subjectName: 'Data Structures', ciaMarks: 21, semesterMarks: 60, totalMarks: 81, grade: 'A', resultStatus: 'Pass' },
+        { subjectCode: 'BCA402', subjectName: 'Algorithms', ciaMarks: 23, semesterMarks: 62, totalMarks: 85, grade: 'A', resultStatus: 'Pass' },
+        { subjectCode: 'BCA403', subjectName: 'Operating Systems', ciaMarks: 19, semesterMarks: 50, totalMarks: 69, grade: 'C', resultStatus: 'Pass' },
+        { subjectCode: 'BCA404', subjectName: 'Database Management', ciaMarks: 22, semesterMarks: 65, totalMarks: 87, grade: 'A', resultStatus: 'Pass' },
+      ],
+    },
+  ],
+  // Priya Verma (BCA)
+  '36623U09015': [
+    {
+      semester: '5th',
+      gpa: 9.2,
+      overallResult: 'Pass',
+      results: [
+        { subjectCode: 'BCA501', subjectName: 'Computer Networks', ciaMarks: 24, semesterMarks: 70, totalMarks: 94, grade: 'O', resultStatus: 'Pass' },
+        { subjectCode: 'BCA502', subjectName: 'Software Engineering', ciaMarks: 25, semesterMarks: 72, totalMarks: 97, grade: 'O', resultStatus: 'Pass' },
+      ],
+    },
   ],
 };
