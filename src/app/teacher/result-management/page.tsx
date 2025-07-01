@@ -97,7 +97,7 @@ export default function ResultManagementPage() {
     };
 
     return (
-        <div className="p-4 md:p-8 grid lg:grid-cols-3 gap-6">
+        <div className="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-1 flex flex-col gap-6">
                 <Card>
                     <CardHeader><CardTitle className="flex items-center gap-2"><SlidersHorizontal /> Filter Students</CardTitle></CardHeader>
@@ -131,11 +131,11 @@ export default function ResultManagementPage() {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><Award /> Result Management</CardTitle>
                         {selectedStudent ? (
-                            <div className="flex justify-between items-center">
+                            <div className="flex flex-col gap-4 mt-2 md:flex-row md:justify-between md:items-center">
                                 <CardDescription>Editing results for {selectedStudent.name}.</CardDescription>
                                 {availableSemesters.length > 0 && (
                                     <Select value={selectedSemester || ''} onValueChange={setSelectedSemester}>
-                                        <SelectTrigger className="w-48"><SelectValue placeholder="Select Semester" /></SelectTrigger>
+                                        <SelectTrigger className="w-full md:w-48"><SelectValue placeholder="Select Semester" /></SelectTrigger>
                                         <SelectContent>{availableSemesters.map(sem => <SelectItem key={sem} value={sem}>{sem} Semester</SelectItem>)}</SelectContent>
                                     </Select>
                                 )}
@@ -144,7 +144,7 @@ export default function ResultManagementPage() {
                     </CardHeader>
                     <CardContent>
                         {selectedStudent && selectedSemester ? (
-                            <div className="rounded-md border">
+                            <div className="rounded-md border overflow-x-auto">
                                 <Table>
                                     <TableHeader><TableRow><TableHead>Subject</TableHead><TableHead>CIA</TableHead><TableHead>Semester</TableHead><TableHead>Total</TableHead><TableHead>Grade</TableHead><TableHead>Result</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
                                     <TableBody>

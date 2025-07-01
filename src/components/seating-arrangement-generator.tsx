@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -107,7 +108,7 @@ export function SeatingArrangementGenerator() {
 
   return (
     <div className="pt-4 space-y-6">
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Configuration Card */}
         <Card>
           <CardHeader>
@@ -147,7 +148,7 @@ export function SeatingArrangementGenerator() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col items-start gap-4">
-            <div className="p-3 rounded-md bg-secondary text-secondary-foreground w-full flex justify-between text-sm">
+            <div className="p-3 rounded-md bg-secondary text-secondary-foreground w-full flex flex-col sm:flex-row justify-between text-sm gap-2">
                 <div className="flex items-center gap-2"><Users /><span>{filteredStudents.length} Students Selected</span></div>
                 <div className="flex items-center gap-2"><BookCopy /><span>{totalCapacity} Total Seats</span></div>
             </div>

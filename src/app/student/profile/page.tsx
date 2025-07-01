@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -32,7 +33,7 @@ export default function StudentProfilePage() {
                     <span className="sr-only">Back</span>
                 </Link>
             </Button>
-            <h1 className="text-3xl font-bold">My Profile</h1>
+            <h1 className="text-2xl font-bold md:text-3xl">My Profile</h1>
         </div>
       </div>
       <Card className="max-w-4xl mx-auto">
@@ -44,7 +45,7 @@ export default function StudentProfilePage() {
                 </AvatarFallback>
             </Avatar>
             <div className="flex-1">
-                <CardTitle className="text-3xl">{student.name}</CardTitle>
+                <CardTitle className="text-2xl md:text-3xl">{student.name}</CardTitle>
                 <CardDescription className="text-base text-muted-foreground">{student.email}</CardDescription>
                 <CardDescription className="text-sm text-muted-foreground mt-1">University Number: {student.university_number}</CardDescription>
             </div>

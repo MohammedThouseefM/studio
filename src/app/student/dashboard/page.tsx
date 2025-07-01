@@ -38,7 +38,7 @@ export default function StudentDashboardPage() {
       </div>
       <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Welcome, {student.name}!</h1>
+          <h1 className="text-2xl font-bold md:text-3xl">Welcome, {student.name}!</h1>
           <p className="text-muted-foreground">
             Here's your complete attendance summary and latest updates.
           </p>
@@ -46,7 +46,7 @@ export default function StudentDashboardPage() {
         <DownloadPdfButton elementId={printableReportId} studentName={student.name} />
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* Main Content: Attendance */}
         <div className="lg:col-span-2 space-y-8">
           <div id={reportId}>

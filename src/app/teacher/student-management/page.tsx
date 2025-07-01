@@ -294,7 +294,7 @@ Please contact the college administration for further details.`;
                         </div>
                     </div>
 
-                    <div className="flex justify-between items-center">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                         <h3 className="font-semibold text-lg">Student Roster ({filteredStudents.length} results)</h3>
                         <Button onClick={handleAddStudentClick}><PlusCircle className="mr-2 h-4 w-4" /> Add New Student</Button>
                     </div>
@@ -352,7 +352,7 @@ Please contact the college administration for further details.`;
             </Card>
 
             <Dialog open={isAddStudentDialogOpen} onOpenChange={setIsAddStudentDialogOpen}>
-                <DialogContent className="sm:max-w-2xl">
+                <DialogContent className="w-[95vw] max-w-2xl">
                     <DialogHeader>
                         <DialogTitle>Add New Student</DialogTitle>
                         <DialogDescription>Fill in the details for the new student.</DialogDescription>
@@ -370,7 +370,7 @@ Please contact the college administration for further details.`;
             </Dialog>
 
             <Dialog open={isEditStudentDialogOpen} onOpenChange={setIsEditStudentDialogOpen}>
-                <DialogContent className="sm:max-w-2xl">
+                <DialogContent className="w-[95vw] max-w-2xl">
                     <DialogHeader>
                         <DialogTitle>Edit Student: {editingStudent?.name}</DialogTitle>
                         <DialogDescription>Update the student's details below. Click save to apply changes.</DialogDescription>
@@ -388,9 +388,9 @@ Please contact the college administration for further details.`;
             </Dialog>
 
             <Dialog open={!!selectedStudent} onOpenChange={(isOpen) => !isOpen && setSelectedStudent(null)}>
-                <DialogContent className="max-w-5xl w-full">
+                <DialogContent className="w-[95vw] max-w-5xl">
                     <DialogHeader>
-                        <div className="flex justify-between items-start">
+                        <div className="flex flex-col sm:flex-row justify-between items-start gap-2">
                             <div>
                                 <DialogTitle>Full Attendance Report for {selectedStudent?.name}</DialogTitle>
                                 <DialogDescription>

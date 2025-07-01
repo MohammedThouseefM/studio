@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -95,7 +96,7 @@ export function AcademicCalendar() {
           View important dates, events, and your daily attendance. Click a date to see details.
         </CardDescription>
       </CardHeader>
-      <CardContent className="grid md:grid-cols-3 gap-6">
+      <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
            <style>{`
             .has-event {

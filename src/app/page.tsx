@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { School, Building, GraduationCap, RefreshCw, UserPlus, Eye, EyeOff } from 'lucide-react';
+import { School, Building, GraduationCap, RefreshCw, UserPlus, Eye, EyeOff, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,6 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { validateStudent, validateTeacher } from '@/lib/auth';
 import Link from 'next/link';
 import { ModeToggle } from '@/components/mode-toggle';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export default function LandingPage() {
   const router = useRouter();
@@ -124,8 +125,9 @@ export default function LandingPage() {
             <School className="h-10 w-10 text-primary" />
             <h1 className="text-xl font-bold text-primary">MHIS College</h1>
           </div>
+          {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-4">
-             <ModeToggle />
+            <ModeToggle />
             <div className="flex items-center gap-2">
                 <Button variant="outline" onClick={() => handleLoginClick('student')}>
                     Student Login
@@ -140,6 +142,25 @@ export default function LandingPage() {
                     </Link>
                 </Button>
             </div>
+          </div>
+          {/* Mobile Nav */}
+           <div className="flex items-center gap-2 md:hidden">
+            <ModeToggle />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Open menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => handleLoginClick('student')}>Student Login</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleLoginClick('teacher')}>Teacher Login</DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <Link href="/register">Register</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
