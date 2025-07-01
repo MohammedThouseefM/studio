@@ -1,5 +1,7 @@
 
 
+import { subDays } from 'date-fns';
+
 // Mock data for the application
 
 export type Student = {
@@ -75,6 +77,14 @@ export type LeaveRequest = {
   reason: string;
   status: 'pending' | 'approved' | 'rejected';
   rejectionReason?: string;
+};
+
+export type AuditLog = {
+    id: string;
+    timestamp: Date;
+    user: string; // Teacher ID
+    action: string;
+    type: 'student' | 'teacher' | 'announcement' | 'attendance' | 'leave' | 'academic';
 };
 
 
@@ -299,4 +309,10 @@ export const leaveRequests: LeaveRequest[] = [
     status: 'rejected',
     rejectionReason: 'Medical certificate not provided.',
   },
+];
+
+export const auditLogs: AuditLog[] = [
+    { id: 'log-1', timestamp: subDays(new Date(), 1), user: 'TEACHER01', action: 'Posted announcement: "Mid-term Exams Schedule"', type: 'announcement' },
+    { id: 'log-2', timestamp: subDays(new Date(), 2), user: 'TEACHER02', action: 'Approved registration for Aarav Sharma (ID: PENDING-001)', type: 'student' },
+    { id: 'log-3', timestamp: subDays(new Date(), 3), user: 'TEACHER01', action: 'Saved attendance for BCA - 3rd Year (Data Structures) on 2024-07-24', type: 'attendance' },
 ];

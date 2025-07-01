@@ -1,7 +1,6 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
-import { AnnouncementsProvider } from '@/context/announcements-context';
 import { CollegeDataProvider } from '@/context/college-data-context';
 import { ThemeProvider } from '@/components/theme-provider';
 
@@ -29,12 +28,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AnnouncementsProvider>
-            <CollegeDataProvider>
-              {children}
-              <Toaster />
-            </CollegeDataProvider>
-          </AnnouncementsProvider>
+          <CollegeDataProvider>
+            {children}
+            <Toaster />
+          </CollegeDataProvider>
         </ThemeProvider>
       </body>
     </html>

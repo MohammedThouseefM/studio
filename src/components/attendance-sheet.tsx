@@ -10,11 +10,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { previousAttendanceData, students, type Student } from '@/lib/mock-data';
+import { students, type Student } from '@/lib/mock-data';
 import { useOnlineStatus } from '@/hooks/use-online-status';
+import { useCollegeData } from '@/context/college-data-context';
 
 type AttendanceStatus = 'present' | 'absent';
-type AttendanceState = Record<string, { status: AttendanceStatus; isPredicted: boolean }>;
+export type AttendanceState = Record<string, { status: AttendanceStatus; isPredicted: boolean }>;
 
 type AttendanceSheetProps = {
   classDetails: {
@@ -30,6 +31,7 @@ export function AttendanceSheet({ classDetails }: AttendanceSheetProps) {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const isOnline = useOnlineStatus();
+  const { saveAttendance } = useCollegeData();
 
   useEffect(() => {
     const initialState: AttendanceState = {};
@@ -50,7 +52,7 @@ export function AttendanceSheet({ classDetails }: AttendanceSheetProps) {
     startTransition(async () => {
       const result = await getAttendancePrediction({
         ...classDetails,
-        previousAttendanceData,
+        previousAttendanceData: [], // In a real app, you'd fetch this dynamically
       });
 
       if (result.success && result.data) {
@@ -79,36 +81,20 @@ export function AttendanceSheet({ classDetails }: AttendanceSheetProps) {
   };
 
   const handleSave = () => {
+    // In a real app, user would come from auth session
+    const teacherId = 'TEACHER01'; 
+    saveAttendance(classDetails, attendance, teacherId, isOnline);
+
     if (isOnline) {
-      // Mock save - current behavior
-      console.log('Saving attendance online:', attendance);
       toast({
         title: 'Attendance Saved!',
         description: 'The attendance has been successfully recorded.',
       });
     } else {
-      // Save to localStorage
-      const key = `offline-attendance-${classDetails.department}-${classDetails.year}-${classDetails.subject}-${classDetails.date}`;
-      try {
-        const pendingSyncs = JSON.parse(localStorage.getItem('pending-attendance-syncs') || '[]');
-        if (!pendingSyncs.includes(key)) {
-          pendingSyncs.push(key);
-          localStorage.setItem('pending-attendance-syncs', JSON.stringify(pendingSyncs));
-        }
-        localStorage.setItem(key, JSON.stringify({ classDetails, attendance }));
-        
-        toast({
-          title: 'Attendance Saved Offline',
-          description: 'This will be synced automatically when you are back online.',
-        });
-      } catch (error) {
-        console.error("Failed to save to localStorage", error);
-        toast({
-          variant: 'destructive',
-          title: 'Error Saving Offline',
-          description: 'Could not save attendance data locally. Your browser storage might be full.',
-        });
-      }
+      toast({
+        title: 'Attendance Saved Offline',
+        description: 'This will be synced automatically when you are back online.',
+      });
     }
   };
 

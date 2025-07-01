@@ -3,10 +3,10 @@
 import { Megaphone } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAnnouncements } from '@/context/announcements-context';
+import { useCollegeData } from '@/context/college-data-context';
 
 export function Announcements() {
-  const { announcements } = useAnnouncements();
+  const { announcements } = useCollegeData();
 
   return (
     <Card>

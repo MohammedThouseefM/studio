@@ -6,8 +6,8 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { format, parseISO } from 'date-fns';
-import { PlusCircle, Trash2, Megaphone, Pencil, Search, FileText, Loader2, Calendar as CalendarIcon, CalendarClock, User, X, BarChart, Users, KeyRound, MailCheck, MailWarning, Eye, EyeOff, Send, Check } from 'lucide-react';
+import { format, formatDistanceToNow, parseISO } from 'date-fns';
+import { PlusCircle, Trash2, Megaphone, Pencil, Search, FileText, Loader2, Calendar as CalendarIcon, CalendarClock, User, X, BarChart, Users, KeyRound, MailCheck, MailWarning, Eye, EyeOff, Send, Check, History, Edit, UserPlus, UserMinus, FilePlus, FileMinus, MessageSquare, MessageSquareX, ClipboardEdit, Lock, ShieldCheck, ShieldX, CalendarPlus, CalendarCheck, CalendarX } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,13 +19,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { type Student, type ClassTimeTable, defaultTimetable, type Teacher, type LeaveRequest } from '@/lib/mock-data';
-import { useAnnouncements } from '@/context/announcements-context';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { getDefaulterReport } from '@/lib/actions';
 import type { DefaulterReportOutput } from '@/ai/flows/defaulter-report-flow';
-import { useCollegeData, type CalendarEventWithId } from '@/context/college-data-context';
+import { useCollegeData, type CalendarEventWithId, type AuditLog } from '@/context/college-data-context';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { cn } from '@/lib/utils';
 import { Calendar } from './ui/calendar';
@@ -72,6 +71,15 @@ type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;
 
 const daysOfWeek = ['D1', 'D2', 'D3', 'D4', 'D5', 'D6'];
 
+const logIcons: Record<AuditLog['type'], React.ReactNode> = {
+  student: <User className="h-4 w-4" />,
+  teacher: <Users className="h-4 w-4" />,
+  announcement: <Megaphone className="h-4 w-4" />,
+  attendance: <CalendarCheck className="h-4 w-4" />,
+  leave: <CalendarX className="h-4 w-4" />,
+  academic: <ClipboardEdit className="h-4 w-4" />,
+};
+
 export function TeacherManagementPanel() {
   const { toast } = useToast();
   // Academic Structure State
@@ -87,7 +95,6 @@ export function TeacherManagementPanel() {
   const [searchTerm, setSearchTerm] = useState('');
 
   // Announcements State
-  const { announcements, addAnnouncement, deleteAnnouncement } = useAnnouncements();
   const [newAnnouncementTitle, setNewAnnouncementTitle] = useState('');
   const [newAnnouncementContent, setNewAnnouncementContent] = useState('');
 
@@ -101,6 +108,9 @@ export function TeacherManagementPanel() {
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
   const [selectedLeaveRequest, setSelectedLeaveRequest] = useState<LeaveRequest | null>(null);
+  
+  // Hardcoded current user for logging purposes
+  const currentTeacherId = 'TEACHER01';
 
   // College Data from Context
   const { 
@@ -110,9 +120,11 @@ export function TeacherManagementPanel() {
     years, addYear, deleteYear,
     hours, addHour, deleteHour,
     teachers, addTeacher, updateTeacherPassword, deleteTeacher,
-    students, setStudents,
+    students, addStudent, updateStudent, deleteStudent,
     pendingStudents, approveStudentRegistration, rejectStudentRegistration, updatePendingStudent,
-    leaveRequests, approveLeaveRequest, rejectLeaveRequest
+    leaveRequests, approveLeaveRequest, rejectLeaveRequest,
+    announcements, addAnnouncement, deleteAnnouncement,
+    auditLogs
   } = useCollegeData();
 
   // Calendar State
@@ -154,12 +166,11 @@ export function TeacherManagementPanel() {
   );
 
   const onStudentSubmit = (data: StudentFormData) => {
-    const newStudent: Student = {
+    addStudent({
       ...data,
       id: data.university_number,
       dob: format(data.dob, 'yyyy-MM-dd'),
-    };
-    setStudents(prev => [newStudent, ...prev]);
+    }, currentTeacherId);
     toast({ title: 'Student Added', description: `Successfully added ${data.name}.` });
     setIsAddStudentDialogOpen(false);
   };
@@ -215,7 +226,7 @@ export function TeacherManagementPanel() {
   
   const onEditStudentSubmit = (data: StudentFormData) => {
     if (!editingStudent) return;
-    setStudents(prev => prev.map(s => s.id === editingStudent.id ? { ...s, ...data, id: data.university_number, dob: format(data.dob, 'yyyy-MM-dd') } : s));
+    updateStudent(editingStudent.id, { ...data, id: data.university_number, dob: format(data.dob, 'yyyy-MM-dd') }, currentTeacherId);
     toast({ title: 'Student Updated', description: `Successfully updated ${data.name}.` });
     setIsEditStudentDialogOpen(false);
     setEditingStudent(null);
@@ -227,22 +238,22 @@ export function TeacherManagementPanel() {
         ...data,
         id: data.university_number,
         dob: format(data.dob, 'yyyy-MM-dd'),
-    });
+    }, currentTeacherId);
     toast({ title: 'Registration Updated', description: `Successfully updated application for ${data.name}.` });
     setIsEditPendingStudentDialogOpen(false);
     setEditingStudent(null);
   };
 
-  const handleDeleteStudent = (student: Student) => {
-    setStudents(prev => prev.filter(s => s.id !== student.id));
+  const handleDeleteStudentSubmit = (student: Student) => {
+    deleteStudent(student.id, currentTeacherId);
     toast({ variant: 'destructive', title: 'Student Deleted', description: `${student.name} has been removed.` });
   };
   
-  const handleAddDepartment = () => { if (newDepartment) { addDepartment(newDepartment); setNewDepartment(''); toast({ title: 'Department Added' }); } };
-  const handleAddYear = () => { if (newYear) { addYear(newYear); setNewYear(''); toast({ title: 'Year Added' }); } };
-  const handleAddHour = () => { if (newHour) { addHour(newHour); setNewHour(''); toast({ title: 'Hour Added' }); } };
-  const handleAddAnnouncement = () => { if (newAnnouncementTitle && newAnnouncementContent) { addAnnouncement(newAnnouncementTitle, newAnnouncementContent); toast({ title: 'Announcement Added' }); setNewAnnouncementTitle(''); setNewAnnouncementContent(''); } };
-
+  const handleAddDepartmentSubmit = () => { if (newDepartment) { addDepartment(newDepartment, currentTeacherId); setNewDepartment(''); toast({ title: 'Department Added' }); } };
+  const handleAddYearSubmit = () => { if (newYear) { addYear(newYear, currentTeacherId); setNewYear(''); toast({ title: 'Year Added' }); } };
+  const handleAddHourSubmit = () => { if (newHour) { addHour(newHour, currentTeacherId); setNewHour(''); toast({ title: 'Hour Added' }); } };
+  const handleAddAnnouncementSubmit = () => { if (newAnnouncementTitle && newAnnouncementContent) { addAnnouncement(newAnnouncementTitle, newAnnouncementContent, currentTeacherId); toast({ title: 'Announcement Added' }); setNewAnnouncementTitle(''); setNewAnnouncementContent(''); } };
+  
   const handleGenerateReport = async () => {
     setIsGeneratingReport(true);
     const result = await getDefaulterReport();
@@ -253,14 +264,14 @@ export function TeacherManagementPanel() {
 
   const onEventSubmit = (data: EventFormData) => {
     const eventData = { ...data, date: format(data.date, 'yyyy-MM-dd') };
-    if (editingEvent) { updateEvent(editingEvent.id, eventData); toast({ title: 'Event Updated' }); } 
-    else { addEvent(eventData); toast({ title: 'Event Added' }); }
+    if (editingEvent) { updateEvent(editingEvent.id, eventData, currentTeacherId); toast({ title: 'Event Updated' }); } 
+    else { addEvent(eventData, currentTeacherId); toast({ title: 'Event Added' }); }
     setIsEventFormDialogOpen(false); setEditingEvent(null);
   };
 
   const handleAddEventClick = () => { setEditingEvent(null); eventForm.reset({ title: '', date: undefined, type: 'event', description: '' }); setIsEventFormDialogOpen(true); };
   const handleEditEventClick = (event: CalendarEventWithId) => { setEditingEvent(event); eventForm.reset({ title: event.title, date: parseISO(event.date), type: event.type, description: event.description || '' }); setIsEventFormDialogOpen(true); };
-  const handleDeleteEvent = (eventId: string) => { deleteEvent(eventId); toast({ variant: 'destructive', title: 'Event Deleted' }); };
+  const handleDeleteEventSubmit = (eventId: string, eventTitle: string) => { deleteEvent(eventId, eventTitle, currentTeacherId); toast({ variant: 'destructive', title: 'Event Deleted' }); };
   
   const handleTimetableChange = (day: string, hourIndex: number, value: string) => {
     if (!editableTimetable) return;
@@ -271,33 +282,37 @@ export function TeacherManagementPanel() {
     setEditableTimetable({ ...newTimetable, [day]: newDaySchedule });
   };
 
-  const handleSaveTimetable = () => { if (selectedDept && selectedYear && editableTimetable) { updateTimeTable(selectedDept, selectedYear, editableTimetable); toast({ title: 'Timetable Saved', description: `Timetable for ${selectedDept} - ${selectedYear} has been updated.` }); } };
+  const handleSaveTimetable = () => { if (selectedDept && selectedYear && editableTimetable) { updateTimeTable(selectedDept, selectedYear, editableTimetable, currentTeacherId); toast({ title: 'Timetable Saved', description: `Timetable for ${selectedDept} - ${selectedYear} has been updated.` }); } };
   
   const onAddTeacherSubmit = (data: TeacherFormData) => {
-    addTeacher(data.name, data.id, data.password);
+    addTeacher(data.name, data.id, data.password, currentTeacherId);
     toast({ title: 'Teacher Added', description: `Successfully added ${data.name}.` });
     setIsAddTeacherDialogOpen(false);
   };
   
   const onChangePasswordSubmit = (data: ChangePasswordFormData) => {
     if (editingTeacher) {
-      updateTeacherPassword(editingTeacher.id, data.password);
+      updateTeacherPassword(editingTeacher.id, data.password, currentTeacherId);
       toast({ title: 'Password Updated', description: `Password for ${editingTeacher.name} has been changed.` });
       setIsChangePasswordDialogOpen(false);
     }
   };
 
-  const handleApprove = (studentId: string) => {
-    approveStudentRegistration(studentId);
-    toast({ title: 'Registration Approved', description: 'The student has been added to the roster.' });
+  const handleApproveRegistration = (student: Student) => {
+    approveStudentRegistration(student.id, currentTeacherId);
+    toast({ title: 'Registration Approved', description: `${student.name} has been added to the roster.` });
   };
   
-  const handleReject = (studentId: string) => {
-    rejectStudentRegistration(studentId);
-    toast({ variant: 'destructive', title: 'Registration Rejected', description: 'The application has been removed.' });
+  const handleRejectRegistration = (student: Student) => {
+    rejectStudentRegistration(student.id, currentTeacherId);
+    toast({ variant: 'destructive', title: 'Registration Rejected', description: `Application for ${student.name} has been removed.` });
+  };
+  
+  const handleApproveLeave = (request: LeaveRequest) => {
+    approveLeaveRequest(request.id, currentTeacherId);
+    toast({ title: 'Leave Approved', description: `Leave request for ${request.studentName} has been approved.` });
   };
 
-  // Leave Management functions
   const handleOpenRejectDialog = (request: LeaveRequest) => {
     setSelectedLeaveRequest(request);
     setIsRejectDialogOpen(true);
@@ -305,7 +320,7 @@ export function TeacherManagementPanel() {
 
   const handleConfirmRejection = () => {
     if (selectedLeaveRequest && rejectionReason) {
-      rejectLeaveRequest(selectedLeaveRequest.id, rejectionReason);
+      rejectLeaveRequest(selectedLeaveRequest.id, rejectionReason, currentTeacherId);
       toast({
         variant: 'destructive',
         title: 'Leave Rejected',
@@ -343,12 +358,12 @@ export function TeacherManagementPanel() {
       <FormField
         control={studentForm.control}
         name="photoUrl"
-        render={({ field: { onChange, onBlur, name, ref } }) => (
+        render={({ field: { onChange, value, onBlur, name, ref } }) => (
           <FormItem>
             <FormLabel>Profile Photo</FormLabel>
             <div className="flex items-center gap-4">
               <Avatar className="h-20 w-20 border">
-                <AvatarImage src={photoUrlValue} alt="Student avatar" data-ai-hint="student portrait" className="object-cover" />
+                <AvatarImage src={value} alt="Student avatar" data-ai-hint="student portrait" className="object-cover" />
                 <AvatarFallback>
                   <User className="h-10 w-10" />
                 </AvatarFallback>
@@ -395,7 +410,7 @@ export function TeacherManagementPanel() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="manage-students" className="min-h-[600px]">
-            <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-5 lg:grid-cols-9">
+            <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-5 lg:grid-cols-10">
               <TabsTrigger value="requests">Requests <div className="ml-2 h-5 w-5 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-xs">{pendingStudents.length}</div></TabsTrigger>
               <TabsTrigger value="leave-requests">Leave Requests <div className="ml-2 h-5 w-5 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-xs">{pendingLeaveRequests.length}</div></TabsTrigger>
               <TabsTrigger value="manage-students">Manage Students</TabsTrigger>
@@ -405,6 +420,7 @@ export function TeacherManagementPanel() {
               <TabsTrigger value="academic-settings">Academic Settings</TabsTrigger>
               <TabsTrigger value="timetable">Timetable</TabsTrigger>
               <TabsTrigger value="reports"><FileText className="mr-2 h-4 w-4" />Reports</TabsTrigger>
+              <TabsTrigger value="audit-logs"><History className="mr-2 h-4 w-4" />Audit Logs</TabsTrigger>
             </TabsList>
 
             <TabsContent value="requests">
@@ -433,7 +449,7 @@ export function TeacherManagementPanel() {
                                         <TableCell>{student.email}</TableCell>
                                         <TableCell>{student.department} - {student.year}</TableCell>
                                         <TableCell className="text-right space-x-1">
-                                            <Button variant="ghost" size="icon" className="text-green-600 hover:text-green-700 hover:bg-green-100" onClick={() => handleApprove(student.id)}>
+                                            <Button variant="ghost" size="icon" className="text-green-600 hover:text-green-700 hover:bg-green-100" onClick={() => handleApproveRegistration(student)}>
                                                 <MailCheck className="h-4 w-4" />
                                                 <span className="sr-only">Accept</span>
                                             </Button>
@@ -457,7 +473,7 @@ export function TeacherManagementPanel() {
                                                     </AlertDialogHeader>
                                                     <AlertDialogFooter>
                                                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                        <AlertDialogAction onClick={() => handleReject(student.id)}>Deny Application</AlertDialogAction>
+                                                        <AlertDialogAction onClick={() => handleRejectRegistration(student)}>Deny Application</AlertDialogAction>
                                                     </AlertDialogFooter>
                                                 </AlertDialogContent>
                                             </AlertDialog>
@@ -499,7 +515,7 @@ export function TeacherManagementPanel() {
                             <TableCell>{format(parseISO(request.startDate), 'MMM d')} - {format(parseISO(request.endDate), 'MMM d')}</TableCell>
                             <TableCell className="max-w-[200px] truncate">{request.reason}</TableCell>
                             <TableCell className="text-right space-x-2">
-                              <Button variant="ghost" size="icon" className="text-green-600 hover:text-green-700 hover:bg-green-100" onClick={() => approveLeaveRequest(request.id)}>
+                              <Button variant="ghost" size="icon" className="text-green-600 hover:text-green-700 hover:bg-green-100" onClick={() => handleApproveLeave(request)}>
                                 <Check className="h-4 w-4" />
                                 <span className="sr-only">Approve</span>
                               </Button>
@@ -531,7 +547,7 @@ export function TeacherManagementPanel() {
                     <PlusCircle /> Add New Student
                   </Button>
                 </div>
-                <div className="rounded-md border"><Table><TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Roll No.</TableHead><TableHead>Department</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader><TableBody>{filteredStudents.length > 0 ? (filteredStudents.map((student) => (<TableRow key={student.id}><TableCell className="font-medium">{student.name}</TableCell><TableCell>{student.rollNumber}</TableCell><TableCell>{student.department}</TableCell><TableCell className="text-right space-x-2"><Button variant="ghost" size="icon" onClick={() => handleEditStudentClick(student)}><Pencil className="h-4 w-4" /><span className="sr-only">Edit</span></Button><AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10"><Trash2 className="h-4 w-4" /><span className="sr-only">Delete</span></Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle><AlertDialogDescription>This action cannot be undone. This will permanently delete the student record for {student.name}.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteStudent(student)}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog></TableCell></TableRow>))) : (<TableRow><TableCell colSpan={4} className="h-24 text-center">No results found.</TableCell></TableRow>)}</TableBody></Table></div>
+                <div className="rounded-md border"><Table><TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Roll No.</TableHead><TableHead>Department</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader><TableBody>{filteredStudents.length > 0 ? (filteredStudents.map((student) => (<TableRow key={student.id}><TableCell className="font-medium">{student.name}</TableCell><TableCell>{student.rollNumber}</TableCell><TableCell>{student.department}</TableCell><TableCell className="text-right space-x-2"><Button variant="ghost" size="icon" onClick={() => handleEditStudentClick(student)}><Pencil className="h-4 w-4" /><span className="sr-only">Edit</span></Button><AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10"><Trash2 className="h-4 w-4" /><span className="sr-only">Delete</span></Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle><AlertDialogDescription>This action cannot be undone. This will permanently delete the student record for {student.name}.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteStudentSubmit(student)}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog></TableCell></TableRow>))) : (<TableRow><TableCell colSpan={4} className="h-24 text-center">No results found.</TableCell></TableRow>)}</TableBody></Table></div>
               </div>
             </TabsContent>
 
@@ -555,10 +571,10 @@ export function TeacherManagementPanel() {
                               <KeyRound className="h-4 w-4" /><span className="sr-only">Change Password</span>
                             </Button>
                             <AlertDialog>
-                              <AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10"><Trash2 className="h-4 w-4" /><span className="sr-only">Delete</span></Button></AlertDialogTrigger>
+                              <AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" disabled={teacher.id === currentTeacherId}><Trash2 className="h-4 w-4" /><span className="sr-only">Delete</span></Button></AlertDialogTrigger>
                               <AlertDialogContent>
                                 <AlertDialogHeader><AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle><AlertDialogDescription>This will permanently delete the staff account for {teacher.name}. They will lose all access.</AlertDialogDescription></AlertDialogHeader>
-                                <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteTeacher(teacher.id)}>Delete</AlertDialogAction></AlertDialogFooter>
+                                <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteTeacher(teacher.id, currentTeacherId)}>Delete</AlertDialogAction></AlertDialogFooter>
                               </AlertDialogContent>
                             </AlertDialog>
                           </TableCell>
@@ -584,13 +600,13 @@ export function TeacherManagementPanel() {
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>Deleting "{dept}" will remove it from the list of available departments.</AlertDialogDescription></AlertDialogHeader>
-                                <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteDepartment(dept)}>Delete</AlertDialogAction></AlertDialogFooter>
+                                <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteDepartment(dept, currentTeacherId)}>Delete</AlertDialogAction></AlertDialogFooter>
                             </AlertDialogContent>
                             </AlertDialog>
                         </div>
                         ))}
                     </div>
-                    <div className="space-y-2"><Label htmlFor="new-department">Add New Department</Label><div className="flex gap-2"><Input id="new-department" value={newDepartment} onChange={e => setNewDepartment(e.target.value)} placeholder="e.g., B.Tech"/><Button onClick={handleAddDepartment}><PlusCircle /> Add</Button></div></div>
+                    <div className="space-y-2"><Label htmlFor="new-department">Add New Department</Label><div className="flex gap-2"><Input id="new-department" value={newDepartment} onChange={e => setNewDepartment(e.target.value)} placeholder="e.g., B.Tech"/><Button onClick={handleAddDepartmentSubmit}><PlusCircle /> Add</Button></div></div>
                 </div>
                 <div className="space-y-4">
                     <Label>Existing Years</Label>
@@ -604,13 +620,13 @@ export function TeacherManagementPanel() {
                            </AlertDialogTrigger>
                            <AlertDialogContent>
                                <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>Deleting "{year}" will remove it from the list of available years.</AlertDialogDescription></AlertDialogHeader>
-                               <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteYear(year)}>Delete</AlertDialogAction></AlertDialogFooter>
+                               <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteYear(year, currentTeacherId)}>Delete</AlertDialogAction></AlertDialogFooter>
                            </AlertDialogContent>
                            </AlertDialog>
                        </div>
                         ))}
                     </div>
-                    <div className="space-y-2"><Label htmlFor="new-year">Add New Year</Label><div className="flex gap-2"><Input id="new-year" value={newYear} onChange={e => setNewYear(e.target.value)} placeholder="e.g., 4th Year"/><Button onClick={handleAddYear}><PlusCircle /> Add</Button></div></div>
+                    <div className="space-y-2"><Label htmlFor="new-year">Add New Year</Label><div className="flex gap-2"><Input id="new-year" value={newYear} onChange={e => setNewYear(e.target.value)} placeholder="e.g., 4th Year"/><Button onClick={handleAddYearSubmit}><PlusCircle /> Add</Button></div></div>
                 </div>
                 <div className="space-y-4">
                     <Label>Class Hours</Label>
@@ -624,19 +640,19 @@ export function TeacherManagementPanel() {
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>Deleting "{hour}" will remove it from the list of available class hours.</AlertDialogDescription></AlertDialogHeader>
-                                <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteHour(hour)}>Delete</AlertDialogAction></AlertDialogFooter>
+                                <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteHour(hour, currentTeacherId)}>Delete</AlertDialogAction></AlertDialogFooter>
                             </AlertDialogContent>
                             </AlertDialog>
                         </div>
                         ))}
                     </div>
-                    <div className="space-y-2"><Label htmlFor="new-hour">Add New Hour</Label><div className="flex gap-2"><Input id="new-hour" value={newHour} onChange={e => setNewHour(e.target.value)} placeholder="e.g., 6th Hour"/><Button onClick={handleAddHour}><PlusCircle /> Add</Button></div></div>
+                    <div className="space-y-2"><Label htmlFor="new-hour">Add New Hour</Label><div className="flex gap-2"><Input id="new-hour" value={newHour} onChange={e => setNewHour(e.target.value)} placeholder="e.g., 6th Hour"/><Button onClick={handleAddHourSubmit}><PlusCircle /> Add</Button></div></div>
                 </div>
               </div>
             </TabsContent>
 
             <TabsContent value="announcements">
-              <div className="pt-4 space-y-6"><div className="space-y-4 p-4 border rounded-lg"><h3 className="font-semibold text-lg flex items-center gap-2"><Megaphone /> Create New Announcement</h3><div className="space-y-2"><Label htmlFor="new-announcement-title">Title</Label><Input id="new-announcement-title" value={newAnnouncementTitle} onChange={(e) => setNewAnnouncementTitle(e.target.value)} placeholder="e.g., Mid-term Exams"/></div><div className="space-y-2"><Label htmlFor="new-announcement-content">Content</Label><Textarea id="new-announcement-content" value={newAnnouncementContent} onChange={(e) => setNewAnnouncementContent(e.target.value)} placeholder="Enter the announcement details here..."/></div><Button onClick={handleAddAnnouncement} className="w-full"><PlusCircle /> Post Announcement</Button></div><div className="space-y-4"><h3 className="font-semibold text-lg">Existing Announcements</h3><div className="space-y-2 max-h-96 overflow-y-auto pr-2">{announcements.length > 0 ? (announcements.map((announcement) => (<div key={announcement.id} className="flex items-start justify-between gap-4 p-3 rounded-md border bg-card-foreground/5"><div className="flex-1"><p className="font-medium">{announcement.title}</p><p className="text-sm text-muted-foreground">{announcement.content}</p><p className="text-xs text-muted-foreground mt-1">{announcement.date}</p></div><Button variant="ghost" size="icon" className="text-destructive shrink-0 hover:bg-destructive/10 h-8 w-8" onClick={() => deleteAnnouncement(announcement.id)}><Trash2 className="h-4 w-4" /></Button></div>))) : (<p className="text-sm text-muted-foreground text-center py-4">No announcements yet.</p>)}</div></div></div>
+              <div className="pt-4 space-y-6"><div className="space-y-4 p-4 border rounded-lg"><h3 className="font-semibold text-lg flex items-center gap-2"><Megaphone /> Create New Announcement</h3><div className="space-y-2"><Label htmlFor="new-announcement-title">Title</Label><Input id="new-announcement-title" value={newAnnouncementTitle} onChange={(e) => setNewAnnouncementTitle(e.target.value)} placeholder="e.g., Mid-term Exams"/></div><div className="space-y-2"><Label htmlFor="new-announcement-content">Content</Label><Textarea id="new-announcement-content" value={newAnnouncementContent} onChange={(e) => setNewAnnouncementContent(e.target.value)} placeholder="Enter the announcement details here..."/></div><Button onClick={handleAddAnnouncementSubmit} className="w-full"><PlusCircle /> Post Announcement</Button></div><div className="space-y-4"><h3 className="font-semibold text-lg">Existing Announcements</h3><div className="space-y-2 max-h-96 overflow-y-auto pr-2">{announcements.length > 0 ? (announcements.map((announcement) => (<div key={announcement.id} className="flex items-start justify-between gap-4 p-3 rounded-md border bg-card-foreground/5"><div className="flex-1"><p className="font-medium">{announcement.title}</p><p className="text-sm text-muted-foreground">{announcement.content}</p><p className="text-xs text-muted-foreground mt-1">{announcement.date}</p></div><Button variant="ghost" size="icon" className="text-destructive shrink-0 hover:bg-destructive/10 h-8 w-8" onClick={() => deleteAnnouncement(announcement.id, currentTeacherId)}><Trash2 className="h-4 w-4" /></Button></div>))) : (<p className="text-sm text-muted-foreground text-center py-4">No announcements yet.</p>)}</div></div></div>
             </TabsContent>
 
             <TabsContent value="academic-settings">
@@ -645,7 +661,7 @@ export function TeacherManagementPanel() {
                   <h3 className="text-lg font-semibold">Manage Academic Calendar</h3>
                   <Button onClick={handleAddEventClick}><PlusCircle /> Add Event</Button>
                 </div>
-                <div className="rounded-md border"><Table><TableHeader><TableRow><TableHead>Title</TableHead><TableHead>Date</TableHead><TableHead>Type</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader><TableBody>{events.map((event) => (<TableRow key={event.id}><TableCell className="font-medium">{event.title}</TableCell><TableCell>{format(parseISO(event.date), 'PPP')}</TableCell><TableCell><span className="capitalize">{event.type}</span></TableCell><TableCell className="text-right space-x-2"><Button variant="ghost" size="icon" onClick={() => handleEditEventClick(event)}><Pencil className="h-4 w-4" /></Button><AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="text-destructive"><Trash2 className="h-4 w-4" /></Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>This will permanently delete the event "{event.title}".</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteEvent(event.id)}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog></TableCell></TableRow>))}</TableBody></Table></div>
+                <div className="rounded-md border"><Table><TableHeader><TableRow><TableHead>Title</TableHead><TableHead>Date</TableHead><TableHead>Type</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader><TableBody>{events.map((event) => (<TableRow key={event.id}><TableCell className="font-medium">{event.title}</TableCell><TableCell>{format(parseISO(event.date), 'PPP')}</TableCell><TableCell><span className="capitalize">{event.type}</span></TableCell><TableCell className="text-right space-x-2"><Button variant="ghost" size="icon" onClick={() => handleEditEventClick(event)}><Pencil className="h-4 w-4" /></Button><AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="text-destructive"><Trash2 className="h-4 w-4" /></Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>This will permanently delete the event "{event.title}".</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteEventSubmit(event.id, event.title)}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog></TableCell></TableRow>))}</TableBody></Table></div>
               </div>
             </TabsContent>
             
@@ -726,6 +742,44 @@ export function TeacherManagementPanel() {
                     </Button>
                   </CardContent>
                 </Card>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="audit-logs">
+              <div className="pt-4 space-y-4">
+                <h3 className="font-semibold text-lg">Administrator Activity</h3>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[180px]">Timestamp</TableHead>
+                        <TableHead className="w-[120px]">User</TableHead>
+                        <TableHead>Action</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {auditLogs.length > 0 ? (
+                        auditLogs.map(log => (
+                          <TableRow key={log.id}>
+                            <TableCell className="text-muted-foreground">
+                              {format(log.timestamp, 'MMM d, yyyy, h:mm a')}
+                              <p className="text-xs">({formatDistanceToNow(log.timestamp, { addSuffix: true })})</p>
+                            </TableCell>
+                            <TableCell className="font-medium">{log.user}</TableCell>
+                            <TableCell className="flex items-start gap-2">
+                              <span className="text-muted-foreground mt-0.5">{logIcons[log.type]}</span>
+                              <span>{log.action}</span>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={3} className="h-24 text-center">No audit logs found.</TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
             </TabsContent>
           </Tabs>
