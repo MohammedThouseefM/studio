@@ -58,7 +58,7 @@ export default function LandingPage() {
     }
   }, [isLoginOpen]);
 
-  const handleStudentLogin = async (e: React.FormEvent) => {
+  const handleStudentLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (studentCaptchaInput.toLowerCase() !== captcha.toLowerCase()) {
       toast({
@@ -71,7 +71,7 @@ export default function LandingPage() {
       return;
     }
     
-    const isValid = await validateStudent(studentId, studentPassword);
+    const isValid = validateStudent(studentId, studentPassword);
     if (isValid) {
       router.push('/student/dashboard');
     } else {
@@ -85,7 +85,7 @@ export default function LandingPage() {
     }
   };
 
-  const handleTeacherLogin = async (e: React.FormEvent) => {
+  const handleTeacherLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (teacherCaptchaInput.toLowerCase() !== captcha.toLowerCase()) {
       toast({
@@ -97,7 +97,7 @@ export default function LandingPage() {
       setTeacherCaptchaInput('');
       return;
     }
-    const isValid = await validateTeacher(teacherId, teacherPassword);
+    const isValid = validateTeacher(teacherId, teacherPassword);
     if (isValid) {
       router.push('/teacher/dashboard');
     } else {
