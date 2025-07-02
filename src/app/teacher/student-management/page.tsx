@@ -79,7 +79,24 @@ export default function StudentManagementPage() {
         studentFeeDetails, studentResults
     } = useCollegeData();
   
-    const studentForm = useForm<StudentFormData>({ resolver: zodResolver(studentSchema) });
+    const studentForm = useForm<StudentFormData>({
+        resolver: zodResolver(studentSchema),
+        defaultValues: {
+            name: '',
+            email: '',
+            phone: '',
+            rollNumber: '',
+            university_number: '',
+            department: '',
+            year: '',
+            photoUrl: '',
+            gender: undefined,
+            currentSemester: '',
+            academicYear: '',
+            address: '',
+            dob: undefined,
+        },
+    });
     const reportId = selectedStudent ? `teacher-view-report-${selectedStudent.id}` : '';
     const printableReportId = selectedStudent ? `printable-report-${selectedStudent.id}` : '';
 

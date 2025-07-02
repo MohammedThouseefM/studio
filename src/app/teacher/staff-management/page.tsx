@@ -41,8 +41,20 @@ export default function StaffManagementPage() {
     const [showAddTeacherPassword, setShowAddTeacherPassword] = useState(false);
     const [showChangePassword, setShowChangePassword] = useState(false);
 
-    const teacherForm = useForm<TeacherFormData>({ resolver: zodResolver(teacherSchema) });
-    const changePasswordForm = useForm<ChangePasswordFormData>({ resolver: zodResolver(changePasswordSchema) });
+    const teacherForm = useForm<TeacherFormData>({
+        resolver: zodResolver(teacherSchema),
+        defaultValues: {
+            name: '',
+            id: '',
+            password: '',
+        },
+    });
+    const changePasswordForm = useForm<ChangePasswordFormData>({
+        resolver: zodResolver(changePasswordSchema),
+        defaultValues: {
+            password: '',
+        },
+    });
 
     const onAddTeacherSubmit = (data: TeacherFormData) => {
         addTeacher(data.name, data.id, data.password, currentTeacherId);

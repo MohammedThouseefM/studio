@@ -54,7 +54,24 @@ export default function RegistrationsPage() {
     const [editingStudent, setEditingStudent] = useState<Student | null>(null);
     const [isEditPendingStudentDialogOpen, setIsEditPendingStudentDialogOpen] = useState(false);
     
-    const studentForm = useForm<StudentFormData>({ resolver: zodResolver(studentSchema) });
+    const studentForm = useForm<StudentFormData>({
+        resolver: zodResolver(studentSchema),
+        defaultValues: {
+            name: '',
+            email: '',
+            phone: '',
+            rollNumber: '',
+            university_number: '',
+            department: '',
+            year: '',
+            photoUrl: '',
+            gender: undefined,
+            currentSemester: '',
+            academicYear: '',
+            address: '',
+            dob: undefined,
+        },
+    });
 
     const handleEditPendingStudentClick = (student: Student) => {
         setEditingStudent(student);

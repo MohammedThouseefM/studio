@@ -37,7 +37,15 @@ export default function AcademicSettingsPage() {
     const { events, addEvent, updateEvent, deleteEvent } = useCollegeData();
     const [isEventFormDialogOpen, setIsEventFormDialogOpen] = useState(false);
     const [editingEvent, setEditingEvent] = useState<CalendarEventWithId | null>(null);
-    const eventForm = useForm<EventFormData>({ resolver: zodResolver(eventSchema) });
+    const eventForm = useForm<EventFormData>({
+        resolver: zodResolver(eventSchema),
+        defaultValues: {
+            title: '',
+            type: 'event',
+            description: '',
+            date: undefined,
+        },
+    });
 
     const onEventSubmit = (data: EventFormData) => {
         const eventData = { ...data, date: format(data.date, 'yyyy-MM-dd') };
