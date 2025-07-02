@@ -1,6 +1,4 @@
 
-'use server';
-
 import { studentUsers, teacherUsers as teachers } from './mock-data';
 
 // In a real app, passwords would be hashed. For this demo, we do a simple string comparison.
