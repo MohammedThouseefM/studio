@@ -5,8 +5,8 @@ import { CollegeDataProvider } from '@/context/college-data-context';
 import { ThemeProvider } from '@/components/theme-provider';
 
 export const metadata: Metadata = {
-  title: 'AttendEase - Merit Haji Ismail Sahib Arts and Science College',
-  description: 'Digital Attendance Management System',
+  title: 'MHIS Student Portal',
+  description: 'A comprehensive portal for students of Merit Haji Ismail Sahib Arts and Science College.',
 };
 
 export default function RootLayout({
