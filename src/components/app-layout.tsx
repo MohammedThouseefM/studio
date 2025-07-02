@@ -17,7 +17,7 @@ type AppLayoutProps = {
 function AppLayoutComponent({ children, navItems, userType }: PropsWithChildren<AppLayoutProps>) {
   return (
     <SidebarProvider>
-      <AppSidebar navItems={navItems} />
+      <AppSidebar navItems={navItems} userType={userType} />
       <SidebarInset>
           <DashboardHeader userType={userType} />
           {children}

@@ -14,14 +14,29 @@ import {
 } from '@/components/ui/sidebar';
 import type { NavItem } from '@/lib/nav-links';
 import Link from 'next/link';
+import { useCollegeData } from '@/context/college-data-context';
+import type { Student } from '@/lib/mock-data';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
+import { User } from 'lucide-react';
 
 type AppSidebarProps = {
   navItems: NavItem[];
+  userType: 'Student' | 'Teacher';
 };
 
-function AppSidebarComponent({ navItems }: AppSidebarProps) {
+function AppSidebarComponent({ navItems, userType }: AppSidebarProps) {
   const { isMobile } = useSidebar();
   const pathname = usePathname();
+  const { students, teachers } = useCollegeData();
+
+  const isStudent = userType === 'Student';
+  const user = isStudent ? students[0] : teachers[0];
+
+  const userName = user?.name;
+  const userId = isStudent ? (user as Student)?.rollNumber : `Staff ID: ${user?.id}`;
+  const userAvatarUrl = isStudent ? (user as Student)?.photoUrl : undefined;
+  const avatarHint = isStudent ? 'student portrait' : 'teacher portrait';
 
   return (
     <Sidebar side="left" collapsible="icon">
@@ -29,6 +44,21 @@ function AppSidebarComponent({ navItems }: AppSidebarProps) {
         {!isMobile && <SidebarTrigger />}
       </SidebarHeader>
       <SidebarContent>
+        {user && (
+            <div className="flex flex-col items-center gap-2 p-4 text-center">
+                <Avatar className="h-20 w-20 border-2 border-primary group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:w-10 transition-all duration-300">
+                    <AvatarImage src={userAvatarUrl} alt={userName || 'User'} data-ai-hint={avatarHint} />
+                    <AvatarFallback>
+                       <User className="h-10 w-10 group-data-[collapsible=icon]:h-6 group-data-[collapsible=icon]:w-6 transition-all duration-300" />
+                    </AvatarFallback>
+                </Avatar>
+                <div className="group-data-[collapsible=icon]:hidden">
+                    <p className="font-semibold">{userName}</p>
+                    <p className="text-xs text-muted-foreground">{userId}</p>
+                </div>
+            </div>
+        )}
+        <Separator className="mx-2 mb-2 w-auto group-data-[collapsible=icon]:hidden" />
         <SidebarMenu>
           {navItems.map((item) => (
             <SidebarMenuItem key={item.href}>
