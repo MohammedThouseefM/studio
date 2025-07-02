@@ -169,7 +169,7 @@ export default function LandingPage() {
         {/* 2. Hero Section */}
         <section className="relative h-[60vh] w-full">
           <Image
-            src="/entrence-bg.jpg"
+            src="https://placehold.co/1200x800.png"
             alt="College Entrance"
             data-ai-hint="college entrance"
             fill
