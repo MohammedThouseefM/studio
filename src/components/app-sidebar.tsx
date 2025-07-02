@@ -1,3 +1,4 @@
+
 'use client';
 
 import { memo } from 'react';
@@ -34,7 +35,7 @@ function AppSidebarComponent({ navItems, userType }: AppSidebarProps) {
   const user = isStudent ? students[0] : teachers[0];
 
   const userName = user?.name;
-  const userId = isStudent ? (user as Student)?.rollNumber : `Staff ID: ${user?.id}`;
+  const userId = isStudent ? `Univ. No: ${(user as Student)?.university_number}` : `Staff ID: ${user?.id}`;
   const userAvatarUrl = isStudent ? (user as Student)?.photoUrl : undefined;
   const avatarHint = isStudent ? 'student portrait' : 'teacher portrait';
 
