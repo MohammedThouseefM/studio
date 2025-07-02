@@ -169,8 +169,8 @@ export default function LandingPage() {
         {/* 2. Hero Section */}
         <section className="relative h-[60vh] w-full">
           <Image
-            src="https://placehold.co/1200x800.png"
-            alt="College Entrance"
+            src="/entrence-bg.jpg"
+            alt="College Entrance Background"
             data-ai-hint="college entrance"
             fill
             className="object-cover brightness-75"
