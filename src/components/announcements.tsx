@@ -1,11 +1,12 @@
 'use client';
 
+import { memo } from 'react';
 import { Megaphone } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCollegeData } from '@/context/college-data-context';
 
-export function Announcements() {
+function AnnouncementsComponent() {
   const { announcements } = useCollegeData();
 
   return (
@@ -34,3 +35,5 @@ export function Announcements() {
     </Card>
   );
 }
+
+export const Announcements = memo(AnnouncementsComponent);

@@ -1,6 +1,6 @@
-
 'use client';
 
+import { memo } from 'react';
 import { AlertTriangle, BarChart3, TrendingUp } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
@@ -17,7 +17,7 @@ type StudentAttendanceSummaryProps = {
   showLowAttendanceWarning?: boolean;
 }
 
-export function StudentAttendanceSummary({ student, attendanceData, showLowAttendanceWarning = false }: StudentAttendanceSummaryProps) {
+function StudentAttendanceSummaryComponent({ student, attendanceData, showLowAttendanceWarning = false }: StudentAttendanceSummaryProps) {
   const chartConfig = {
     present: {
       label: 'Present',
@@ -106,3 +106,5 @@ export function StudentAttendanceSummary({ student, attendanceData, showLowAtten
     </Card>
   );
 }
+
+export const StudentAttendanceSummary = memo(StudentAttendanceSummaryComponent);

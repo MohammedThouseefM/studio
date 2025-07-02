@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import Link from 'next/link';
 import { CalendarPlus, ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -10,7 +11,7 @@ import { students } from '@/lib/mock-data'; // To get current student id
 import { format, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
 
-export function LeaveRequestCard() {
+function LeaveRequestCardComponent() {
   const { leaveRequests } = useCollegeData();
   const studentId = students[0].id; // Mock: get current student's ID
 
@@ -58,3 +59,5 @@ export function LeaveRequestCard() {
     </Card>
   );
 }
+
+export const LeaveRequestCard = memo(LeaveRequestCardComponent);

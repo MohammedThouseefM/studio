@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { usePathname } from 'next/navigation';
 import {
   Sidebar,
@@ -18,7 +19,7 @@ type AppSidebarProps = {
   navItems: NavItem[];
 };
 
-export function AppSidebar({ navItems }: AppSidebarProps) {
+function AppSidebarComponent({ navItems }: AppSidebarProps) {
   const { isMobile } = useSidebar();
   const pathname = usePathname();
 
@@ -48,3 +49,5 @@ export function AppSidebar({ navItems }: AppSidebarProps) {
     </Sidebar>
   );
 }
+
+export const AppSidebar = memo(AppSidebarComponent);

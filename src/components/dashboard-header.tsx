@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { LogOut, School, User, UserCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -21,7 +22,7 @@ type DashboardHeaderProps = {
   userType: 'Student' | 'Teacher';
 };
 
-export function DashboardHeader({ userType }: DashboardHeaderProps) {
+function DashboardHeaderComponent({ userType }: DashboardHeaderProps) {
   const router = useRouter();
   const { isMobile } = useSidebar();
 
@@ -82,3 +83,5 @@ export function DashboardHeader({ userType }: DashboardHeaderProps) {
     </header>
   );
 }
+
+export const DashboardHeader = memo(DashboardHeaderComponent);

@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import Link from 'next/link';
 import { Star, ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -8,7 +9,7 @@ import { useCollegeData } from '@/context/college-data-context';
 import { students } from '@/lib/mock-data';
 import { isWithinInterval, parseISO } from 'date-fns';
 
-export function FeedbackCard() {
+function FeedbackCardComponent() {
   const { feedbackSessions, feedbackData } = useCollegeData();
   const studentId = students[0].id; // Mock student
 
@@ -57,3 +58,5 @@ export function FeedbackCard() {
     </Card>
   );
 }
+
+export const FeedbackCard = memo(FeedbackCardComponent);

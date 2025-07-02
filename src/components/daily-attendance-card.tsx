@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, XCircle, HelpCircle, CalendarCheck } from 'lucide-react';
 import { dailyAttendanceData } from '@/lib/mock-data';
@@ -18,7 +19,7 @@ const statusColors = {
     'not-marked': 'text-muted-foreground',
 }
 
-export function DailyAttendanceCard() {
+function DailyAttendanceCardComponent() {
   const today = format(new Date(), 'PPP');
   // In a real app, you'd fetch this for the current day for the logged in student
   const attendance = dailyAttendanceData; 
@@ -51,3 +52,5 @@ export function DailyAttendanceCard() {
     </Card>
   );
 }
+
+export const DailyAttendanceCard = memo(DailyAttendanceCardComponent);

@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import Link from 'next/link';
 import { Calendar, ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -7,7 +8,7 @@ import { Button } from './ui/button';
 import { format, isAfter, parseISO } from 'date-fns';
 import { useCollegeData } from '@/context/college-data-context';
 
-export function AcademicCalendarCard() {
+function AcademicCalendarCardComponent() {
   const { events } = useCollegeData();
 
   const upcomingEvents = events
@@ -46,3 +47,5 @@ export function AcademicCalendarCard() {
     </Card>
   );
 }
+
+export const AcademicCalendarCard = memo(AcademicCalendarCardComponent);

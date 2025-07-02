@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon } from 'lucide-react';
@@ -14,7 +14,7 @@ import { useCollegeData } from '@/context/college-data-context';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 
-export function TeacherAttendanceSelector() {
+function TeacherAttendanceSelectorComponent() {
   const router = useRouter();
   const [department, setDepartment] = useState<string>('');
   const [year, setYear] = useState<string>('');
@@ -117,3 +117,5 @@ export function TeacherAttendanceSelector() {
     </Card>
   );
 }
+
+export const TeacherAttendanceSelector = memo(TeacherAttendanceSelectorComponent);

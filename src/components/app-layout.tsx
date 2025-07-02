@@ -1,6 +1,6 @@
 'use client';
 
-import type { PropsWithChildren } from 'react';
+import { type PropsWithChildren, memo } from 'react';
 import {
   SidebarProvider,
   SidebarInset,
@@ -14,7 +14,7 @@ type AppLayoutProps = {
   userType: 'Student' | 'Teacher';
 };
 
-export function AppLayout({ children, navItems, userType }: PropsWithChildren<AppLayoutProps>) {
+function AppLayoutComponent({ children, navItems, userType }: PropsWithChildren<AppLayoutProps>) {
   return (
     <SidebarProvider>
       <AppSidebar navItems={navItems} />
@@ -25,3 +25,5 @@ export function AppLayout({ children, navItems, userType }: PropsWithChildren<Ap
     </SidebarProvider>
   );
 }
+
+export const AppLayout = memo(AppLayoutComponent);

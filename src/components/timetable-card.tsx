@@ -1,6 +1,6 @@
-
 'use client';
 
+import { memo } from 'react';
 import Link from 'next/link';
 import { CalendarDays, ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +8,7 @@ import { Button } from './ui/button';
 import { students, defaultTimetable } from '@/lib/mock-data';
 import { useCollegeData } from '@/context/college-data-context';
 
-export function TimetableCard() {
+function TimetableCardComponent() {
   const { timeTable, hours } = useCollegeData();
   
   const getTodayKey = () => {
@@ -60,3 +60,5 @@ export function TimetableCard() {
     </Card>
   );
 }
+
+export const TimetableCard = memo(TimetableCardComponent);

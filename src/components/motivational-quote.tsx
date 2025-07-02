@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, memo } from 'react';
 import { Lightbulb } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getQuote } from '@/lib/actions';
 
-export function MotivationalQuote() {
+function MotivationalQuoteComponent() {
   const [quote, setQuote] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -43,3 +43,5 @@ export function MotivationalQuote() {
     </Card>
   );
 }
+
+export const MotivationalQuote = memo(MotivationalQuoteComponent);
