@@ -3,7 +3,7 @@
 
 import { Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { AttendanceSheet } from '@/components/attendance-sheet';
 import { Button } from '@/components/ui/button';
@@ -67,8 +67,6 @@ function AttendanceContent() {
 }
 
 export default function AttendancePage() {
-  const router = useRouter();
-
   return (
     <div className="p-4 md:p-8">
       <div className="flex items-center gap-4 mb-6">
