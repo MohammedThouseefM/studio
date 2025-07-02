@@ -7,6 +7,9 @@ import { ThemeProvider } from '@/components/theme-provider';
 export const metadata: Metadata = {
   title: 'MHIS Student Portal',
   description: 'A comprehensive portal for students of Merit Haji Ismail Sahib Arts and Science College.',
+  icons: {
+    icon: '/mhis-icon.jpg',
+  },
 };
 
 export default function RootLayout({

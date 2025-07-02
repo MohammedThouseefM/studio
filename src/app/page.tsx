@@ -179,7 +179,7 @@ export default function LandingPage() {
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white p-4">
              <h2 className="text-4xl md:text-5xl font-extrabold drop-shadow-lg">Merit Haji Ismail Sahib Arts and Science College</h2>
              <p className="mt-4 max-w-3xl text-lg md:text-xl text-white/90 drop-shadow-md">
-                Kondamalli, Pernambut, Tamil Nadu, India
+                Kondamalli, Pernambut-635810.
              </p>
              <p className="mt-4 max-w-2xl text-lg md:text-xl drop-shadow-md">
                 Empowering the next generation of leaders through innovative teaching and research.
