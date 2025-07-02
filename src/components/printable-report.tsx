@@ -33,9 +33,10 @@ export function PrintableReport({ id, student, attendanceData, feeHistory, lates
           <div><strong>Name:</strong> {student.name}</div>
           <div><strong>Department:</strong> {student.department} - {student.year}</div>
           <div><strong>Roll Number:</strong> {student.rollNumber}</div>
-          <div><strong>Academic Year:</strong> {student.academicYear}</div>
           <div><strong>University Number:</strong> {student.university_number}</div>
-          <div><strong>Date of Birth:</strong> {format(parseISO(student.dob), 'PPP')}</div>
+          <div><strong>Father's Contact:</strong> {student.fatherContactNumber}</div>
+          <div><strong>Academic Year:</strong> {student.academicYear}</div>
+          <div className="col-span-2"><strong>Date of Birth:</strong> {format(parseISO(student.dob), 'PPP')}</div>
         </div>
       </section>
 

@@ -26,7 +26,8 @@ import { AppHeader } from '@/components/app-header';
 const studentSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
   email: z.string().email('Invalid email address.'),
-  phone: z.string().min(10, 'Phone number must be at least 10 digits.'),
+  phone: z.string().min(10, 'Phone number must be at least 10 digits.').regex(/^\d+$/, "Please enter a valid phone number."),
+  fatherContactNumber: z.string().min(10, "Father's contact number must be at least 10 digits.").regex(/^\d+$/, "Please enter a valid phone number."),
   rollNumber: z.string().min(1, 'Roll number is required.'),
   university_number: z.string().min(1, 'A temporary ID or number is required.'),
   department: z.string().min(1, 'Please select a department.'),
@@ -52,6 +53,7 @@ export default function RegisterPage() {
       name: '',
       email: '',
       phone: '',
+      fatherContactNumber: '',
       rollNumber: '',
       university_number: '',
       department: '',
@@ -114,6 +116,7 @@ export default function RegisterPage() {
                   <FormField control={form.control} name="name" render={({ field }) => ( <FormItem> <FormLabel>Full Name</FormLabel> <FormControl><Input placeholder="Enter your full name" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                   <FormField control={form.control} name="email" render={({ field }) => ( <FormItem> <FormLabel>Email</FormLabel> <FormControl><Input placeholder="you@example.com" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                   <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem> <FormLabel>Phone Number</FormLabel> <FormControl><Input placeholder="9876543210" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                  <FormField control={form.control} name="fatherContactNumber" render={({ field }) => ( <FormItem> <FormLabel>Father's Contact Number</FormLabel> <FormControl><Input placeholder="9876543210" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                   <FormField control={form.control} name="rollNumber" render={({ field }) => ( <FormItem> <FormLabel>Prospective Roll Number</FormLabel> <FormControl><Input placeholder="e.g., 3BCA-29" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                   <FormField control={form.control} name="university_number" render={({ field }) => ( <FormItem> <FormLabel>University Application No.</FormLabel> <FormControl><Input placeholder="e.g., 36623U09029" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                   <FormField control={form.control} name="department" render={({ field }) => ( <FormItem> <FormLabel>Department</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl><SelectTrigger><SelectValue placeholder="Select a department" /></SelectTrigger></FormControl> <SelectContent>{departments.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent> </Select> <FormMessage /> </FormItem> )}/>

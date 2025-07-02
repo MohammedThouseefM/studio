@@ -73,6 +73,10 @@ export default function StudentProfilePage() {
               <p className="text-sm text-muted-foreground">Phone Number</p>
               <p className="font-medium">{student.phone}</p>
             </div>
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">Father's Contact</p>
+              <p className="font-medium">{student.fatherContactNumber}</p>
+            </div>
              <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Gender</p>
               <p className="font-medium">{student.gender}</p>
