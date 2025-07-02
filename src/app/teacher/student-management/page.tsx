@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format, parseISO } from 'date-fns';
-import { PlusCircle, Pencil, Search, BarChart, User, Calendar as CalendarIcon, SlidersHorizontal, Users, Send } from 'lucide-react';
+import { PlusCircle, Pencil, Search, BarChart, User, SlidersHorizontal, Users, Send } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,9 +19,6 @@ import { useToast } from '@/hooks/use-toast';
 import { type Student, previousAttendanceData, studentAttendance } from '@/lib/mock-data';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useCollegeData } from '@/context/college-data-context';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
-import { Calendar } from '@/components/ui/calendar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { StudentAttendanceSummary } from '@/components/student-attendance-summary';
@@ -40,7 +37,7 @@ const studentSchema = z.object({
   department: z.string().min(1, 'Please select a department.'),
   year: z.string().min(1, 'Please select a year.'),
   photoUrl: z.string().optional(),
-  dob: z.date({ required_error: 'Date of birth is required.' }),
+  dob: z.string().min(1, 'Date of birth is required.'),
   gender: z.enum(['Male', 'Female', 'Other'], { required_error: 'Please select a gender.' }),
   currentSemester: z.string().min(1, 'Semester is required.'),
   academicYear: z.string().min(1, 'Academic year is required.'),
@@ -96,7 +93,7 @@ export default function StudentManagementPage() {
             currentSemester: '',
             academicYear: '',
             address: '',
-            dob: undefined,
+            dob: '',
         },
     });
     const reportId = selectedStudent ? `teacher-view-report-${selectedStudent.id}` : '';
@@ -141,7 +138,6 @@ export default function StudentManagementPage() {
         addStudent({
         ...data,
         id: data.university_number,
-        dob: format(data.dob, 'yyyy-MM-dd'),
         }, currentTeacherId);
         toast({ title: 'Student Added', description: `Successfully added ${data.name}.` });
         setIsAddStudentDialogOpen(false);
@@ -151,7 +147,7 @@ export default function StudentManagementPage() {
         setEditingStudent(null);
         studentForm.reset({
         name: '', email: '', phone: '', fatherContactNumber: '', rollNumber: '', university_number: '',
-        department: '', year: '', photoUrl: '', dob: undefined, gender: undefined,
+        department: '', year: '', photoUrl: '', dob: '', gender: undefined,
         currentSemester: '', academicYear: '', address: ''
         });
         setIsAddStudentDialogOpen(true);
@@ -164,7 +160,7 @@ export default function StudentManagementPage() {
             fatherContactNumber: student.fatherContactNumber,
             rollNumber: student.rollNumber, university_number: student.university_number,
             department: student.department, year: student.year, photoUrl: student.photoUrl || '',
-            dob: parseISO(student.dob), gender: student.gender,
+            dob: student.dob, gender: student.gender,
             currentSemester: student.currentSemester, academicYear: student.academicYear, address: student.address,
         });
         setIsEditStudentDialogOpen(true);
@@ -172,7 +168,7 @@ export default function StudentManagementPage() {
     
     const onEditStudentSubmit = (data: StudentFormData) => {
         if (!editingStudent) return;
-        updateStudent(editingStudent.id, { ...data, id: data.university_number, dob: format(data.dob, 'yyyy-MM-dd') }, currentTeacherId);
+        updateStudent(editingStudent.id, { ...data, id: data.university_number }, currentTeacherId);
         toast({ title: 'Student Updated', description: `Successfully updated ${data.name}.` });
         setIsEditStudentDialogOpen(false);
         setEditingStudent(null);
@@ -231,7 +227,7 @@ Please contact the college administration for further details.`;
                 <FormField control={studentForm.control} name="university_number" render={({ field }) => ( <FormItem> <FormLabel>University Number</FormLabel> <FormControl><Input placeholder="e.g., 36623U09029" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                 <FormField control={studentForm.control} name="department" render={({ field }) => ( <FormItem> <FormLabel>Department</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl><SelectTrigger><SelectValue placeholder="Select a department" /></SelectTrigger></FormControl> <SelectContent>{departments.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent> </Select> <FormMessage /> </FormItem> )}/>
                 <FormField control={studentForm.control} name="year" render={({ field }) => ( <FormItem> <FormLabel>Year</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl><SelectTrigger><SelectValue placeholder="Select a year" /></SelectTrigger></FormControl> <SelectContent>{years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}</SelectContent> </Select> <FormMessage /> </FormItem> )}/>
-                <FormField control={studentForm.control} name="dob" render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>Date of Birth</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}><CalendarIcon className="mr-2 h-4 w-4" />{field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}</Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus /></PopoverContent></Popover><FormMessage /></FormItem>)}/>
+                <FormField control={studentForm.control} name="dob" render={({ field }) => ( <FormItem> <FormLabel>Date of Birth</FormLabel> <FormControl><Input type="date" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                 <FormField control={studentForm.control} name="gender" render={({ field }) => ( <FormItem> <FormLabel>Gender</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl><SelectTrigger><SelectValue placeholder="Select a gender" /></SelectTrigger></FormControl> <SelectContent><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem><SelectItem value="Other">Other</SelectItem></SelectContent> </Select> <FormMessage /> </FormItem> )}/>
                 <FormField control={studentForm.control} name="currentSemester" render={({ field }) => ( <FormItem> <FormLabel>Current Semester</FormLabel> <FormControl><Input placeholder="e.g., 6th" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                 <FormField control={studentForm.control} name="academicYear" render={({ field }) => ( <FormItem> <FormLabel>Academic Year</FormLabel> <FormControl><Input placeholder="e.g., 2024-2025" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
@@ -425,7 +421,7 @@ Please contact the college administration for further details.`;
                         <Tabs defaultValue="summary">
                             <TabsList className="grid w-full grid-cols-2">
                                 <TabsTrigger value="summary"><BarChart className="mr-2 h-4 w-4" />Summary Report</TabsTrigger>
-                                <TabsTrigger value="daily"><CalendarIcon className="mr-2 h-4 w-4" />Daily Attendance</TabsTrigger>
+                                <TabsTrigger value="daily">Daily Attendance</TabsTrigger>
                             </TabsList>
                             <TabsContent value="summary" className="mt-4">
                                 <div id={reportId}>

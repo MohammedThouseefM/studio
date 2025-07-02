@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format, parseISO } from 'date-fns';
-import { PlusCircle, Pencil, Trash2, Calendar as CalendarIcon, Settings } from 'lucide-react';
+import { PlusCircle, Pencil, Trash2, Settings } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,13 +19,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useCollegeData, type CalendarEventWithId } from '@/context/college-data-context';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
-import { Calendar } from '@/components/ui/calendar';
 
 const eventSchema = z.object({
   title: z.string().min(2, 'Title must be at least 2 characters.'),
-  date: z.date({ required_error: 'An event date is required.' }),
+  date: z.string().min(1, 'An event date is required.'),
   type: z.enum(['holiday', 'exam', 'assignment', 'event']),
   description: z.string().optional(),
 });
@@ -43,12 +40,12 @@ export default function AcademicSettingsPage() {
             title: '',
             type: 'event',
             description: '',
-            date: undefined,
+            date: '',
         },
     });
 
     const onEventSubmit = (data: EventFormData) => {
-        const eventData = { ...data, date: format(data.date, 'yyyy-MM-dd') };
+        const eventData = { ...data };
         if (editingEvent) {
             updateEvent(editingEvent.id, eventData, currentTeacherId);
             toast({ title: 'Event Updated' });
@@ -62,7 +59,7 @@ export default function AcademicSettingsPage() {
 
     const handleAddEventClick = () => {
         setEditingEvent(null);
-        eventForm.reset({ title: '', date: undefined, type: 'event', description: '' });
+        eventForm.reset({ title: '', date: '', type: 'event', description: '' });
         setIsEventFormDialogOpen(true);
     };
 
@@ -70,7 +67,7 @@ export default function AcademicSettingsPage() {
         setEditingEvent(event);
         eventForm.reset({
             title: event.title,
-            date: parseISO(event.date),
+            date: event.date,
             type: event.type,
             description: event.description || ''
         });
@@ -148,7 +145,7 @@ export default function AcademicSettingsPage() {
                     <Form {...eventForm}>
                         <form onSubmit={eventForm.handleSubmit(onEventSubmit)} className="space-y-4 py-4">
                             <FormField control={eventForm.control} name="title" render={({ field }) => (<FormItem><FormLabel>Title</FormLabel><FormControl><Input placeholder="e.g., Mid-term Exams" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                            <FormField control={eventForm.control} name="date" render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>Date</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}><CalendarIcon className="mr-2 h-4 w-4" />{field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}</Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus /></PopoverContent></Popover><FormMessage /></FormItem>)} />
+                            <FormField control={eventForm.control} name="date" render={({ field }) => ( <FormItem> <FormLabel>Date</FormLabel> <FormControl><Input type="date" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                             <FormField control={eventForm.control} name="type" render={({ field }) => (<FormItem><FormLabel>Type</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select event type" /></SelectTrigger></FormControl><SelectContent><SelectItem value="exam">Exam</SelectItem><SelectItem value="holiday">Holiday</SelectItem><SelectItem value="assignment">Assignment</SelectItem><SelectItem value="event">Event</SelectItem></SelectContent></Select><FormMessage /></FormItem>)} />
                             <FormField control={eventForm.control} name="description" render={({ field }) => (<FormItem><FormLabel>Description (Optional)</FormLabel><FormControl><Textarea placeholder="Add a short description..." {...field} /></FormControl><FormMessage /></FormItem>)} />
                             <DialogFooter>

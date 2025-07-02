@@ -1,10 +1,11 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format, parseISO } from 'date-fns';
-import { CalendarIcon, CalendarPlus, Info } from 'lucide-react';
+import { CalendarPlus, Info } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,9 +13,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useCollegeData } from '@/context/college-data-context';
-import { cn } from '@/lib/utils';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
 import { students } from '@/lib/mock-data';
 import { Table, TableBody, TableCell, TableHeader, TableRow, TableHead } from './ui/table';
 import { Badge } from './ui/badge';
@@ -24,13 +22,18 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { Input } from './ui/input';
 
 const leaveSchema = z.object({
-  dateRange: z.object({
-    from: z.date({ required_error: 'A start date is required.' }),
-    to: z.date({ required_error: 'An end date is required.' }),
-  }),
+  startDate: z.string().min(1, 'A start date is required.'),
+  endDate: z.string().min(1, 'An end date is required.'),
   reason: z.string().min(10, 'Reason must be at least 10 characters.'),
+}).refine((data) => {
+    if (!data.startDate || !data.endDate) return true; // Don't validate if dates are not present
+    return data.endDate >= data.startDate;
+}, {
+  message: "End date cannot be before start date.",
+  path: ["endDate"], 
 });
 
 type LeaveFormData = z.infer<typeof leaveSchema>;
@@ -45,6 +48,8 @@ export function LeaveManagement() {
   const form = useForm<LeaveFormData>({
     resolver: zodResolver(leaveSchema),
     defaultValues: {
+      startDate: '',
+      endDate: '',
       reason: '',
     },
   });
@@ -52,8 +57,8 @@ export function LeaveManagement() {
   const onSubmit = (data: LeaveFormData) => {
     addLeaveRequest(
       studentId,
-      format(data.dateRange.from, 'yyyy-MM-dd'),
-      format(data.dateRange.to, 'yyyy-MM-dd'),
+      data.startDate,
+      data.endDate,
       data.reason
     );
     toast({
@@ -84,52 +89,10 @@ export function LeaveManagement() {
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="dateRange"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Leave Dates</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !field.value?.from && "text-muted-foreground"
-                              )}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {field.value?.from ? (
-                                field.value.to ? (
-                                  <>
-                                    {format(field.value.from, "LLL dd, y")} -{" "}
-                                    {format(field.value.to, "LLL dd, y")}
-                                  </>
-                                ) : (
-                                  format(field.value.from, "LLL dd, y")
-                                )
-                              ) : (
-                                <span>Pick your leave dates</span>
-                              )}
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="range"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            initialFocus
-                            disabled={{ before: new Date() }}
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField control={form.control} name="startDate" render={({ field }) => ( <FormItem> <FormLabel>Start Date</FormLabel> <FormControl><Input type="date" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                  <FormField control={form.control} name="endDate" render={({ field }) => ( <FormItem> <FormLabel>End Date</FormLabel> <FormControl><Input type="date" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                </div>
                 <FormField
                   control={form.control}
                   name="reason"

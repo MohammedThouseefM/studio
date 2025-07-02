@@ -6,22 +6,17 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { format } from 'date-fns';
-import { ArrowLeft, CalendarIcon, User, UserPlus } from 'lucide-react';
+import { ArrowLeft, User, UserPlus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useCollegeData } from '@/context/college-data-context';
-import { cn } from '@/lib/utils';
-import { Calendar } from '@/components/ui/calendar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { AppHeader } from '@/components/app-header';
 
 const studentSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -33,7 +28,7 @@ const studentSchema = z.object({
   department: z.string().min(1, 'Please select a department.'),
   year: z.string().min(1, 'Please select a year.'),
   photoUrl: z.string().optional(),
-  dob: z.date({ required_error: 'Date of birth is required.' }),
+  dob: z.string().min(1, 'Date of birth is required.'),
   gender: z.enum(['Male', 'Female', 'Other'], { required_error: 'Please select a gender.' }),
   currentSemester: z.string().min(1, 'Semester is required.'),
   academicYear: z.string().min(1, 'Academic year is required.'),
@@ -63,6 +58,7 @@ export default function RegisterPage() {
       currentSemester: '',
       academicYear: '',
       address: '',
+      dob: '',
     },
   });
   
@@ -72,7 +68,6 @@ export default function RegisterPage() {
     addPendingStudent({
       ...data,
       id: data.university_number, // Use a temporary unique ID
-      dob: format(data.dob, 'yyyy-MM-dd'),
     });
     toast({
       title: 'Registration Submitted!',
@@ -121,7 +116,7 @@ export default function RegisterPage() {
                   <FormField control={form.control} name="university_number" render={({ field }) => ( <FormItem> <FormLabel>University Application No.</FormLabel> <FormControl><Input placeholder="e.g., 36623U09029" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                   <FormField control={form.control} name="department" render={({ field }) => ( <FormItem> <FormLabel>Department</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl><SelectTrigger><SelectValue placeholder="Select a department" /></SelectTrigger></FormControl> <SelectContent>{departments.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent> </Select> <FormMessage /> </FormItem> )}/>
                   <FormField control={form.control} name="year" render={({ field }) => ( <FormItem> <FormLabel>Year</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl><SelectTrigger><SelectValue placeholder="Select a year" /></SelectTrigger></FormControl> <SelectContent>{years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}</SelectContent> </Select> <FormMessage /> </FormItem> )}/>
-                  <FormField control={form.control} name="dob" render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>Date of Birth</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}><CalendarIcon className="mr-2 h-4 w-4" />{field.value ? format(field.value, 'PPP') : <span>Pick your date of birth</span>}</Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus /></PopoverContent></Popover><FormMessage /></FormItem>)}/>
+                  <FormField control={form.control} name="dob" render={({ field }) => ( <FormItem> <FormLabel>Date of Birth</FormLabel> <FormControl><Input type="date" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                   <FormField control={form.control} name="gender" render={({ field }) => ( <FormItem> <FormLabel>Gender</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl><SelectTrigger><SelectValue placeholder="Select a gender" /></SelectTrigger></FormControl> <SelectContent><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem><SelectItem value="Other">Other</SelectItem></SelectContent> </Select> <FormMessage /> </FormItem> )}/>
                   <FormField control={form.control} name="currentSemester" render={({ field }) => ( <FormItem> <FormLabel>Prospective Semester</FormLabel> <FormControl><Input placeholder="e.g., 1st" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                   <FormField control={form.control} name="academicYear" render={({ field }) => ( <FormItem> <FormLabel>Academic Year</FormLabel> <FormControl><Input placeholder="e.g., 2024-2025" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
