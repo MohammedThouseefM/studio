@@ -170,7 +170,7 @@ export default function LandingPage() {
         <section className="relative h-[60vh] w-full">
           <Image
             src="/entrence-bg.jpg"
-            alt="College Entrance Background"
+            alt="College Entrance"
             data-ai-hint="college entrance"
             fill
             className="object-cover brightness-75"
