@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { CheckCircle, XCircle, Wifi, WifiOff } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -30,13 +30,21 @@ export function AttendanceSheet({ classDetails }: AttendanceSheetProps) {
   const isOnline = useOnlineStatus();
   const { saveAttendance } = useCollegeData();
 
+  const filteredStudents = useMemo(() => {
+    return students.filter(
+      (student) =>
+        student.department === classDetails.department &&
+        student.year === classDetails.year
+    );
+  }, [classDetails.department, classDetails.year]);
+
   useEffect(() => {
     const initialState: AttendanceState = {};
-    students.forEach((student) => {
+    filteredStudents.forEach((student) => {
       initialState[student.id] = { status: 'present' };
     });
     setAttendance(initialState);
-  }, []);
+  }, [filteredStudents]);
 
   const handleStatusChange = (studentId: string, newStatus: boolean) => {
     setAttendance((prev) => ({
@@ -62,8 +70,6 @@ export function AttendanceSheet({ classDetails }: AttendanceSheetProps) {
       });
     }
   };
-
-  const getStudentById = (id: string): Student | undefined => students.find(s => s.id === id);
 
   return (
     <Card>
@@ -95,10 +101,13 @@ export function AttendanceSheet({ classDetails }: AttendanceSheetProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {Object.keys(attendance).length > 0 ? (
-                Object.entries(attendance).map(([studentId, { status }]) => {
-                  const student = getStudentById(studentId);
-                  return student ? (
+              {filteredStudents.length > 0 ? (
+                filteredStudents.map((student) => {
+                  const studentAttendance = attendance[student.id];
+                  if (!studentAttendance) return null; // Guard if state isn't synced
+                  const { status } = studentAttendance;
+
+                  return (
                     <TableRow key={student.id}>
                       <TableCell>{student.rollNumber}</TableCell>
                       <TableCell className="font-medium">{student.name}</TableCell>
@@ -122,12 +131,12 @@ export function AttendanceSheet({ classDetails }: AttendanceSheetProps) {
                         </div>
                       </TableCell>
                     </TableRow>
-                  ) : null;
+                  );
                 })
               ) : (
                 <TableRow>
                   <TableCell colSpan={4} className="text-center">
-                    Loading students...
+                    No students found for this class.
                   </TableCell>
                 </TableRow>
               )}

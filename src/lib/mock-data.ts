@@ -1,5 +1,3 @@
-
-
 import { subDays } from 'date-fns';
 
 // Mock data for the application
@@ -160,39 +158,62 @@ export const teachers: Teacher[] = [
     { id: 'TEACHER02', password: 'Professor@Pass2', name: 'Prof. Samuel Cruz' }
 ];
 
-const rawStudents = [
-    { "roll_no": "3BCA-28", "name": "Mohammed Thouseef", "dob": "2005-12-12", "university_number": "36623U09028", "department": "BCA", "year": "3rd Year", "email": "mthouseef100@gmail.com", "phone": "9865789870", "father_contact_number": "9876543210", "gender": "Male" as const, "currentSemester": "6th", "academicYear": "2024-2025", "address": "123 Main St, Anytown, India" },
-    { "roll_no": "3BCA-15", "name": "Priya Verma", "dob": "2004-08-05", "university_number": "36623U09015", "department": "BCA", "year": "3rd Year", "email": "priya.verma@gmail.com", "phone": "8876543210", "father_contact_number": "9876543211", "gender": "Female" as const, "currentSemester": "6th", "academicYear": "2024-2025", "address": "456 Oak Ave, Anytown, India" },
-    { "roll_no": "3BCA-42", "name": "Rahul Desai", "dob": "2005-03-22", "university_number": "36623U09042", "department": "BCA", "year": "3rd Year", "email": "rahul.desai@gmail.com", "phone": "7765432109", "father_contact_number": "9876543212", "gender": "Male" as const, "currentSemester": "6th", "academicYear": "2024-2025", "address": "789 Pine Ln, Anytown, India" },
-    { "roll_no": "3BSC-07", "name": "Ananya Joshi", "dob": "2004-09-14", "university_number": "36623U08007", "department": "BSC", "year": "3rd Year", "email": "ananya.joshi@gmail.com", "phone": "9988776655", "father_contact_number": "9876543213", "gender": "Female" as const, "currentSemester": "6th", "academicYear": "2024-2025", "address": "101 Maple Dr, Anytown, India" },
-    { "roll_no": "3BSC-19", "name": "Karan Patel", "dob": "2005-11-30", "university_number": "36623U08019", "department": "BSC", "year": "3rd Year", "email": "karan.patel@gmail.com", "phone": "8899001122", "father_contact_number": "9876543214", "gender": "Male" as const, "currentSemester": "6th", "academicYear": "2024-2025", "address": "212 Birch Rd, Anytown, India" },
-    { "roll_no": "3BSC-33", "name": "Sneha Menon", "dob": "2005-01-17", "university_number": "36623U08033", "department": "BSC", "year": "3rd Year", "email": "sneha.menon@gmail.com", "phone": "7788990011", "father_contact_number": "9876543215", "gender": "Female" as const, "currentSemester": "6th", "academicYear": "2024-2025", "address": "333 Cedar Ct, Anytown, India" },
-    { "roll_no": "3BBA-12", "name": "Aditya Rao", "dob": "2004-04-08", "university_number": "36623U07012", "department": "BBA", "year": "3rd Year", "email": "aditya.rao@gmail.com", "phone": "9876543210", "father_contact_number": "9876543216", "gender": "Male" as const, "currentSemester": "6th", "academicYear": "2024-2025", "address": "444 Elm St, Anytown, India" },
-    { "roll_no": "3BBA-25", "name": "Divya Iyer", "dob": "2005-07-25", "university_number": "36623U07025", "department": "BBA", "year": "3rd Year", "email": "divya.iyer@gmail.com", "phone": "8765432109", "father_contact_number": "9876543217", "gender": "Female" as const, "currentSemester": "6th", "academicYear": "2024-2025", "address": "555 Spruce Way, Anytown, India" },
-    { "roll_no": "3BBA-38", "name": "Vikram Choudhary", "dob": "2004-10-03", "university_number": "36623U07038", "department": "BBA", "year": "3rd Year", "email": "vikram.c@gmail.com", "phone": "7654321098", "father_contact_number": "9876543218", "gender": "Male" as const, "currentSemester": "6th", "academicYear": "2024-2025", "address": "666 Walnut Blvd, Anytown, India" },
-    { "roll_no": "3BCOM-05", "name": "Neha Gupta", "dob": "2005-06-19", "university_number": "36623U06005", "department": "BCOM", "year": "3rd Year", "email": "neha.gupta@gmail.com", "phone": "6543210987", "father_contact_number": "9876543219", "gender": "Female" as const, "currentSemester": "6th", "academicYear": "2024-2025", "address": "777 Aspen Ave, Anytown, India" },
-    { "roll_no": "3BCOM-21", "name": "Rajesh Khanna", "dob": "2004-12-11", "university_number": "36623U06021", "department": "BCOM", "year": "3rd Year", "email": "rajesh.k@gmail.com", "phone": "9432109876", "father_contact_number": "9876543220", "gender": "Male" as const, "currentSemester": "6th", "academicYear": "2024-2025", "address": "888 Willow Dr, Anytown, India" },
-    { "roll_no": "3BCOM-14", "name": "Swati Nair", "dob": "2005-02-28", "university_number": "36623U06014", "department": "BCOM", "year": "3rd Year", "email": "swati.nair@gmail.com", "phone": "8321098765", "father_contact_number": "9876543221", "gender": "Female" as const, "currentSemester": "6th", "academicYear": "2024-2025", "address": "999 Poplar Pl, Anytown, India" }
+const names = [
+    { name: 'Aarav Sharma', gender: 'Male' as const }, { name: 'Vivaan Singh', gender: 'Male' as const }, { name: 'Aditya Kumar', gender: 'Male' as const }, { name: 'Vihaan Patel', gender: 'Male' as const }, { name: 'Arjun Gupta', gender: 'Male' as const },
+    { name: 'Saanvi Sharma', gender: 'Female' as const }, { name: 'Aanya Singh', gender: 'Female' as const }, { name: 'Aadhya Kumar', gender: 'Female' as const }, { name: 'Ananya Patel', gender: 'Female' as const }, { name: 'Diya Gupta', gender: 'Female' as const },
+];
+const departments = [
+    { name: 'BCA', code: '09' },
+    { name: 'BSC', code: '08' },
+    { name: 'BCOM', code: '10' },
+    { name: 'BBA', code: '11' }
+];
+const years = [
+    { name: '1st Year', code: '25', semester: '1st', academicYear: '2024-2025', dobYear: 2006 },
+    { name: '2nd Year', code: '24', semester: '3rd', academicYear: '2023-2024', dobYear: 2005 },
+    { name: '3rd Year', code: '23', semester: '5th', academicYear: '2022-2023', dobYear: 2004 }
 ];
 
-export const students: Student[] = rawStudents.map(s => ({
-  ...s,
-  id: s.university_number,
-  rollNumber: s.roll_no,
-  fatherContactNumber: s.father_contact_number,
-  photoUrl: '',
-}));
+const generatedStudents: Student[] = [];
+let studentCounter = 1;
+
+departments.forEach(dept => {
+    years.forEach(year => {
+        for (let i = 1; i <= 6; i++) {
+            const nameData = names[(studentCounter -1) % names.length];
+            const firstName = nameData.name.split(' ')[0].toLowerCase();
+            const paddedCounter = String(i).padStart(3, '0');
+            const paddedDeptCounter = String(studentCounter).padStart(3, '0');
+
+            const student: Student = {
+                id: `366${year.code}U${dept.code}${paddedDeptCounter}`,
+                university_number: `366${year.code}U${dept.code}${paddedDeptCounter}`,
+                rollNumber: `${year.name.charAt(0)}${dept.name}-${paddedCounter}`,
+                name: `${nameData.name} ${i}`,
+                dob: `${year.dobYear}-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`,
+                department: dept.name,
+                year: year.name,
+                email: `${firstName}${i}@example.com`,
+                phone: `9${String(Math.floor(Math.random() * 900000000) + 100000000)}`,
+                fatherContactNumber: `9${String(Math.floor(Math.random() * 900000000) + 100000000)}`,
+                gender: nameData.gender,
+                currentSemester: year.semester,
+                academicYear: year.academicYear,
+                address: `${i * 123} Main St, Anytown, India`,
+                photoUrl: '',
+            };
+            generatedStudents.push(student);
+            studentCounter++;
+        }
+    });
+});
+
+export const students: Student[] = generatedStudents;
 
 export const pendingStudents: Student[] = [
-    { "id": "PENDING-001", "roll_no": "1BCA-NEW", "name": "Aarav Sharma", "dob": "2006-05-20", "university_number": "APP-2024-001", "department": "BCA", "year": "1st Year", "email": "aarav.sharma.new@example.com", "phone": "9123456789", "father_contact_number": "9123456780", "gender": "Male" as const, "currentSemester": "1st", "academicYear": "2024-2025", "address": "15 Cherry Blossom Lane, New Delhi" },
-    { "id": "PENDING-002", "roll_no": "1BSC-NEW", "name": "Isha Singh", "dob": "2006-04-11", "university_number": "APP-2024-002", "department": "BSC", "year": "1st Year", "email": "isha.singh.new@example.com", "phone": "9234567890", "father_contact_number": "9234567891", "gender": "Female" as const, "currentSemester": "1st", "academicYear": "2024-2025", "address": "22 Rosewood Drive, Mumbai" }
-].map(s => ({
-  ...s,
-  rollNumber: s.roll_no,
-  fatherContactNumber: s.father_contact_number,
-  photoUrl: '',
-}));
-
+    { "id": "PENDING-001", "rollNumber": "1BCA-NEW", "name": "Aarav Sharma", "dob": "2006-05-20", "university_number": "APP-2024-001", "department": "BCA", "year": "1st Year", "email": "aarav.sharma.new@example.com", "phone": "9123456789", "fatherContactNumber": "9123456780", "gender": "Male" as const, "currentSemester": "1st", "academicYear": "2024-2025", "address": "15 Cherry Blossom Lane, New Delhi", photoUrl: '' },
+    { "id": "PENDING-002", "rollNumber": "1BSC-NEW", "name": "Isha Singh", "dob": "2006-04-11", "university_number": "APP-2024-002", "department": "BSC", "year": "1st Year", "email": "isha.singh.new@example.com", "phone": "9234567890", "fatherContactNumber": "9234567891", "gender": "Female" as const, "currentSemester": "1st", "academicYear": "2024-2025", "address": "22 Rosewood Drive, Mumbai", photoUrl: '' }
+];
 
 export const studentUsers = students.map(student => ({
   id: student.university_number,
@@ -203,27 +224,21 @@ export const teacherUsers = teachers;
 
 export const previousAttendanceData = [
   // Week 1
-  { date: '2024-07-01', studentId: '36623U09028', attendanceStatus: 'present' as const },
-  { date: '2024-07-01', studentId: '36623U09015', attendanceStatus: 'present' as const },
-  { date: '2024-07-01', studentId: '36623U09042', attendanceStatus: 'absent' as const },
-  { date: '2024-07-01', studentId: '36623U08007', attendanceStatus: 'present' as const },
-  { date: '2024-07-01', studentId: '36623U08019', attendanceStatus: 'present' as const },
-  { date: '2024-07-01', studentId: '36623U08033', attendanceStatus: 'present' as const },
-  { date: '2024-07-01', studentId: '36623U07012', attendanceStatus: 'absent' as const },
-  { date: '2024-07-01', studentId: '36623U07025', attendanceStatus: 'present' as const },
-  { date: '2024-07-01', studentId: '36623U07038', attendanceStatus: 'present' as const },
-  { date: '2024-07-01', studentId: '36623U06005', attendanceStatus: 'present' as const },
+  { date: '2024-07-01', studentId: students[0].id, attendanceStatus: 'present' as const },
+  { date: '2024-07-01', studentId: students[1].id, attendanceStatus: 'present' as const },
+  { date: '2024-07-01', studentId: students[2].id, attendanceStatus: 'absent' as const },
+  { date: '2024-07-01', studentId: students[6].id, attendanceStatus: 'present' as const },
+  { date: '2024-07-01', studentId: students[7].id, attendanceStatus: 'present' as const },
+  { date: '2024-07-01', studentId: students[8].id, attendanceStatus: 'present' as const },
+  { date: '2024-07-01', studentId: students[12].id, attendanceStatus: 'absent' as const },
   // Week 2
-  { date: '2024-07-08', studentId: '36623U09028', attendanceStatus: 'present' as const },
-  { date: '2024-07-08', studentId: '36623U09015', attendanceStatus: 'present' as const },
-  { date: '2024-07-08', studentId: '36623U09042', attendanceStatus: 'present' as const },
-  { date: '2024-07-08', studentId: '36623U08007', attendanceStatus: 'present' as const },
-  { date: '2024-07-08', studentId: '36623U08019', attendanceStatus: 'absent' as const },
-  { date: '2024-07-08', studentId: '36623U08033', attendanceStatus: 'present' as const },
-  { date: '2024-07-08', studentId: '36623U07012', attendanceStatus: 'absent' as const },
-  { date: '2024-07-08', studentId: '36623U07025', attendanceStatus: 'present' as const },
-  { date: '2024-07-08', studentId: '36623U07038', attendanceStatus: 'present' as const },
-  { date: '2024-07-08', studentId: '36623U06005', attendanceStatus: 'absent' as const },
+  { date: '2024-07-08', studentId: students[0].id, attendanceStatus: 'present' as const },
+  { date: '2024-07-08', studentId: students[1].id, attendanceStatus: 'present' as const },
+  { date: '2024-07-08', studentId: students[2].id, attendanceStatus: 'present' as const },
+  { date: '2024-07-08', studentId: students[6].id, attendanceStatus: 'present' as const },
+  { date: '2024-07-08', studentId: students[7].id, attendanceStatus: 'absent' as const },
+  { date: '2024-07-08', studentId: students[8].id, attendanceStatus: 'present' as const },
+  { date: '2024-07-08', studentId: students[12].id, attendanceStatus: 'absent' as const },
 ];
 
 export const studentAttendance = {
@@ -346,10 +361,10 @@ export const dailyAttendanceData: DailyAttendance[] = [
 export const leaveRequests: LeaveRequest[] = [
   {
     id: 'leave-1',
-    studentId: '36623U09015',
-    studentName: 'Priya Verma',
+    studentId: students[1].id,
+    studentName: students[1].name,
     department: 'BCA',
-    year: '3rd Year',
+    year: '1st Year',
     startDate: '2024-07-29',
     endDate: '2024-07-30',
     reason: 'Family function.',
@@ -357,10 +372,10 @@ export const leaveRequests: LeaveRequest[] = [
   },
   {
     id: 'leave-2',
-    studentId: '36623U08007',
-    studentName: 'Ananya Joshi',
+    studentId: students[7].id,
+    studentName: students[7].name,
     department: 'BSC',
-    year: '3rd Year',
+    year: '2nd Year',
     startDate: '2024-08-01',
     endDate: '2024-08-01',
     reason: 'Medical appointment.',
@@ -368,10 +383,10 @@ export const leaveRequests: LeaveRequest[] = [
   },
    {
     id: 'leave-3',
-    studentId: '36623U09042',
-    studentName: 'Rahul Desai',
+    studentId: students[2].id,
+    studentName: students[2].name,
     department: 'BCA',
-    year: '3rd Year',
+    year: '1st Year',
     startDate: '2024-08-02',
     endDate: '2024-08-03',
     reason: 'Not feeling well.',
@@ -393,9 +408,9 @@ export const feedbackSessions: FeedbackSession[] = [
 
 export const feedbackData: Feedback[] = [
     // Example closed session data
-    { id: 'fb-1', sessionId: 'session-2', studentId: '36623U09015', subject: 'Algorithms', rating: 4, comment: 'The professor explains concepts very clearly.' },
-    { id: 'fb-2', sessionId: 'session-2', studentId: '36623U09042', subject: 'Algorithms', rating: 5, comment: 'Great examples and practical sessions.' },
-    { id: 'fb-3', sessionId: 'session-2', studentId: '36623U09015', subject: 'Data Structures', rating: 3, comment: 'Could use more real-world examples.' },
+    { id: 'fb-1', sessionId: 'session-2', studentId: '36624U09002', subject: 'Algorithms', rating: 4, comment: 'The professor explains concepts very clearly.' },
+    { id: 'fb-2', sessionId: 'session-2', studentId: '36624U09003', subject: 'Algorithms', rating: 5, comment: 'Great examples and practical sessions.' },
+    { id: 'fb-3', sessionId: 'session-2', studentId: '36624U09002', subject: 'Data Structures', rating: 3, comment: 'Could use more real-world examples.' },
 ];
 
 export const examTimeTable: FullExamTimeTable = {
@@ -421,37 +436,27 @@ export const examTimeTable: FullExamTimeTable = {
 };
 
 export const studentFeeDetails: StudentFeeDetails = {
-  // Mohammed Thouseef (BCA)
-  '36623U09028': [
-    { semester: '1st', totalFee: 25000, paid: 25000, balance: 0, status: 'Paid', dueDate: '2022-08-15' },
-    { semester: '2nd', totalFee: 25000, paid: 25000, balance: 0, status: 'Paid', dueDate: '2023-01-15' },
-    { semester: '3rd', totalFee: 25000, paid: 25000, balance: 0, status: 'Paid', dueDate: '2023-08-15' },
-    { semester: '4th', totalFee: 25000, paid: 25000, balance: 0, status: 'Paid', dueDate: '2024-01-15' },
-    { semester: '5th', totalFee: 25000, paid: 15000, balance: 10000, status: 'Pending', dueDate: '2024-08-15' },
-    { semester: '6th', totalFee: 25000, paid: 0, balance: 25000, status: 'Pending', dueDate: '2025-01-15' },
+  [students[0].id]: [
+    { semester: '1st', totalFee: 25000, paid: 25000, balance: 0, status: 'Paid', dueDate: '2024-08-15' },
+    { semester: '2nd', totalFee: 25000, paid: 15000, balance: 10000, status: 'Pending', dueDate: '2025-01-15' },
   ],
-  // Priya Verma (BCA)
-  '36623U09015': [
-    { semester: '5th', totalFee: 25000, paid: 25000, balance: 0, status: 'Paid', dueDate: '2024-08-15' },
+  [students[1].id]: [
+    { semester: '1st', totalFee: 25000, paid: 25000, balance: 0, status: 'Paid', dueDate: '2024-08-15' },
   ],
-  // Ananya Joshi (BSC)
-  '36623U08007': [
-     { semester: '5th', totalFee: 22000, paid: 22000, balance: 0, status: 'Paid', dueDate: '2024-08-15' },
-     { semester: '6th', totalFee: 22000, paid: 0, balance: 22000, status: 'Pending', dueDate: '2025-01-15' },
+  [students[7].id]: [
+     { semester: '3rd', totalFee: 22000, paid: 22000, balance: 0, status: 'Paid', dueDate: '2024-08-15' },
+     { semester: '4th', totalFee: 22000, paid: 0, balance: 22000, status: 'Pending', dueDate: '2025-01-15' },
   ],
-  // Aditya Rao (BBA)
-  '36623U07012': [
+  [students[13].id]: [
      { semester: '5th', totalFee: 28000, paid: 10000, balance: 18000, status: 'Overdue', dueDate: '2024-07-15' },
   ],
-  // Neha Gupta (BCOM)
-  '36623U06005': [
-     { semester: '5th', totalFee: 20000, paid: 20000, balance: 0, status: 'Paid', dueDate: '2024-08-15' },
+  [students[19].id]: [
+     { semester: '1st', totalFee: 20000, paid: 20000, balance: 0, status: 'Paid', dueDate: '2024-08-15' },
   ],
 };
 
 export const studentResults: StudentResults = {
-  // Mohammed Thouseef (BCA)
-  '36623U09028': [
+  [students[12].id]: [
     {
       semester: '5th',
       gpa: 8.8,
@@ -459,8 +464,6 @@ export const studentResults: StudentResults = {
       results: [
         { subjectCode: 'BCA501', subjectName: 'Computer Networks', ciaMarks: 22, semesterMarks: 65, totalMarks: 87, grade: 'A', resultStatus: 'Pass' },
         { subjectCode: 'BCA502', subjectName: 'Software Engineering', ciaMarks: 24, semesterMarks: 70, totalMarks: 94, grade: 'O', resultStatus: 'Pass' },
-        { subjectCode: 'BCA503', subjectName: 'Cloud Computing', ciaMarks: 20, semesterMarks: 55, totalMarks: 75, grade: 'B', resultStatus: 'Pass' },
-        { subjectCode: 'BCA504', subjectName: 'Python Programming', ciaMarks: 25, semesterMarks: 68, totalMarks: 93, grade: 'O', resultStatus: 'Pass' },
       ],
     },
     {
@@ -469,21 +472,16 @@ export const studentResults: StudentResults = {
       overallResult: 'Pass',
       results: [
         { subjectCode: 'BCA401', subjectName: 'Data Structures', ciaMarks: 21, semesterMarks: 60, totalMarks: 81, grade: 'A', resultStatus: 'Pass' },
-        { subjectCode: 'BCA402', subjectName: 'Algorithms', ciaMarks: 23, semesterMarks: 62, totalMarks: 85, grade: 'A', resultStatus: 'Pass' },
-        { subjectCode: 'BCA403', subjectName: 'Operating Systems', ciaMarks: 19, semesterMarks: 50, totalMarks: 69, grade: 'C', resultStatus: 'Pass' },
-        { subjectCode: 'BCA404', subjectName: 'Database Management', ciaMarks: 22, semesterMarks: 65, totalMarks: 87, grade: 'A', resultStatus: 'Pass' },
       ],
     },
   ],
-  // Priya Verma (BCA)
-  '36623U09015': [
+  [students[13].id]: [
     {
       semester: '5th',
       gpa: 9.2,
       overallResult: 'Pass',
       results: [
         { subjectCode: 'BCA501', subjectName: 'Computer Networks', ciaMarks: 24, semesterMarks: 70, totalMarks: 94, grade: 'O', resultStatus: 'Pass' },
-        { subjectCode: 'BCA502', subjectName: 'Software Engineering', ciaMarks: 25, semesterMarks: 72, totalMarks: 97, grade: 'O', resultStatus: 'Pass' },
       ],
     },
   ],
