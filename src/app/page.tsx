@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -174,7 +173,7 @@ export default function LandingPage() {
         <section className="relative h-[60vh] w-full">
           <Image
             src="/entrance-bg.jpg"
-            alt="College Entrance"
+            alt="Entrance of Merit Haji Ismail Sahib Arts and Science College"
             data-ai-hint="college entrance"
             fill
             className="object-cover brightness-75"
