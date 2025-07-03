@@ -218,7 +218,7 @@ export default function LandingPage() {
             <DialogDescription>
               {loginTab === 'student'
                 ? "Student ID is your University Number. The password is your Date of Birth."
-                : "Teacher ID is your Staff ID. For demo, use ID: TEACHER01 / Pass: password"
+                : "Teacher ID is your Staff ID. For demo, use ID: TEACHER01 / Pass: Teacher@Pass1"
               }
             </DialogDescription>
           </DialogHeader>

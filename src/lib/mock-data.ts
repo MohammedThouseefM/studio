@@ -156,8 +156,8 @@ export type StudentResults = {
 };
 
 export const teachers: Teacher[] = [
-    { id: 'TEACHER01', password: 'password', name: 'Dr. Evelyn Reed' },
-    { id: 'TEACHER02', password: 'password123', name: 'Prof. Samuel Cruz' }
+    { id: 'TEACHER01', password: 'Teacher@Pass1', name: 'Dr. Evelyn Reed' },
+    { id: 'TEACHER02', password: 'Professor@Pass2', name: 'Prof. Samuel Cruz' }
 ];
 
 const rawStudents = [
