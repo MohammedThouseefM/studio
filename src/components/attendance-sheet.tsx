@@ -1,10 +1,8 @@
-
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
-import { Wand2, Loader2, CheckCircle, XCircle, Wifi, WifiOff } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { CheckCircle, XCircle, Wifi, WifiOff } from 'lucide-react';
 
-import { getAttendancePrediction } from '@/lib/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -15,7 +13,7 @@ import { useOnlineStatus } from '@/hooks/use-online-status';
 import { useCollegeData } from '@/context/college-data-context';
 
 type AttendanceStatus = 'present' | 'absent';
-export type AttendanceState = Record<string, { status: AttendanceStatus; isPredicted: boolean }>;
+export type AttendanceState = Record<string, { status: AttendanceStatus }>;
 
 type AttendanceSheetProps = {
   classDetails: {
@@ -28,7 +26,6 @@ type AttendanceSheetProps = {
 
 export function AttendanceSheet({ classDetails }: AttendanceSheetProps) {
   const [attendance, setAttendance] = useState<AttendanceState>({});
-  const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const isOnline = useOnlineStatus();
   const { saveAttendance } = useCollegeData();
@@ -36,7 +33,7 @@ export function AttendanceSheet({ classDetails }: AttendanceSheetProps) {
   useEffect(() => {
     const initialState: AttendanceState = {};
     students.forEach((student) => {
-      initialState[student.id] = { status: 'present', isPredicted: false };
+      initialState[student.id] = { status: 'present' };
     });
     setAttendance(initialState);
   }, []);
@@ -44,45 +41,13 @@ export function AttendanceSheet({ classDetails }: AttendanceSheetProps) {
   const handleStatusChange = (studentId: string, newStatus: boolean) => {
     setAttendance((prev) => ({
       ...prev,
-      [studentId]: { status: newStatus ? 'present' : 'absent', isPredicted: false },
+      [studentId]: { status: newStatus ? 'present' : 'absent' },
     }));
-  };
-  
-  const handlePrediction = () => {
-    startTransition(async () => {
-      const result = await getAttendancePrediction({
-        ...classDetails,
-        previousAttendanceData: [], // In a real app, you'd fetch this dynamically
-      });
-
-      if (result.success && result.data) {
-        toast({
-          title: 'Prediction Complete',
-          description: 'AI-powered attendance suggestions have been applied.',
-        });
-        const newAttendanceState: AttendanceState = { ...attendance };
-        result.data.forEach((prediction) => {
-          if (newAttendanceState[prediction.studentId]) {
-            newAttendanceState[prediction.studentId] = {
-              status: prediction.predictedStatus,
-              isPredicted: true,
-            };
-          }
-        });
-        setAttendance(newAttendanceState);
-      } else {
-        toast({
-          variant: 'destructive',
-          title: 'Prediction Failed',
-          description: result.error || 'An unknown error occurred.',
-        });
-      }
-    });
   };
 
   const handleSave = () => {
     // In a real app, user would come from auth session
-    const teacherId = 'TEACHER01'; 
+    const teacherId = 'TEACHER01';
     saveAttendance(classDetails, attendance, teacherId, isOnline);
 
     if (isOnline) {
@@ -115,14 +80,6 @@ export function AttendanceSheet({ classDetails }: AttendanceSheetProps) {
               {isOnline ? <Wifi className="h-4 w-4" /> : <WifiOff className="h-4 w-4" />}
               <span>{isOnline ? 'Online' : 'Offline Mode'}</span>
             </div>
-            <Button onClick={handlePrediction} disabled={isPending || !isOnline}>
-              {isPending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Wand2 className="mr-2 h-4 w-4" />
-              )}
-              Predict Attendance
-            </Button>
           </div>
         </div>
       </CardHeader>
@@ -139,7 +96,7 @@ export function AttendanceSheet({ classDetails }: AttendanceSheetProps) {
             </TableHeader>
             <TableBody>
               {Object.keys(attendance).length > 0 ? (
-                Object.entries(attendance).map(([studentId, { status, isPredicted }]) => {
+                Object.entries(attendance).map(([studentId, { status }]) => {
                   const student = getStudentById(studentId);
                   return student ? (
                     <TableRow key={student.id}>
@@ -158,7 +115,6 @@ export function AttendanceSheet({ classDetails }: AttendanceSheetProps) {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
-                           {isPredicted && <Wand2 className="h-4 w-4 text-accent" title="AI Suggestion" />}
                           <Switch
                             checked={status === 'present'}
                             onCheckedChange={(checked) => handleStatusChange(student.id, checked)}
