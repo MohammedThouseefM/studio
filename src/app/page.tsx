@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -40,7 +39,7 @@ export default function LandingPage() {
   const [showTeacherPassword, setShowTeacherPassword] = useState(false);
 
   const generateCaptcha = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let captchaText = '';
     for (let i = 0; i < 6; i++) {
         captchaText += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -280,7 +279,7 @@ export default function LandingPage() {
                     <Label htmlFor="student-captcha">Captcha</Label>
                     <div className="flex items-center gap-4">
                       <div className="flex-1 select-none rounded-md border bg-muted p-2 text-center text-xl font-bold tracking-widest">
-                        <span className="line-through">{captcha}</span>
+                        <span className="line-through uppercase">{captcha}</span>
                       </div>
                       <Button
                         type="button"
@@ -350,7 +349,7 @@ export default function LandingPage() {
                     <Label htmlFor="teacher-captcha">Captcha</Label>
                     <div className="flex items-center gap-4">
                       <div className="flex-1 select-none rounded-md border bg-muted p-2 text-center text-xl font-bold tracking-widest">
-                         <span className="line-through">{captcha}</span>
+                         <span className="line-through uppercase">{captcha}</span>
                       </div>
                       <Button
                         type="button"
