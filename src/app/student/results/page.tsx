@@ -11,12 +11,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useCollegeData } from '@/context/college-data-context';
-import { students } from '@/lib/mock-data';
 import { cn } from '@/lib/utils';
+import Loading from '@/app/loading';
 
 export default function ResultsPage() {
-  const { studentResults } = useCollegeData();
-  const student = students[0]; // Mock logged-in student
+  const { studentResults, currentUser } = useCollegeData();
+  
+  if (!currentUser || !('university_number' in currentUser)) {
+    return <Loading />;
+  }
+  const student = currentUser;
   
   const results = useMemo(() => studentResults[student.id] || [], [student.id, studentResults]);
   const availableSemesters = useMemo(() => results.map(r => r.semester), [results]);

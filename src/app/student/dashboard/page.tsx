@@ -13,12 +13,16 @@ import { studentAttendance } from "@/lib/mock-data";
 import { AcademicCalendarCard } from "@/components/academic-calendar-card";
 import { useCollegeData } from "@/context/college-data-context";
 import { PrintableReport } from "@/components/printable-report";
+import Loading from "@/app/loading";
 
 export default function StudentDashboardPage() {
-  const { students, studentFeeDetails, studentResults } = useCollegeData();
+  const { currentUser, studentFeeDetails, studentResults } = useCollegeData();
   
-  // In a real app, this would come from a user session
-  const student = students[0];
+  if (!currentUser || !('university_number' in currentUser)) {
+    return <Loading />;
+  }
+  const student = currentUser;
+
   const feeHistory = studentFeeDetails[student.id] || [];
   const latestResult = (studentResults[student.id] || [])[0] || null;
 

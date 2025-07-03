@@ -1,3 +1,4 @@
+
 'use client';
 
 import { memo } from 'react';
@@ -5,12 +6,17 @@ import Link from 'next/link';
 import { CalendarDays, ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from './ui/button';
-import { students, defaultTimetable } from '@/lib/mock-data';
+import { defaultTimetable } from '@/lib/mock-data';
 import { useCollegeData } from '@/context/college-data-context';
 
 function TimetableCardComponent() {
-  const { timeTable, hours } = useCollegeData();
+  const { timeTable, hours, currentUser } = useCollegeData();
   
+  if (!currentUser || !('university_number' in currentUser)) {
+    return null;
+  }
+  const student = currentUser;
+
   const getTodayKey = () => {
     const dayIndex = new Date().getDay(); // Sunday - 0, Monday - 1, etc.
     switch (dayIndex) {
@@ -26,9 +32,6 @@ function TimetableCardComponent() {
 
   const today = getTodayKey();
   
-  // In a real app, you would get the logged-in student's ID from a session.
-  // For this demo, we'll use the first student.
-  const student = students[0];
   const studentTimetable = timeTable[student.department]?.[student.year] || defaultTimetable;
 
   // Fallback to D1 if today is not in timetable or no schedule for today

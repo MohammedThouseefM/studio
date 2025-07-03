@@ -1,3 +1,4 @@
+
 'use client';
 
 import { ArrowLeft, CalendarDays } from 'lucide-react';
@@ -19,17 +20,19 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { students, defaultTimetable } from '@/lib/mock-data';
+import { defaultTimetable } from '@/lib/mock-data';
 import { useCollegeData } from '@/context/college-data-context';
+import Loading from '@/app/loading';
 
 const daysOfWeek = ['D1', 'D2', 'D3', 'D4', 'D5', 'D6'];
 
 export default function TimetablePage() {
-  const { timeTable, hours } = useCollegeData();
+  const { timeTable, hours, currentUser } = useCollegeData();
   
-  // In a real app, you would get the logged-in student's ID from a session.
-  // For this demo, we'll use the first student.
-  const student = students[0];
+  if (!currentUser || !('university_number' in currentUser)) {
+    return <Loading />;
+  }
+  const student = currentUser;
   const studentTimetable = timeTable[student.department]?.[student.year] || defaultTimetable;
 
   return (

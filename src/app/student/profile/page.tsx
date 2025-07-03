@@ -7,21 +7,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { students } from "@/lib/mock-data";
 import { format, parseISO } from 'date-fns';
+import { useCollegeData } from '@/context/college-data-context';
+import Loading from '@/app/loading';
 
 export default function StudentProfilePage() {
-  // In a real app, you would get the logged-in student's ID from a session
-  // and fetch their specific data. For this demo, we'll use the first student.
-  const student = students[0];
+  const { currentUser } = useCollegeData();
 
-  if (!student) {
-    return (
-      <div className="p-4 md:p-8 text-center">
-        Student data not available.
-      </div>
-    );
+  if (!currentUser || !('university_number' in currentUser)) {
+    return <Loading />;
   }
+  const student = currentUser;
 
   return (
     <div className="p-4 md:p-8">

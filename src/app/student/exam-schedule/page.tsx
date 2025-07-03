@@ -4,15 +4,19 @@
 import Link from 'next/link';
 import { ArrowLeft, ClipboardList } from 'lucide-react';
 import { useCollegeData } from '@/context/college-data-context';
-import { students } from '@/lib/mock-data';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format, parseISO } from 'date-fns';
+import Loading from '@/app/loading';
 
 export default function ExamSchedulePage() {
-  const { examTimeTable } = useCollegeData();
-  const student = students[0]; // Mock student
+  const { examTimeTable, currentUser } = useCollegeData();
+  
+  if (!currentUser || !('university_number' in currentUser)) {
+    return <Loading />;
+  }
+  const student = currentUser;
 
   const schedule = examTimeTable[student.department]?.[student.year] || [];
 

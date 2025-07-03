@@ -21,10 +21,12 @@ import { validateStudent, validateTeacher } from '@/lib/auth';
 import Link from 'next/link';
 import { ModeToggle } from '@/components/mode-toggle';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useCollegeData } from '@/context/college-data-context';
 
 export default function LandingPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const { setCurrentUser } = useCollegeData();
   const [studentId, setStudentId] = useState('');
   const [studentPassword, setStudentPassword] = useState('');
   const [teacherId, setTeacherId] = useState('');
@@ -71,8 +73,9 @@ export default function LandingPage() {
       return;
     }
     
-    const isValid = validateStudent(studentId, studentPassword);
-    if (isValid) {
+    const user = validateStudent(studentId, studentPassword);
+    if (user) {
+      setCurrentUser(user);
       router.push('/student/dashboard');
     } else {
       toast({
@@ -97,8 +100,9 @@ export default function LandingPage() {
       setTeacherCaptchaInput('');
       return;
     }
-    const isValid = validateTeacher(teacherId, teacherPassword);
-    if (isValid) {
+    const user = validateTeacher(teacherId, teacherPassword);
+    if (user) {
+      setCurrentUser(user);
       router.push('/teacher/dashboard');
     } else {
       toast({

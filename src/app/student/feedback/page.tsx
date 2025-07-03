@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -12,9 +13,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useCollegeData } from '@/context/college-data-context';
-import { studentAttendance, students } from '@/lib/mock-data';
+import { studentAttendance } from '@/lib/mock-data';
 import { Slider } from '@/components/ui/slider';
 import { isWithinInterval, parseISO } from 'date-fns';
+import Loading from '@/app/loading';
 
 const feedbackItemSchema = z.object({
   subject: z.string(),
@@ -31,8 +33,12 @@ type FeedbackFormData = z.infer<typeof feedbackFormSchema>;
 export default function FeedbackPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { feedbackSessions, feedbackData, submitFeedback } = useCollegeData();
-  const student = students[0]; // Mock student
+  const { feedbackSessions, feedbackData, submitFeedback, currentUser } = useCollegeData();
+  
+  if (!currentUser || !('university_number' in currentUser)) {
+    return <Loading />;
+  }
+  const student = currentUser;
   const subjects = studentAttendance.subjects; // Mock student's subjects
 
   const openSession = feedbackSessions.find(s => {

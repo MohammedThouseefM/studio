@@ -60,6 +60,7 @@ type CollegeState = {
   feedbackData: Feedback[];
   studentFeeDetails: StudentFeeDetails;
   studentResults: StudentResults;
+  currentUser: Student | Teacher | null;
 };
 
 const getInitialState = (): CollegeState => {
@@ -80,10 +81,13 @@ const getInitialState = (): CollegeState => {
     feedbackData: initialFeedbackData,
     studentFeeDetails: initialStudentFeeDetails,
     studentResults: initialStudentResults,
+    currentUser: null,
   };
 };
 
 type CollegeDataContextType = CollegeState & {
+  setCurrentUser: (user: Student | Teacher | null) => void;
+  logout: () => void;
   // Functions
   addEvent: (event: Omit<CalendarEventWithId, 'id'>, user: string) => void;
   updateEvent: (eventId: string, updatedEvent: Omit<CalendarEventWithId, 'id'>, user: string) => void;
@@ -126,18 +130,33 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
   // Load from localStorage on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      let stateToLoad = getInitialState();
       try {
         const storedData = window.localStorage.getItem(LOCAL_STORAGE_KEY);
         if (storedData) {
           const parsedData = JSON.parse(storedData);
           // Re-hydrate Date objects that are stored as strings
           parsedData.auditLogs = parsedData.auditLogs.map((log: AuditLog) => ({...log, timestamp: new Date(log.timestamp)}));
-          setAppState(parsedData);
+          stateToLoad = { ...stateToLoad, ...parsedData, currentUser: null }; // Start with no user
+        }
+
+        const storedUserId = localStorage.getItem('currentUserId');
+        const storedUserType = localStorage.getItem('currentUserType');
+
+        if (storedUserId && storedUserType) {
+            if (storedUserType === 'student') {
+                const user = stateToLoad.students.find(s => s.id === storedUserId);
+                if (user) stateToLoad.currentUser = user;
+            } else {
+                const user = stateToLoad.teachers.find(t => t.id === storedUserId);
+                if (user) stateToLoad.currentUser = user;
+            }
         }
       } catch (error) {
         console.error('Error loading data from localStorage:', error);
-        setAppState(getInitialState());
+        stateToLoad = getInitialState();
       } finally {
+        setAppState(stateToLoad);
         setIsLoaded(true);
       }
     }
@@ -147,12 +166,29 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (typeof window !== 'undefined' && isLoaded) {
       try {
-        window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(appState));
+        const stateToSave = { ...appState, currentUser: null }; // Don't save currentUser directly
+        window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(stateToSave));
       } catch (error) {
         console.error('Error saving data to localStorage:', error);
       }
     }
   }, [appState, isLoaded]);
+
+  const setCurrentUser = (user: Student | Teacher | null) => {
+    setAppState(prev => ({ ...prev, currentUser: user }));
+    if (user) {
+        const isStudent = 'university_number' in user;
+        localStorage.setItem('currentUserId', user.id);
+        localStorage.setItem('currentUserType', isStudent ? 'student' : 'teacher');
+    } else {
+        localStorage.removeItem('currentUserId');
+        localStorage.removeItem('currentUserType');
+    }
+  };
+
+  const logout = () => {
+    setCurrentUser(null);
+  };
 
   const addAuditLog = (user: string, action: string, type: AuditLog['type']) => {
     const newLog: AuditLog = { id: `log-${Date.now()}`, timestamp: new Date(), user, action, type };
@@ -220,6 +256,8 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
   
   const contextValue: CollegeDataContextType = { 
     ...appState,
+    setCurrentUser,
+    logout,
     addEvent, updateEvent, deleteEvent, 
     updateTimeTable,
     updateExamTimeTable,

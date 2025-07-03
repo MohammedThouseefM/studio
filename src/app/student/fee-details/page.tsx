@@ -7,20 +7,24 @@ import { format, parseISO } from 'date-fns';
 import { ArrowLeft, CreditCard, DollarSign, CheckCircle, AlertCircle } from 'lucide-react';
 
 import { useCollegeData } from '@/context/college-data-context';
-import { students } from '@/lib/mock-data';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import Loading from '@/app/loading';
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
 };
 
 export default function FeeDetailsPage() {
-  const { studentFeeDetails } = useCollegeData();
-  const student = students[0]; // Mock logged-in student
+  const { studentFeeDetails, currentUser } = useCollegeData();
+
+  if (!currentUser || !('university_number' in currentUser)) {
+    return <Loading />;
+  }
+  const student = currentUser;
 
   const feeHistory = studentFeeDetails[student.id] || [];
 

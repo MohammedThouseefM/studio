@@ -1,15 +1,32 @@
+
 'use client';
 
-import type { PropsWithChildren } from "react";
-import { useEffect } from "react";
-import { AppLayout } from "@/components/app-layout";
-import { teacherNavItems } from "@/lib/nav-links";
-import { useOnlineStatus } from "@/hooks/use-online-status";
-import { useToast } from "@/hooks/use-toast";
+import { type PropsWithChildren, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { AppLayout } from '@/components/app-layout';
+import { teacherNavItems } from '@/lib/nav-links';
+import { useOnlineStatus } from '@/hooks/use-online-status';
+import { useToast } from '@/hooks/use-toast';
+import { useCollegeData } from '@/context/college-data-context';
+import Loading from '@/app/loading';
 
 export default function TeacherLayout({ children }: PropsWithChildren) {
   const isOnline = useOnlineStatus();
   const { toast } = useToast();
+  const { currentUser } = useCollegeData();
+  const router = useRouter();
+
+  useEffect(() => {
+    // This effect checks for a valid logged-in user.
+    // A small timeout allows the context to hydrate from localStorage on the client.
+    const timer = setTimeout(() => {
+      if (!currentUser || ('university_number' in currentUser)) {
+        router.push('/');
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [currentUser, router]);
 
   useEffect(() => {
     const syncOfflineData = async () => {
@@ -59,9 +76,13 @@ export default function TeacherLayout({ children }: PropsWithChildren) {
       syncOfflineData();
     }
   }, [isOnline, toast]);
+  
+  if (!currentUser || ('university_number' in currentUser)) {
+    return <Loading />;
+  }
 
   return (
-    <AppLayout navItems={teacherNavItems} userType="Teacher">
+    <AppLayout navItems={teacherNavItems} userType="Teacher" user={currentUser}>
       {children}
     </AppLayout>
   );

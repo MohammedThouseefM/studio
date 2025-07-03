@@ -13,7 +13,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useCollegeData } from '@/context/college-data-context';
-import { students } from '@/lib/mock-data';
 import { Table, TableBody, TableCell, TableHeader, TableRow, TableHead } from './ui/table';
 import { Badge } from './ui/badge';
 import {
@@ -23,6 +22,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { Input } from './ui/input';
+import Loading from '../app/loading';
 
 const leaveSchema = z.object({
   startDate: z.string().min(1, 'A start date is required.'),
@@ -40,8 +40,12 @@ type LeaveFormData = z.infer<typeof leaveSchema>;
 
 export function LeaveManagement() {
   const { toast } = useToast();
-  const { leaveRequests, addLeaveRequest } = useCollegeData();
-  const studentId = students[0].id; // Mock: get current student's ID
+  const { leaveRequests, addLeaveRequest, currentUser } = useCollegeData();
+  
+  if (!currentUser || !('university_number' in currentUser)) {
+    return <Loading />;
+  }
+  const studentId = currentUser.id;
 
   const studentLeaveRequests = leaveRequests.filter(req => req.studentId === studentId);
 

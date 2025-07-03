@@ -15,8 +15,7 @@ import {
 } from '@/components/ui/sidebar';
 import type { NavItem } from '@/lib/nav-links';
 import Link from 'next/link';
-import { useCollegeData } from '@/context/college-data-context';
-import type { Student } from '@/lib/mock-data';
+import type { Student, Teacher } from '@/lib/mock-data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { User } from 'lucide-react';
@@ -24,19 +23,17 @@ import { User } from 'lucide-react';
 type AppSidebarProps = {
   navItems: NavItem[];
   userType: 'Student' | 'Teacher';
+  user: Student | Teacher;
 };
 
-function AppSidebarComponent({ navItems, userType }: AppSidebarProps) {
+function AppSidebarComponent({ navItems, userType, user }: AppSidebarProps) {
   const { isMobile } = useSidebar();
   const pathname = usePathname();
-  const { students, teachers } = useCollegeData();
 
-  const isStudent = userType === 'Student';
-  const user = isStudent ? students[0] : teachers[0];
-
+  const isStudent = 'university_number' in user;
   const userName = user?.name;
-  const userId = isStudent ? `Univ. No: ${(user as Student)?.university_number}` : `Staff ID: ${user?.id}`;
-  const userAvatarUrl = isStudent ? (user as Student)?.photoUrl : undefined;
+  const userId = isStudent ? `Univ. No: ${user.university_number}` : `Staff ID: ${user.id}`;
+  const userAvatarUrl = isStudent ? user.photoUrl : undefined;
   const avatarHint = isStudent ? 'student portrait' : 'teacher portrait';
 
   return (

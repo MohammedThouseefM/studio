@@ -1,3 +1,4 @@
+
 'use client';
 
 import { memo } from 'react';
@@ -7,13 +8,15 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { useCollegeData } from '@/context/college-data-context';
-import { students } from '@/lib/mock-data'; // To get current student id
 import { format, parseISO } from 'date-fns';
-import { cn } from '@/lib/utils';
 
 function LeaveRequestCardComponent() {
-  const { leaveRequests } = useCollegeData();
-  const studentId = students[0].id; // Mock: get current student's ID
+  const { leaveRequests, currentUser } = useCollegeData();
+  
+  if (!currentUser || !('university_number' in currentUser)) {
+    return null; // Or a loading skeleton
+  }
+  const studentId = currentUser.id;
 
   const studentLeaveRequests = leaveRequests
     .filter(req => req.studentId === studentId)
