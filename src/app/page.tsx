@@ -1,9 +1,10 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { School, Building, GraduationCap, RefreshCw, UserPlus, Eye, EyeOff, Menu } from 'lucide-react';
+import { School, Building, GraduationCap, RefreshCw, UserPlus, Eye, EyeOff, Menu, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -132,6 +133,9 @@ export default function LandingPage() {
           <div className="hidden md:flex items-center gap-4">
             <ModeToggle />
             <div className="flex items-center gap-2">
+                <Button variant="ghost" asChild>
+                    <Link href="/faculty">Faculty</Link>
+                </Button>
                 <Button variant="outline" onClick={() => handleLoginClick('student')}>
                     Student Login
                 </Button>
@@ -157,6 +161,9 @@ export default function LandingPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                    <Link href="/faculty">Faculty</Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleLoginClick('student')}>Student Login</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleLoginClick('teacher')}>Teacher Login</DropdownMenuItem>
                 <DropdownMenuItem asChild>
