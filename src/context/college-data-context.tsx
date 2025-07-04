@@ -35,7 +35,7 @@ import {
   type SubjectResult,
 } from '@/lib/mock-data';
 import type { AttendanceState } from '@/components/attendance-sheet';
-import { parseISO } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 
 export type CalendarEventWithId = RawCalendarEvent & { id: string };
 export type AuditLog = AuditLogType;
@@ -130,47 +130,62 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
   // Load from localStorage on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      let stateToLoad: CollegeState;
       try {
         const storedData = window.localStorage.getItem(LOCAL_STORAGE_KEY);
+        const initialState = getInitialState();
+        
+        let finalState: CollegeState;
+
         if (storedData) {
-          // If stored data exists, prioritize it.
-          stateToLoad = JSON.parse(storedData);
+          const parsedData = JSON.parse(storedData);
           
-          // Re-hydrate Date objects after parsing, as they are stored as strings.
-          if (stateToLoad.auditLogs) {
-            stateToLoad.auditLogs = stateToLoad.auditLogs.map((log: any) => ({...log, timestamp: new Date(log.timestamp)}));
+          // Safely merge the stored data with the initial state from the code.
+          // This prevents new properties in the code from being lost and
+          // provides a fallback if stored data is missing fields.
+          finalState = { ...initialState, ...parsedData };
+
+          // Explicitly check crucial arrays. If they are empty or invalid in storage,
+          // reset them from the fresh initial data. This prevents data corruption.
+          if (!Array.isArray(finalState.teachers) || finalState.teachers.length === 0) {
+            finalState.teachers = initialState.teachers;
+          }
+          if (!Array.isArray(finalState.students) || finalState.students.length === 0) {
+            finalState.students = initialState.students;
           }
         } else {
-          // If no stored data, use the fresh data from the code.
-          stateToLoad = getInitialState();
+          // No stored data, so use the fresh state from code.
+          finalState = initialState;
+        }
+        
+        // Re-hydrate Date objects that were stringified in JSON
+        if (finalState.auditLogs) {
+          finalState.auditLogs = finalState.auditLogs.map((log: any) => ({...log, timestamp: new Date(log.timestamp)}));
         }
 
-        // Always start with no user logged in.
-        stateToLoad.currentUser = null;
-
+        // Restore the logged-in user session if it exists
         const storedUserId = localStorage.getItem('currentUserId');
         const storedUserType = localStorage.getItem('currentUserType');
-
         if (storedUserId && storedUserType) {
             if (storedUserType === 'student') {
-                const user = stateToLoad.students.find(s => s.id === storedUserId);
-                if (user) stateToLoad.currentUser = user;
+                finalState.currentUser = finalState.students.find(s => s.id === storedUserId) || null;
             } else {
-                const user = stateToLoad.teachers.find(t => t.id === storedUserId);
-                if (user) stateToLoad.currentUser = user;
+                finalState.currentUser = finalState.teachers.find(t => t.id === storedUserId) || null;
             }
+        } else {
+            finalState.currentUser = null;
         }
+        
+        setAppState(finalState);
+
       } catch (error) {
-        console.error('Error loading data from localStorage:', error);
-        // Fallback to initial state on error.
-        stateToLoad = getInitialState();
+        console.error('Error loading data from localStorage, resetting to initial state:', error);
+        // If anything fails, start fresh to prevent a broken app state.
+        setAppState(getInitialState());
       } finally {
-        setAppState(stateToLoad);
         setIsLoaded(true);
       }
     }
-  }, []);
+  }, []); // Run only once on mount
 
   // Save to localStorage on change
   useEffect(() => {
@@ -253,7 +268,7 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
   const approveLeaveRequest = (requestId: string, user: string) => { const request = appState.leaveRequests.find(r => r.id === requestId); if(request) { setAppState(prev => ({ ...prev, leaveRequests: prev.leaveRequests.map(r => r.id === requestId ? { ...r, status: 'approved' } : r) })); addAuditLog(user, `Approved leave request for ${request.studentName}`, 'leave'); } };
   const rejectLeaveRequest = (requestId: string, reason: string, user: string) => { const request = appState.leaveRequests.find(r => r.id === requestId); if(request) { setAppState(prev => ({ ...prev, leaveRequests: prev.leaveRequests.map(r => r.id === requestId ? { ...r, status: 'rejected', rejectionReason: reason } : r) })); addAuditLog(user, `Rejected leave request for ${request.studentName}`, 'leave'); } };
 
-  const addAnnouncement = (title: string, content: string, user: string) => { const newAnnouncement: Announcement = { id: `${Date.now()}`, title, content, date: new Date().toISOString().split('T')[0] }; setAppState(prev => ({ ...prev, announcements: [newAnnouncement, ...prev.announcements] })); addAuditLog(user, `Posted announcement: "${title}"`, 'announcement'); };
+  const addAnnouncement = (title: string, content: string, user: string) => { const newAnnouncement: Announcement = { id: `${Date.now()}`, title, content, date: format(new Date(), 'yyyy-MM-dd') }; setAppState(prev => ({ ...prev, announcements: [newAnnouncement, ...prev.announcements] })); addAuditLog(user, `Posted announcement: "${title}"`, 'announcement'); };
   const deleteAnnouncement = (id: string, user: string) => { const announcement = appState.announcements.find(a => a.id === id); if (announcement) { setAppState(prev => ({ ...prev, announcements: prev.announcements.filter(ann => ann.id !== id) })); addAuditLog(user, `Deleted announcement: "${announcement.title}"`, 'announcement'); } };
 
   const saveAttendance = (classDetails: any, attendance: AttendanceState, user: string, isOnline: boolean) => { if (isOnline) { addAuditLog(user, `Saved attendance for ${classDetails.department} - ${classDetails.year} (${classDetails.subject}) on ${classDetails.date}`, 'attendance'); } else { const key = `offline-attendance-${classDetails.department}-${classDetails.year}-${classDetails.subject}-${classDetails.date}`; try { const pendingSyncs = JSON.parse(localStorage.getItem('pending-attendance-syncs') || '[]' ); if (!pendingSyncs.includes(key)) { pendingSyncs.push(key); localStorage.setItem('pending-attendance-syncs', JSON.stringify(pendingSyncs)); } localStorage.setItem(key, JSON.stringify({ classDetails, attendance, user })); } catch (error) { console.error("Failed to save to localStorage", error); } } };
