@@ -130,19 +130,22 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
   // Load from localStorage on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      let stateToLoad = getInitialState();
+      let stateToLoad: CollegeState;
       try {
         const storedData = window.localStorage.getItem(LOCAL_STORAGE_KEY);
         if (storedData) {
-          const parsedData = JSON.parse(storedData);
+          stateToLoad = JSON.parse(storedData);
           
-          // Re-hydrate Date objects that are stored as strings
-          if (parsedData.auditLogs) {
-            parsedData.auditLogs = parsedData.auditLogs.map((log: AuditLog) => ({...log, timestamp: new Date(log.timestamp)}));
+          // Re-hydrate Date objects after parsing
+          if (stateToLoad.auditLogs) {
+            stateToLoad.auditLogs = stateToLoad.auditLogs.map((log: any) => ({...log, timestamp: new Date(log.timestamp)}));
           }
-
-          stateToLoad = { ...getInitialState(), ...parsedData, currentUser: null }; // Start with no user
+        } else {
+          stateToLoad = getInitialState();
         }
+
+        // Always start with no user logged in
+        stateToLoad.currentUser = null;
 
         const storedUserId = localStorage.getItem('currentUserId');
         const storedUserType = localStorage.getItem('currentUserType');
