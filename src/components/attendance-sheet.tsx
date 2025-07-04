@@ -8,7 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { students, type Student } from '@/lib/mock-data';
 import { useOnlineStatus } from '@/hooks/use-online-status';
 import { useCollegeData } from '@/context/college-data-context';
 
@@ -28,7 +27,7 @@ export function AttendanceSheet({ classDetails }: AttendanceSheetProps) {
   const [attendance, setAttendance] = useState<AttendanceState>({});
   const { toast } = useToast();
   const isOnline = useOnlineStatus();
-  const { saveAttendance } = useCollegeData();
+  const { saveAttendance, students } = useCollegeData();
 
   const filteredStudents = useMemo(() => {
     return students.filter(
@@ -36,7 +35,7 @@ export function AttendanceSheet({ classDetails }: AttendanceSheetProps) {
         student.department === classDetails.department &&
         student.year === classDetails.year
     );
-  }, [classDetails.department, classDetails.year]);
+  }, [classDetails.department, classDetails.year, students]);
 
   useEffect(() => {
     const initialState: AttendanceState = {};
