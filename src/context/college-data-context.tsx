@@ -135,9 +135,18 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
         const storedData = window.localStorage.getItem(LOCAL_STORAGE_KEY);
         if (storedData) {
           const parsedData = JSON.parse(storedData);
+          
+          // Exclude the 'students' array from the persisted data.
+          // This ensures the latest student mock data is always used from the code,
+          // preventing outdated cached data from being loaded.
+          const { students, ...persistedData } = parsedData;
+
           // Re-hydrate Date objects that are stored as strings
-          parsedData.auditLogs = parsedData.auditLogs.map((log: AuditLog) => ({...log, timestamp: new Date(log.timestamp)}));
-          stateToLoad = { ...stateToLoad, ...parsedData, currentUser: null }; // Start with no user
+          if (persistedData.auditLogs) {
+            persistedData.auditLogs = persistedData.auditLogs.map((log: AuditLog) => ({...log, timestamp: new Date(log.timestamp)}));
+          }
+
+          stateToLoad = { ...stateToLoad, ...persistedData, currentUser: null }; // Start with no user
         }
 
         const storedUserId = localStorage.getItem('currentUserId');
