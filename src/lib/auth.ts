@@ -1,5 +1,5 @@
 
-import { type Student, type Teacher } from './mock-data';
+import { type Student, type Teacher, teachers as initialTeachers } from './mock-data';
 
 // In a real app, passwords would be hashed. For this demo, we do a simple string comparison.
 export function validateStudent(id: string, pass: string, studentList: Student[]): Student | null {
@@ -21,9 +21,19 @@ export function validateStudent(id: string, pass: string, studentList: Student[]
 }
 
 export function validateTeacher(id:string, pass: string, teacherList: Teacher[]): Teacher | null {
-  const user = teacherList.find(u => u.id === id);
+  // First, check the list provided from the context (which may include new teachers)
+  let user = teacherList.find(u => u.id === id);
   if (user && user.password === pass) {
     return user;
   }
+
+  // FALLBACK: If not found in the live list (or if the list is corrupt/empty),
+  // check against the initial hardcoded list of teachers.
+  // This ensures the default admin accounts always work.
+  user = initialTeachers.find(u => u.id === id);
+  if (user && user.password === pass) {
+    return user;
+  }
+  
   return null;
 }
