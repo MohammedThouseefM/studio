@@ -1,22 +1,21 @@
 
-import { type Student, type Teacher, teachers as initialTeachers } from './mock-data';
+import { type Student, type Teacher, students as initialStudents, teachers as initialTeachers } from './mock-data';
 
 // In a real app, passwords would be hashed. For this demo, we do a simple string comparison.
 export function validateStudent(id: string, pass: string, studentList: Student[]): Student | null {
-  const user = studentList.find(u => u.university_number === id);
-  if (user) {
-    // User enters password as dd-mm-yyyy. Student DOB is stored as yyyy-mm-dd.
-    const passParts = pass.split(/[-/]/);
-    if (passParts.length === 3 && passParts[0].length === 2) {
-      const day = passParts[0];
-      const month = passParts[1];
-      const year = passParts[2];
-      const formattedPassForComparison = `${year}-${month}-${day}`;
-      if (user.dob === formattedPassForComparison) {
-        return user;
-      }
-    }
+  // Check the live list first, which includes new students from the session.
+  let user = studentList.find(u => u.university_number === id);
+  if (user && user.dob === pass) {
+    return user;
   }
+
+  // FALLBACK: If not found, check against the initial hardcoded list.
+  // This is a safety net in case the live list from storage is corrupted.
+  user = initialStudents.find(u => u.university_number === id);
+  if (user && user.dob === pass) {
+    return user;
+  }
+  
   return null;
 }
 
@@ -27,7 +26,7 @@ export function validateTeacher(id:string, pass: string, teacherList: Teacher[])
     return user;
   }
 
-  // FALLBACK: If not found in the live list (or if the list is corrupt/empty),
+  // FALLBACK: If not found in the live list (e.g., if storage is cleared),
   // check against the initial hardcoded list of teachers.
   // This ensures the default admin accounts always work.
   user = initialTeachers.find(u => u.id === id);

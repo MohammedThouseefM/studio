@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { School, Building, GraduationCap, RefreshCw, UserPlus, Eye, EyeOff, Menu, Users } from 'lucide-react';
+import { School, Building, GraduationCap, RefreshCw, UserPlus, Eye, EyeOff, Menu, Users, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,7 +26,7 @@ import { useCollegeData } from '@/context/college-data-context';
 export default function LandingPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { setCurrentUser, students, teachers } = useCollegeData();
+  const { setCurrentUser, students, teachers, isLoaded } = useCollegeData();
   const [studentId, setStudentId] = useState('');
   const [studentPassword, setStudentPassword] = useState('');
   const [teacherId, setTeacherId] = useState('');
@@ -183,7 +183,7 @@ export default function LandingPage() {
             alt="Entrance of Merit Haji Ismail Sahib Arts and Science College"
             data-ai-hint="college entrance"
             fill
-            className="object-cover brightness-75"
+            className="object-cover brightness-50"
             priority
           />
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white p-4">
@@ -301,8 +301,9 @@ export default function LandingPage() {
                       autoComplete="off"
                     />
                   </div>
-                  <Button type="submit" className="w-full bg-accent hover:bg-accent/90">
-                    Login as Student
+                  <Button type="submit" className="w-full bg-accent hover:bg-accent/90" disabled={!isLoaded}>
+                    {!isLoaded && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {isLoaded ? 'Login as Student' : 'Loading...'}
                   </Button>
                 </div>
               </form>
@@ -371,8 +372,9 @@ export default function LandingPage() {
                       autoComplete="off"
                     />
                   </div>
-                  <Button type="submit" className="w-full bg-accent hover:bg-accent/90">
-                    Login as Teacher
+                  <Button type="submit" className="w-full bg-accent hover:bg-accent/90" disabled={!isLoaded}>
+                    {!isLoaded && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {isLoaded ? 'Login as Teacher' : 'Loading...'}
                   </Button>
                 </div>
               </form>
