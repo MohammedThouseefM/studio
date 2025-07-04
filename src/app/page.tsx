@@ -179,7 +179,7 @@ export default function LandingPage() {
         {/* 2. Hero Section */}
         <section className="relative h-[60vh] w-full">
           <Image
-            src="/entrance-bg.jpg"
+            src="/clg_img.jpg"
             alt="Entrance of Merit Haji Ismail Sahib Arts and Science College"
             data-ai-hint="college entrance"
             fill
