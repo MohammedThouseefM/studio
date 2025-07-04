@@ -134,17 +134,19 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
       try {
         const storedData = window.localStorage.getItem(LOCAL_STORAGE_KEY);
         if (storedData) {
+          // If stored data exists, prioritize it.
           stateToLoad = JSON.parse(storedData);
           
-          // Re-hydrate Date objects after parsing
+          // Re-hydrate Date objects after parsing, as they are stored as strings.
           if (stateToLoad.auditLogs) {
             stateToLoad.auditLogs = stateToLoad.auditLogs.map((log: any) => ({...log, timestamp: new Date(log.timestamp)}));
           }
         } else {
+          // If no stored data, use the fresh data from the code.
           stateToLoad = getInitialState();
         }
 
-        // Always start with no user logged in
+        // Always start with no user logged in.
         stateToLoad.currentUser = null;
 
         const storedUserId = localStorage.getItem('currentUserId');
@@ -161,6 +163,7 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
         }
       } catch (error) {
         console.error('Error loading data from localStorage:', error);
+        // Fallback to initial state on error.
         stateToLoad = getInitialState();
       } finally {
         setAppState(stateToLoad);
