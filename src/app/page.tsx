@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -222,7 +223,7 @@ export default function LandingPage() {
             <DialogTitle className="text-2xl">Welcome Back!</DialogTitle>
             <DialogDescription>
               {loginTab === 'student'
-                ? "Student ID is your University Number. The password is your Date of Birth."
+                ? "Student ID is your University Number. The password is your Date of Birth in DD-MM-YYYY format."
                 : "Teacher ID is your Staff ID. For demo, use ID: TEACHER01 / Pass: Teacher@Pass1"
               }
             </DialogDescription>
@@ -255,7 +256,7 @@ export default function LandingPage() {
                       <Input
                         id="student-password"
                         type={showStudentPassword ? 'text' : 'password'}
-                        placeholder="YYYY-MM-DD"
+                        placeholder="DD-MM-YYYY"
                         value={studentPassword}
                         onChange={(e) => setStudentPassword(e.target.value)}
                         required

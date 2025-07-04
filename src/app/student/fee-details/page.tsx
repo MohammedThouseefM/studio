@@ -122,7 +122,7 @@ export default function FeeDetailsPage() {
                       <TableCell className={cn(fee.balance > 0 && 'text-destructive font-medium')}>
                         {formatCurrency(fee.balance)}
                       </TableCell>
-                      <TableCell>{format(parseISO(fee.dueDate), 'PPP')}</TableCell>
+                      <TableCell>{format(parseISO(fee.dueDate), 'dd-MM-yyyy')}</TableCell>
                       <TableCell className="text-right">
                         <Badge variant={statusVariant[fee.status]} className="capitalize">{fee.status}</Badge>
                       </TableCell>

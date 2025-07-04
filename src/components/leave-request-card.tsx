@@ -43,7 +43,7 @@ function LeaveRequestCardComponent() {
             studentLeaveRequests.map((request) => (
              <div key={request.id} className="text-sm p-3 rounded-md bg-card-foreground/5 flex justify-between items-center">
                 <div>
-                  <p className="font-semibold">{format(parseISO(request.startDate), 'MMM d, yyyy')} - {format(parseISO(request.endDate), 'MMM d, yyyy')}</p>
+                  <p className="font-semibold">{format(parseISO(request.startDate), 'dd-MM-yyyy')} - {format(parseISO(request.endDate), 'dd-MM-yyyy')}</p>
                   <p className="text-muted-foreground truncate max-w-[150px]">{request.reason}</p>
                 </div>
                 <Badge variant={statusVariant[request.status]} className="capitalize">{request.status}</Badge>

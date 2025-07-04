@@ -56,7 +56,7 @@ export default function ExamSchedulePage() {
                 {schedule.length > 0 ? (
                   schedule.map((exam) => (
                     <TableRow key={exam.id}>
-                      <TableCell className="font-medium">{format(parseISO(exam.date), 'PPP')}</TableCell>
+                      <TableCell className="font-medium">{format(parseISO(exam.date), 'dd-MM-yyyy')}</TableCell>
                       <TableCell>{exam.subjectCode}</TableCell>
                       <TableCell>{exam.subject}</TableCell>
                       <TableCell>{exam.time}</TableCell>

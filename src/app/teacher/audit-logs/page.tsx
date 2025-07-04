@@ -41,7 +41,7 @@ export default function AuditLogsPage() {
                                     auditLogs.map(log => (
                                         <TableRow key={log.id}>
                                             <TableCell className="text-muted-foreground">
-                                                {format(log.timestamp, 'MMM d, yyyy, h:mm a')}
+                                                {format(log.timestamp, 'dd-MM-yyyy, h:mm a')}
                                                 <p className="text-xs">({formatDistanceToNow(log.timestamp, { addSuffix: true })})</p>
                                             </TableCell>
                                             <TableCell className="font-medium">{log.user}</TableCell>

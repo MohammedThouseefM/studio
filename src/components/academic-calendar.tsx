@@ -125,7 +125,7 @@ export function AcademicCalendar() {
         </div>
         <div className="md:col-span-1">
           <h3 className="font-semibold text-lg mb-4">
-            Details for {selectedDay ? format(selectedDay, 'PPP') : '...'}
+            Details for {selectedDay ? format(selectedDay, 'dd-MM-yyyy') : '...'}
           </h3>
           <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
             <div>

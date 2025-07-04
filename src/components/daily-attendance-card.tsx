@@ -1,3 +1,4 @@
+
 'use client';
 
 import { memo } from 'react';
@@ -20,7 +21,7 @@ const statusColors = {
 }
 
 function DailyAttendanceCardComponent() {
-  const today = format(new Date(), 'PPP');
+  const today = format(new Date(), 'dd-MM-yyyy');
   // In a real app, you'd fetch this for the current day for the logged in student
   const attendance = dailyAttendanceData; 
 

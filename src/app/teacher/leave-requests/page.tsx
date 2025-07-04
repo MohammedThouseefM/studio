@@ -81,7 +81,7 @@ export default function LeaveRequestsPage() {
                                         <TableRow key={request.id}>
                                             <TableCell className="font-medium">{request.studentName}</TableCell>
                                             <TableCell>{request.department} - {request.year}</TableCell>
-                                            <TableCell>{format(parseISO(request.startDate), 'MMM d')} - {format(parseISO(request.endDate), 'MMM d')}</TableCell>
+                                            <TableCell>{format(parseISO(request.startDate), 'dd-MM-yyyy')} - {format(parseISO(request.endDate), 'dd-MM-yyyy')}</TableCell>
                                             <TableCell className="max-w-[200px] truncate">{request.reason}</TableCell>
                                             <TableCell className="text-right space-x-2">
                                                 <Button variant="ghost" size="icon" className="text-green-600 hover:text-green-700 hover:bg-green-100" onClick={() => handleApproveLeave(request)}>

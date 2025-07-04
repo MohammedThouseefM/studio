@@ -104,7 +104,7 @@ export default function AcademicSettingsPage() {
                                 {events.map((event) => (
                                     <TableRow key={event.id}>
                                         <TableCell className="font-medium">{event.title}</TableCell>
-                                        <TableCell>{format(parseISO(event.date), 'PPP')}</TableCell>
+                                        <TableCell>{format(parseISO(event.date), 'dd-MM-yyyy')}</TableCell>
                                         <TableCell><span className="capitalize">{event.type}</span></TableCell>
                                         <TableCell className="text-right space-x-2">
                                             <Button variant="ghost" size="icon" onClick={() => handleEditEventClick(event)}>

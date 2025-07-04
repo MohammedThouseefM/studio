@@ -63,7 +63,7 @@ export default function StudentProfilePage() {
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Date of Birth</p>
-              <p className="font-medium">{format(parseISO(student.dob), 'PPP')}</p>
+              <p className="font-medium">{format(parseISO(student.dob), 'dd-MM-yyyy')}</p>
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Phone Number</p>

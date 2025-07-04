@@ -1,3 +1,4 @@
+
 'use client';
 
 import { memo } from 'react';
@@ -31,7 +32,7 @@ function AcademicCalendarCardComponent() {
             upcomingEvents.map((event) => (
              <div key={event.id} className="text-sm p-3 rounded-md bg-card-foreground/5">
                 <p className="font-semibold">{event.title}</p>
-                <p className="text-muted-foreground">{format(parseISO(event.date), 'MMMM d, yyyy')}</p>
+                <p className="text-muted-foreground">{format(parseISO(event.date), 'dd-MM-yyyy')}</p>
             </div>
             ))
           ) : (

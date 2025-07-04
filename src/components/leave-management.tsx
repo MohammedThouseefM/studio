@@ -139,8 +139,8 @@ export function LeaveManagement() {
                   {studentLeaveRequests.length > 0 ? (
                     studentLeaveRequests.map((request) => (
                       <TableRow key={request.id}>
-                        <TableCell>{format(parseISO(request.startDate), 'PPP')}</TableCell>
-                        <TableCell>{format(parseISO(request.endDate), 'PPP')}</TableCell>
+                        <TableCell>{format(parseISO(request.startDate), 'dd-MM-yyyy')}</TableCell>
+                        <TableCell>{format(parseISO(request.endDate), 'dd-MM-yyyy')}</TableCell>
                         <TableCell className="max-w-[200px] truncate">{request.reason}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-2">
