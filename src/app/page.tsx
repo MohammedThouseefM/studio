@@ -26,7 +26,7 @@ import { useCollegeData } from '@/context/college-data-context';
 export default function LandingPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { setCurrentUser } = useCollegeData();
+  const { setCurrentUser, students, teachers } = useCollegeData();
   const [studentId, setStudentId] = useState('');
   const [studentPassword, setStudentPassword] = useState('');
   const [teacherId, setTeacherId] = useState('');
@@ -62,7 +62,7 @@ export default function LandingPage() {
 
   const handleStudentLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (studentCaptchaInput.toLowerCase() !== captcha.toLowerCase()) {
+    if (studentCaptchaInput.toUpperCase() !== captcha.toUpperCase()) {
       toast({
         variant: 'destructive',
         title: 'Login Failed',
@@ -73,7 +73,7 @@ export default function LandingPage() {
       return;
     }
     
-    const user = validateStudent(studentId, studentPassword);
+    const user = validateStudent(studentId, studentPassword, students);
     if (user) {
       setCurrentUser(user);
       router.push('/student/dashboard');
@@ -90,7 +90,7 @@ export default function LandingPage() {
 
   const handleTeacherLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (teacherCaptchaInput.toLowerCase() !== captcha.toLowerCase()) {
+    if (teacherCaptchaInput.toUpperCase() !== captcha.toUpperCase()) {
       toast({
         variant: 'destructive',
         title: 'Login Failed',
@@ -100,7 +100,7 @@ export default function LandingPage() {
       setTeacherCaptchaInput('');
       return;
     }
-    const user = validateTeacher(teacherId, teacherPassword);
+    const user = validateTeacher(teacherId, teacherPassword, teachers);
     if (user) {
       setCurrentUser(user);
       router.push('/teacher/dashboard');
@@ -223,7 +223,7 @@ export default function LandingPage() {
             <DialogTitle className="text-2xl">Welcome Back!</DialogTitle>
             <DialogDescription>
               {loginTab === 'student'
-                ? "Student ID is your University Number. The password is your Date of Birth in DD-MM-YYYY format."
+                ? "Student ID is your University Number. The password is your Date of Birth in dd-MM-yyyy format."
                 : "Teacher ID is your Staff ID. For demo, use ID: TEACHER01 / Pass: Teacher@Pass1"
               }
             </DialogDescription>
@@ -256,7 +256,7 @@ export default function LandingPage() {
                       <Input
                         id="student-password"
                         type={showStudentPassword ? 'text' : 'password'}
-                        placeholder="DD-MM-YYYY"
+                        placeholder="dd-MM-yyyy"
                         value={studentPassword}
                         onChange={(e) => setStudentPassword(e.target.value)}
                         required
@@ -280,7 +280,7 @@ export default function LandingPage() {
                     <Label htmlFor="student-captcha">Captcha</Label>
                     <div className="flex items-center gap-4">
                       <div className="flex-1 select-none rounded-md border bg-muted p-2 text-center text-xl font-bold tracking-widest">
-                        <span className="line-through uppercase">{captcha}</span>
+                        <span className="uppercase">{captcha}</span>
                       </div>
                       <Button
                         type="button"
@@ -350,7 +350,7 @@ export default function LandingPage() {
                     <Label htmlFor="teacher-captcha">Captcha</Label>
                     <div className="flex items-center gap-4">
                       <div className="flex-1 select-none rounded-md border bg-muted p-2 text-center text-xl font-bold tracking-widest">
-                         <span className="line-through uppercase">{captcha}</span>
+                         <span className="uppercase">{captcha}</span>
                       </div>
                       <Button
                         type="button"

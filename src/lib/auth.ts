@@ -1,9 +1,9 @@
 
-import { students, teachers, type Student, type Teacher } from './mock-data';
+import { type Student, type Teacher } from './mock-data';
 
 // In a real app, passwords would be hashed. For this demo, we do a simple string comparison.
-export function validateStudent(id: string, pass: string): Student | null {
-  const user = students.find(u => u.university_number === id);
+export function validateStudent(id: string, pass: string, studentList: Student[]): Student | null {
+  const user = studentList.find(u => u.university_number === id);
   if (user) {
     // User enters password as dd-mm-yyyy. Student DOB is stored as yyyy-mm-dd.
     const passParts = pass.split(/[-/]/);
@@ -20,8 +20,8 @@ export function validateStudent(id: string, pass: string): Student | null {
   return null;
 }
 
-export function validateTeacher(id:string, pass: string): Teacher | null {
-  const user = teachers.find(u => u.id === id);
+export function validateTeacher(id:string, pass: string, teacherList: Teacher[]): Teacher | null {
+  const user = teacherList.find(u => u.id === id);
   if (user && user.password === pass) {
     return user;
   }
