@@ -41,7 +41,7 @@ export type CalendarEventWithId = RawCalendarEvent & { id: string };
 export type AuditLog = AuditLogType;
 export type { SemesterFee };
 
-const LOCAL_STORAGE_KEY = 'attend-ease-data';
+const LOCAL_STORAGE_KEY = 'attend-ease-data-v2';
 
 type CollegeState = {
   events: CalendarEventWithId[];
