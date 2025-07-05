@@ -7,8 +7,13 @@ export function validateStudent(id: string, pass: string, studentList: Student[]
   const user = studentList.find(u => u.university_number.toLowerCase() === id.toLowerCase());
   
   if (user) {
-    // Password (pass) and stored DOB (user.dob) are both expected in YYYY-MM-DD format.
-    if (user.dob === pass) {
+    // The stored DOB (user.dob) is in YYYY-MM-DD format.
+    // The password (pass) is provided in DD-MM-YYYY format.
+    // We convert the stored DOB to DD-MM-YYYY for comparison.
+    const [year, month, day] = user.dob.split('-');
+    const formattedDobForPassword = `${day}-${month}-${year}`;
+    
+    if (formattedDobForPassword === pass) {
       return user.isActive ? user : 'inactive';
     }
   }
