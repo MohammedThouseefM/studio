@@ -41,7 +41,7 @@ export type CalendarEventWithId = RawCalendarEvent & { id: string };
 export type AuditLog = AuditLogType;
 export type { SemesterFee };
 
-const LOCAL_STORAGE_KEY = 'attend-ease-data-v4';
+const LOCAL_STORAGE_KEY = 'attend-ease-data-v8';
 
 type CollegeState = {
   events: CalendarEventWithId[];
@@ -135,30 +135,33 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
     if (typeof window !== 'undefined') {
       let finalState: CollegeState;
       try {
+        // Start with a fresh set of initial data.
+        const initialState = getInitialState();
+        
         const storedDataJSON = window.localStorage.getItem(LOCAL_STORAGE_KEY);
         if (storedDataJSON) {
           const storedData = JSON.parse(storedDataJSON);
-          const initialState = getInitialState();
-
-          // Safely merge teachers: Start with initial teachers, update with stored data, add new ones
+          
+          // Safely merge teachers: Start with initial teachers, then update with any stored data.
           const teacherMap = new Map<string, Teacher>(initialState.teachers.map(t => [t.id, t]));
           if (Array.isArray(storedData.teachers)) {
-              storedData.teachers.forEach((teacher: Teacher) => {
-                  teacherMap.set(teacher.id, { ...(teacherMap.get(teacher.id) || {}), ...teacher });
-              });
+            storedData.teachers.forEach((teacher: Teacher) => {
+              // Update existing teachers or add new ones from storage.
+              teacherMap.set(teacher.id, { ...(teacherMap.get(teacher.id) || {}), ...teacher });
+            });
           }
 
-          // Safely merge students: Start with initial students, update with stored data, add new ones
+          // Safely merge students: Start with initial students, then update with any stored data.
           const studentMap = new Map<string, Student>(initialState.students.map(s => [s.id, s]));
           if (Array.isArray(storedData.students)) {
-              storedData.students.forEach((student: Student) => {
-                  studentMap.set(student.id, { ...(studentMap.get(student.id) || {}), ...student });
-              });
+            storedData.students.forEach((student: Student) => {
+              studentMap.set(student.id, { ...(studentMap.get(student.id) || {}), ...student });
+            });
           }
           
           finalState = {
             ...initialState, // Start with defaults
-            ...storedData, // Apply stored dynamic data like events, logs, etc.
+            ...storedData, // Apply other stored dynamic data like events, logs, etc.
             teachers: Array.from(teacherMap.values()), // Use safely merged teachers
             students: Array.from(studentMap.values()), // Use safely merged students
           };
