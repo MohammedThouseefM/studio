@@ -32,6 +32,7 @@ import {
   type StudentFeeDetails,
   type SemesterFee,
   type SubjectResult,
+  type StudentResults,
 } from '@/lib/mock-data';
 import type { AttendanceState } from '@/components/attendance-sheet';
 import { format, parseISO } from 'date-fns';
@@ -134,15 +135,36 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
     if (typeof window !== 'undefined') {
       let finalState: CollegeState;
       try {
-        const storedData = window.localStorage.getItem(LOCAL_STORAGE_KEY);
-        if (storedData) {
-          // If there's data in storage, use it as the primary source.
-          // We merge it with the initial state to pick up any new properties
-          // that might have been added to the code since the data was stored.
-          const parsedData = JSON.parse(storedData);
-          finalState = { ...getInitialState(), ...parsedData };
+        const storedDataJSON = window.localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (storedDataJSON) {
+          const storedData = JSON.parse(storedDataJSON);
+          const initialState = getInitialState();
+
+          // Safely merge teachers: Start with initial teachers, update with stored data, add new ones
+          const teacherMap = new Map<string, Teacher>(initialState.teachers.map(t => [t.id, t]));
+          if (Array.isArray(storedData.teachers)) {
+              storedData.teachers.forEach((teacher: Teacher) => {
+                  teacherMap.set(teacher.id, { ...(teacherMap.get(teacher.id) || {}), ...teacher });
+              });
+          }
+
+          // Safely merge students: Start with initial students, update with stored data, add new ones
+          const studentMap = new Map<string, Student>(initialState.students.map(s => [s.id, s]));
+          if (Array.isArray(storedData.students)) {
+              storedData.students.forEach((student: Student) => {
+                  studentMap.set(student.id, { ...(studentMap.get(student.id) || {}), ...student });
+              });
+          }
+          
+          finalState = {
+            ...initialState, // Start with defaults
+            ...storedData, // Apply stored dynamic data like events, logs, etc.
+            teachers: Array.from(teacherMap.values()), // Use safely merged teachers
+            students: Array.from(studentMap.values()), // Use safely merged students
+          };
+
         } else {
-          // No stored data, so use the fresh initial data from the code.
+          // No stored data, use fresh initial data.
           finalState = getInitialState();
         }
       } catch (error) {
