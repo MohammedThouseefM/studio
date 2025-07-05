@@ -31,7 +31,6 @@ import {
   type Feedback,
   type StudentFeeDetails,
   type SemesterFee,
-  type StudentResults,
   type SubjectResult,
 } from '@/lib/mock-data';
 import type { AttendanceState } from '@/components/attendance-sheet';
@@ -136,39 +135,15 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
       let finalState: CollegeState;
       try {
         const storedData = window.localStorage.getItem(LOCAL_STORAGE_KEY);
-        const initialState = getInitialState();
-        
         if (storedData) {
-            const parsedData = JSON.parse(storedData);
-            
-            // Start with the initial state, then overwrite with stored data to preserve structure
-            finalState = { ...initialState, ...parsedData };
-
-            // --- Robust Merge Logic ---
-            // Now, perform a safe merge for teachers and students to ensure default users are not lost.
-            // This preserves user-created accounts and any changes to existing accounts from localStorage.
-            const storedTeachers: Teacher[] = parsedData.teachers || [];
-            const teachersMap = new Map(storedTeachers.map(t => [t.id, t]));
-            initialState.teachers.forEach(initialTeacher => {
-                // If a default teacher is missing from storage (e.g., from a bug), add them back.
-                if (!teachersMap.has(initialTeacher.id)) {
-                    teachersMap.set(initialTeacher.id, initialTeacher);
-                }
-            });
-            finalState.teachers = Array.from(teachersMap.values());
-
-            const storedStudents: Student[] = parsedData.students || [];
-            const studentsMap = new Map(storedStudents.map(s => [s.id, s]));
-            initialState.students.forEach(initialStudent => {
-                if (!studentsMap.has(initialStudent.id)) {
-                    studentsMap.set(initialStudent.id, initialStudent);
-                }
-            });
-            finalState.students = Array.from(studentsMap.values());
-
+          // If there's data in storage, use it as the primary source.
+          // We merge it with the initial state to pick up any new properties
+          // that might have been added to the code since the data was stored.
+          const parsedData = JSON.parse(storedData);
+          finalState = { ...getInitialState(), ...parsedData };
         } else {
-            // No stored data, start fresh with initial data
-            finalState = initialState;
+          // No stored data, so use the fresh initial data from the code.
+          finalState = getInitialState();
         }
       } catch (error) {
         console.error('Failed to load or parse stored data, resetting.', error);
@@ -188,7 +163,7 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
           finalState.currentUser = null;
       }
       
-      // Rehydrate Date objects
+      // Rehydrate Date objects from string representation in JSON
       if (finalState.auditLogs) {
           finalState.auditLogs = finalState.auditLogs.map((log: any) => ({...log, timestamp: new Date(log.timestamp)}));
       }
