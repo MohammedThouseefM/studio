@@ -138,13 +138,33 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
         const storedData = window.localStorage.getItem(LOCAL_STORAGE_KEY);
         if (storedData) {
             const parsedData = JSON.parse(storedData);
-            // Self-healing: Ensure initial teachers/students are always present if storage becomes empty/corrupted.
-            if (!parsedData.teachers || parsedData.teachers.length === 0) {
-              parsedData.teachers = initialTeachers;
-            }
-            if (!parsedData.students || parsedData.students.length === 0) {
-              parsedData.students = initialStudents;
-            }
+            
+            // --- Teacher Merge Logic ---
+            const storedTeachers: Teacher[] = parsedData.teachers || [];
+            const storedTeachersMap = new Map(storedTeachers.map(t => [t.id, t]));
+            const mergedTeachers = initialTeachers.map(initialTeacher => 
+                storedTeachersMap.get(initialTeacher.id) || initialTeacher
+            );
+            storedTeachers.forEach(storedTeacher => {
+                if (!initialTeachers.some(it => it.id === storedTeacher.id)) {
+                    mergedTeachers.push(storedTeacher);
+                }
+            });
+            parsedData.teachers = mergedTeachers;
+
+            // --- Student Merge Logic ---
+            const storedStudents: Student[] = parsedData.students || [];
+            const storedStudentsMap = new Map(storedStudents.map(s => [s.id, s]));
+            const mergedStudents = initialStudents.map(initialStudent => 
+                storedStudentsMap.get(initialStudent.id) || initialStudent
+            );
+            storedStudents.forEach(storedStudent => {
+                if (!initialStudents.some(is => is.id === storedStudent.id)) {
+                    mergedStudents.push(storedStudent);
+                }
+            });
+            parsedData.students = mergedStudents;
+            
             finalState = parsedData;
         } else {
             // No stored data, start fresh
