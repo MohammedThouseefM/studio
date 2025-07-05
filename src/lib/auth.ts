@@ -1,3 +1,4 @@
+
 import { type Student, type Teacher } from './mock-data';
 
 // In a real app, passwords would be hashed. For this demo, we do a simple string comparison.
@@ -6,23 +7,25 @@ export function validateStudent(id: string, pass: string, studentList: Student[]
   const user = studentList.find(u => u.university_number.toLowerCase() === id.toLowerCase());
   
   if (user) {
-    // The stored DOB is in 'YYYY-MM-DD' format. The password input is in 'dd-MM-yyyy' format.
-    // Instead of using new Date() which can have timezone issues, we'll reformat the input string.
     try {
-        const passParts = pass.split('-');
-        if (passParts.length === 3) {
-            const [day, month, year] = passParts;
-            // Ensure parts are valid before creating the string
-            if (day && month && year && year.length === 4) {
-                const formattedPassAsDob = `${year}-${month}-${day}`;
-                if (user.dob === formattedPassAsDob) {
-                    return user.isActive ? user : 'inactive';
-                }
-            }
-        }
+      // Stored DOB is 'YYYY-MM-DD'
+      const [storedYear, storedMonth, storedDay] = user.dob.split('-').map(Number);
+
+      // Input password is 'dd-MM-yyyy'
+      const passParts = pass.split('-');
+      if (passParts.length !== 3) return null;
+
+      const [inputDay, inputMonth, inputYear] = passParts.map(Number);
+      
+      // Check if parts are valid numbers before comparison
+      if (isNaN(inputDay) || isNaN(inputMonth) || isNaN(inputYear)) return null;
+
+      if (storedYear === inputYear && storedMonth === inputMonth && storedDay === inputDay) {
+        return user.isActive ? user : 'inactive';
+      }
     } catch (e) {
-        console.error("Error parsing date from password", e);
-        // This catch block will likely not be hit with string splitting, but it's safe to keep.
+      console.error("Error validating student password date:", e);
+      return null;
     }
   }
   

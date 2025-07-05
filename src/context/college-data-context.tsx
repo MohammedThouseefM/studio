@@ -141,21 +141,22 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
         if (storedData) {
             const parsedData = JSON.parse(storedData);
             
-            // --- Robust Merge Logic ---
-            // This ensures that default users from mock-data are always present,
-            // while user-created users and changes to existing users from localStorage are preserved.
+            // Start with the initial state, then overwrite with stored data to preserve structure
+            finalState = { ...initialState, ...parsedData };
 
-            // Merge Teachers
+            // --- Robust Merge Logic ---
+            // Now, perform a safe merge for teachers and students to ensure default users are not lost.
+            // This preserves user-created accounts and any changes to existing accounts from localStorage.
             const storedTeachers: Teacher[] = parsedData.teachers || [];
             const teachersMap = new Map(storedTeachers.map(t => [t.id, t]));
             initialState.teachers.forEach(initialTeacher => {
+                // If a default teacher is missing from storage (e.g., from a bug), add them back.
                 if (!teachersMap.has(initialTeacher.id)) {
                     teachersMap.set(initialTeacher.id, initialTeacher);
                 }
             });
-            parsedData.teachers = Array.from(teachersMap.values());
+            finalState.teachers = Array.from(teachersMap.values());
 
-            // Merge Students
             const storedStudents: Student[] = parsedData.students || [];
             const studentsMap = new Map(storedStudents.map(s => [s.id, s]));
             initialState.students.forEach(initialStudent => {
@@ -163,14 +164,10 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
                     studentsMap.set(initialStudent.id, initialStudent);
                 }
             });
-            parsedData.students = Array.from(studentsMap.values());
-            
-            // Combine initial state with parsed data. Parsed data will overwrite initial state
-            // for things like announcements, events, etc., preserving user changes.
-            finalState = { ...initialState, ...parsedData };
+            finalState.students = Array.from(studentsMap.values());
 
         } else {
-            // No stored data, start fresh
+            // No stored data, start fresh with initial data
             finalState = initialState;
         }
       } catch (error) {
