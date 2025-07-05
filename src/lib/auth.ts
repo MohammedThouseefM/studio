@@ -1,24 +1,28 @@
-
 import { type Student, type Teacher } from './mock-data';
-import { format } from 'date-fns';
 
 // In a real app, passwords would be hashed. For this demo, we do a simple string comparison.
 export function validateStudent(id: string, pass: string, studentList: Student[]): Student | 'inactive' | null {
-  const user = studentList.find(u => u.university_number === id);
+  // Student ID check should be case-insensitive
+  const user = studentList.find(u => u.university_number.toLowerCase() === id.toLowerCase());
   
   if (user) {
-    // The stored DOB is YYYY-MM-DD. The password input is dd-MM-yyyy.
-    // We must format the stored DOB to match the password format for comparison.
+    // The stored DOB is in 'YYYY-MM-DD' format. The password input is in 'dd-MM-yyyy' format.
+    // Instead of using new Date() which can have timezone issues, we'll reformat the input string.
     try {
-        const formattedDob = format(new Date(user.dob), 'dd-MM-yyyy');
-        if (formattedDob === pass) {
-            return user.isActive ? user : 'inactive';
+        const passParts = pass.split('-');
+        if (passParts.length === 3) {
+            const [day, month, year] = passParts;
+            // Ensure parts are valid before creating the string
+            if (day && month && year && year.length === 4) {
+                const formattedPassAsDob = `${year}-${month}-${day}`;
+                if (user.dob === formattedPassAsDob) {
+                    return user.isActive ? user : 'inactive';
+                }
+            }
         }
     } catch (e) {
-        // Fallback for any potential date format errors
-        if (user.dob === pass) {
-            return user.isActive ? user : 'inactive';
-        }
+        console.error("Error parsing date from password", e);
+        // This catch block will likely not be hit with string splitting, but it's safe to keep.
     }
   }
   
@@ -26,7 +30,8 @@ export function validateStudent(id: string, pass: string, studentList: Student[]
 }
 
 export function validateTeacher(id:string, pass: string, teacherList: Teacher[]): Teacher | 'inactive' | null {
-  const user = teacherList.find(u => u.id === id);
+  // Teacher ID check should be case-insensitive.
+  const user = teacherList.find(u => u.id.toLowerCase() === id.toLowerCase());
 
   if (user) {
     if (user.password === pass) {

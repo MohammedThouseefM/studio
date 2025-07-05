@@ -267,15 +267,16 @@ const genderMap: { [key: string]: 'Male' | 'Female' | 'Other' } = {
 }
 
 const usedRegNumbers = new Set<string>();
+let duplicateCounter = 1;
 
 const processedStudents: Student[] = Object.values(rawStudentData).flatMap(deptData => {
   return Object.entries(deptData).flatMap(([yearKey, studentsData]) => {
-    return studentsData.map((s, index) => {
+    return studentsData.map(s => {
       let regNum = s.registration_number.toLowerCase();
       
       // Ensure unique registration number
       if (usedRegNumbers.has(regNum)) {
-        regNum = `${regNum}-${index + 1}`;
+        regNum = `${regNum}-${duplicateCounter++}`;
       }
       usedRegNumbers.add(regNum);
       
@@ -351,7 +352,7 @@ export const academicCalendarEvents: CalendarEvent[] = [
 
 
 export const pendingStudents: Student[] = [
-  { id: '36623U09029', name: 'Zoya Khan', dob: '2005-05-20', university_number: '36623U09029', department: 'BCA', year: '1st Year', rollNumber: '3BCA-30', email: 'zoya.k@example.com', phone: '9123456780', fatherContactNumber: '9123456781', photoUrl: `https://placehold.co/200x200.png`, gender: 'Female', currentSemester: '1st', academicYear: '2024-2025', address: '123 New Street, Vellore', isActive: true }
+  { id: '36623u09029', name: 'Zoya Khan', dob: '2005-05-20', university_number: '36623u09029', department: 'BCA', year: '1st Year', rollNumber: '3BCA-30', email: 'zoya.k@example.com', phone: '9123456780', fatherContactNumber: '9123456781', photoUrl: `https://placehold.co/200x200.png`, gender: 'Female', currentSemester: '1st', academicYear: '2024-2025', address: '123 New Street, Vellore', isActive: true }
 ];
 
 export const leaveRequests: LeaveRequest[] = [
