@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format, parseISO } from 'date-fns';
-import { PlusCircle, Pencil, Search, BarChart, User, SlidersHorizontal, Users, Send } from 'lucide-react';
+import { PlusCircle, Pencil, Search, BarChart, User, SlidersHorizontal, Users, Send, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,6 +18,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { type Student, previousAttendanceData, studentAttendance } from '@/lib/mock-data';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useCollegeData } from '@/context/college-data-context';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
@@ -26,6 +27,8 @@ import { AcademicCalendar } from '@/components/academic-calendar';
 import { DownloadPdfButton } from '@/components/download-pdf-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PrintableReport } from '@/components/printable-report';
+import { cn } from '@/lib/utils';
+import { Switch } from '@/components/ui/switch';
 
 const studentSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -73,7 +76,7 @@ export default function StudentManagementPage() {
 
     const { 
         departments, years,
-        students, addStudent, updateStudent,
+        students, addStudent, updateStudent, deleteStudent, toggleStudentStatus,
         studentFeeDetails, studentResults
     } = useCollegeData();
   
@@ -138,6 +141,7 @@ export default function StudentManagementPage() {
         addStudent({
         ...data,
         id: data.university_number,
+        isActive: true,
         }, currentTeacherId);
         toast({ title: 'Student Added', description: `Successfully added ${data.name}.` });
         setIsAddStudentDialogOpen(false);
@@ -168,7 +172,7 @@ export default function StudentManagementPage() {
     
     const onEditStudentSubmit = (data: StudentFormData) => {
         if (!editingStudent) return;
-        updateStudent(editingStudent.id, { ...data, id: data.university_number }, currentTeacherId);
+        updateStudent(editingStudent.id, { ...data, id: data.university_number, isActive: editingStudent.isActive }, currentTeacherId);
         toast({ title: 'Student Updated', description: `Successfully updated ${data.name}.` });
         setIsEditStudentDialogOpen(false);
         setEditingStudent(null);
@@ -214,6 +218,11 @@ Please contact the college administration for further details.`;
             title: "Redirecting to WhatsApp",
             description: "A new tab has been opened to share the report.",
         });
+    };
+    
+    const handleDeleteStudent = (student: Student) => {
+        deleteStudent(student.id, currentTeacherId);
+        toast({ variant: 'destructive', title: 'Student Removed', description: `${student.name} has been removed from the roster.` });
     };
 
     const StudentFormFields = ({ photoUrlValue }: { photoUrlValue?: string }) => (
@@ -322,7 +331,7 @@ Please contact the college administration for further details.`;
                                 {filteredStudents.map(student => {
                                     const attendance = calculateAttendancePercentage(student.id);
                                     return (
-                                        <Card key={student.id} className="flex flex-col justify-between">
+                                        <Card key={student.id} className={cn("flex flex-col justify-between", !student.isActive && 'opacity-50 bg-muted/50')}>
                                             <div>
                                                 <CardHeader className="flex flex-row items-center gap-4 p-4">
                                                     <Avatar className="h-12 w-12 border">
@@ -346,16 +355,41 @@ Please contact the college administration for further details.`;
                                                     </div>
                                                 </CardContent>
                                             </div>
-                                            <CardFooter className="p-2 pt-0 grid grid-cols-3 gap-2">
-                                                <Button variant="outline" className="w-full text-xs px-2" onClick={() => setSelectedStudent(student)}>
-                                                    <BarChart className="mr-2 h-4 w-4" /> Report
-                                                </Button>
-                                                <Button variant="outline" className="w-full text-xs px-2" onClick={() => handleEditStudentClick(student)}>
-                                                    <Pencil className="mr-2 h-4 w-4" /> Edit
-                                                </Button>
-                                                <Button variant="outline" className="w-full text-xs px-2" onClick={() => handleSendToParent(student)}>
-                                                    <Send className="mr-2 h-4 w-4" /> WhatsApp
-                                                </Button>
+                                            <CardFooter className="p-2 pt-0 flex flex-col gap-2">
+                                                <div className="grid grid-cols-3 gap-2 w-full">
+                                                    <Button variant="outline" className="w-full text-xs px-2" onClick={() => setSelectedStudent(student)}>
+                                                        <BarChart className="mr-2 h-4 w-4" /> Report
+                                                    </Button>
+                                                    <Button variant="outline" className="w-full text-xs px-2" onClick={() => handleEditStudentClick(student)}>
+                                                        <Pencil className="mr-2 h-4 w-4" /> Edit
+                                                    </Button>
+                                                    <Button variant="outline" className="w-full text-xs px-2" onClick={() => handleSendToParent(student)}>
+                                                        <Send className="mr-2 h-4 w-4" /> WhatsApp
+                                                    </Button>
+                                                </div>
+                                                <div className="flex items-center justify-between w-full border-t pt-2 mt-2">
+                                                     <div className="flex items-center space-x-2">
+                                                        <Switch id={`active-switch-${student.id}`} checked={student.isActive} onCheckedChange={() => toggleStudentStatus(student.id, currentTeacherId)} />
+                                                        <Label htmlFor={`active-switch-${student.id}`} className="text-xs">{student.isActive ? 'Active' : 'Deactivated'}</Label>
+                                                    </div>
+                                                    <AlertDialog>
+                                                        <AlertDialogTrigger asChild>
+                                                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:bg-destructive/10">
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </Button>
+                                                        </AlertDialogTrigger>
+                                                        <AlertDialogContent>
+                                                            <AlertDialogHeader>
+                                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                                <AlertDialogDescription>This will permanently remove {student.name} from the roster. This action cannot be undone.</AlertDialogDescription>
+                                                            </AlertDialogHeader>
+                                                            <AlertDialogFooter>
+                                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                <AlertDialogAction onClick={() => handleDeleteStudent(student)}>Delete Student</AlertDialogAction>
+                                                            </AlertDialogFooter>
+                                                        </AlertDialogContent>
+                                                    </AlertDialog>
+                                                </div>
                                             </CardFooter>
                                         </Card>
                                     )

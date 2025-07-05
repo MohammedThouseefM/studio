@@ -73,15 +73,17 @@ export default function LandingPage() {
       return;
     }
     
-    const user = validateStudent(studentId, studentPassword, students);
-    if (user) {
-      setCurrentUser(user);
+    const result = validateStudent(studentId, studentPassword, students);
+    if (result && typeof result !== 'string') {
+      setCurrentUser(result);
       router.push('/student/dashboard');
     } else {
       toast({
         variant: 'destructive',
         title: 'Login Failed',
-        description: 'Invalid University Number or Password.',
+        description: result === 'inactive' 
+          ? 'Your account has been deactivated. Please contact administration.' 
+          : 'Invalid University Number or Password.',
       });
       generateCaptcha();
       setStudentCaptchaInput('');
@@ -100,15 +102,17 @@ export default function LandingPage() {
       setTeacherCaptchaInput('');
       return;
     }
-    const user = validateTeacher(teacherId, teacherPassword, teachers);
-    if (user) {
-      setCurrentUser(user);
+    const result = validateTeacher(teacherId, teacherPassword, teachers);
+    if (result && typeof result !== 'string') {
+      setCurrentUser(result);
       router.push('/teacher/dashboard');
     } else {
       toast({
         variant: 'destructive',
         title: 'Login Failed',
-        description: 'Invalid Staff ID or Password.',
+        description: result === 'inactive'
+         ? 'Your account has been deactivated. Please contact administration.'
+         : 'Invalid Staff ID or Password.',
       });
       generateCaptcha();
       setTeacherCaptchaInput('');

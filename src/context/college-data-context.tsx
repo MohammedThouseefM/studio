@@ -104,9 +104,11 @@ type CollegeDataContextType = CollegeState & {
   addTeacher: (name: string, id: string, password: string, user: string) => void;
   updateTeacherPassword: (teacherId: string, newPassword: string, user: string) => void;
   deleteTeacher: (teacherId: string, user: string) => void;
+  toggleTeacherStatus: (teacherId: string, user: string) => void;
   addStudent: (student: Student, user: string) => void;
   updateStudent: (studentId: string, updatedStudent: Student, user: string) => void;
   deleteStudent: (studentId: string, user: string) => void;
+  toggleStudentStatus: (studentId: string, user: string) => void;
   addPendingStudent: (student: Student) => void;
   approveStudentRegistration: (studentId: string, user: string) => void;
   rejectStudentRegistration: (studentId: string, user: string) => void;
@@ -135,7 +137,15 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
       try {
         const storedData = window.localStorage.getItem(LOCAL_STORAGE_KEY);
         if (storedData) {
-            finalState = JSON.parse(storedData);
+            const parsedData = JSON.parse(storedData);
+            // Self-healing: Ensure initial teachers/students are always present if storage becomes empty/corrupted.
+            if (!parsedData.teachers || parsedData.teachers.length === 0) {
+              parsedData.teachers = initialTeachers;
+            }
+            if (!parsedData.students || parsedData.students.length === 0) {
+              parsedData.students = initialStudents;
+            }
+            finalState = parsedData;
         } else {
             // No stored data, start fresh
             finalState = getInitialState();
@@ -157,13 +167,6 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
       } else {
           finalState.currentUser = null;
       }
-
-      // Self-healing: Ensure initial teachers are always present.
-      initialTeachers.forEach(initialTeacher => {
-          if (!finalState.teachers.some(t => t.id === initialTeacher.id)) {
-              finalState.teachers.push(initialTeacher);
-          }
-      });
       
       // Rehydrate Date objects
       if (finalState.auditLogs) {
@@ -239,13 +242,15 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
   const addHour = (hour: string, user: string) => { if (hour && !appState.hours.includes(hour)) { setAppState(prev => ({ ...prev, hours: [...prev.hours, hour] })); addAuditLog(user, `Added new class hour: "${hour}"`, 'academic'); } };
   const deleteHour = (hour: string, user: string) => { setAppState(prev => ({ ...prev, hours: prev.hours.filter(h => h !== hour) })); addAuditLog(user, `Deleted class hour: "${hour}"`, 'academic'); };
 
-  const addTeacher = (name: string, id: string, password: string, user: string) => { if (name && id && password && !appState.teachers.some(t => t.id === id)) { setAppState(prev => ({ ...prev, teachers: [...prev.teachers, { name, id, password }] })); addAuditLog(user, `Added new teacher: ${name} (ID: ${id})`, 'teacher'); } };
+  const addTeacher = (name: string, id: string, password: string, user: string) => { if (name && id && password && !appState.teachers.some(t => t.id === id)) { setAppState(prev => ({ ...prev, teachers: [...prev.teachers, { name, id, password, isActive: true }] })); addAuditLog(user, `Added new teacher: ${name} (ID: ${id})`, 'teacher'); } };
   const updateTeacherPassword = (teacherId: string, newPassword: string, user: string) => { const teacher = appState.teachers.find(t => t.id === teacherId); if(teacher) { setAppState(prev => ({ ...prev, teachers: prev.teachers.map(t => t.id === teacherId ? { ...t, password: newPassword } : t) })); addAuditLog(user, `Changed password for teacher: ${teacher.name} (ID: ${teacherId})`, 'teacher'); } };
   const deleteTeacher = (teacherId: string, user: string) => { const teacher = appState.teachers.find(t => t.id === teacherId); if(teacher) { setAppState(prev => ({ ...prev, teachers: prev.teachers.filter(t => t.id !== teacherId) })); addAuditLog(user, `Deleted teacher: ${teacher.name} (ID: ${teacherId})`, 'teacher'); } };
+  const toggleTeacherStatus = (teacherId: string, user: string) => { const teacher = appState.teachers.find(t => t.id === teacherId); if (teacher) { setAppState(prev => ({ ...prev, teachers: prev.teachers.map(t => t.id === teacherId ? { ...t, isActive: !t.isActive } : t) })); addAuditLog(user, `${teacher.isActive ? 'Deactivated' : 'Activated'} teacher: ${teacher.name} (ID: ${teacherId})`, 'teacher'); } };
 
   const addStudent = (student: Student, user: string) => { setAppState(prev => ({ ...prev, students: [student, ...prev.students] })); addAuditLog(user, `Added new student: ${student.name} (ID: ${student.id})`, 'student'); };
   const updateStudent = (studentId: string, updatedStudent: Student, user: string) => { setAppState(prev => ({ ...prev, students: prev.students.map(s => s.id === studentId ? updatedStudent : s) })); addAuditLog(user, `Updated details for student: ${updatedStudent.name} (ID: ${studentId})`, 'student'); };
   const deleteStudent = (studentId: string, user: string) => { const student = appState.students.find(s => s.id === studentId); if (student) { setAppState(prev => ({ ...prev, students: prev.students.filter(s => s.id !== studentId) })); addAuditLog(user, `Deleted student: ${student.name} (ID: ${studentId})`, 'student'); } };
+  const toggleStudentStatus = (studentId: string, user: string) => { const student = appState.students.find(s => s.id === studentId); if (student) { setAppState(prev => ({ ...prev, students: prev.students.map(s => s.id === studentId ? { ...s, isActive: !s.isActive } : s) })); addAuditLog(user, `${student.isActive ? 'Deactivated' : 'Activated'} student: ${student.name} (ID: ${studentId})`, 'student'); } };
   
   const addPendingStudent = (student: Student) => { setAppState(prev => ({ ...prev, pendingStudents: [student, ...prev.pendingStudents] })); };
   const approveStudentRegistration = (studentId: string, user: string) => { const studentToApprove = appState.pendingStudents.find(s => s.id === studentId); if (studentToApprove) { setAppState(prev => ({ ...prev, students: [studentToApprove, ...prev.students], pendingStudents: prev.pendingStudents.filter(s => s.id !== studentId) })); addAuditLog(user, `Approved registration for ${studentToApprove.name} (ID: ${studentId})`, 'student'); } };
@@ -278,8 +283,8 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
     addDepartment, deleteDepartment,
     addYear, deleteYear,
     addHour, deleteHour,
-    addTeacher, updateTeacherPassword, deleteTeacher,
-    addStudent, updateStudent, deleteStudent,
+    addTeacher, updateTeacherPassword, deleteTeacher, toggleTeacherStatus,
+    addStudent, updateStudent, deleteStudent, toggleStudentStatus,
     addPendingStudent, approveStudentRegistration, rejectStudentRegistration, updatePendingStudent,
     addLeaveRequest, approveLeaveRequest, rejectLeaveRequest,
     addAnnouncement, deleteAnnouncement,

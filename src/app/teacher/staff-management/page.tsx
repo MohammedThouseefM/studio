@@ -17,6 +17,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useCollegeData } from '@/context/college-data-context';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 const teacherSchema = z.object({
   name: z.string().min(2, 'Name is required.'),
@@ -32,8 +35,8 @@ type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;
 
 export default function StaffManagementPage() {
     const { toast } = useToast();
-    const currentTeacherId = 'TEACHER01';
-    const { teachers, addTeacher, updateTeacherPassword, deleteTeacher } = useCollegeData();
+    const { teachers, addTeacher, updateTeacherPassword, deleteTeacher, toggleTeacherStatus, currentUser } = useCollegeData();
+    const currentTeacherId = currentUser?.id || '';
     
     const [isAddTeacherDialogOpen, setIsAddTeacherDialogOpen] = useState(false);
     const [isChangePasswordDialogOpen, setIsChangePasswordDialogOpen] = useState(false);
@@ -89,14 +92,29 @@ export default function StaffManagementPage() {
                                 <TableRow>
                                     <TableHead>Name</TableHead>
                                     <TableHead>Staff ID</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead>Active</TableHead>
                                     <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {teachers.map((teacher) => (
-                                    <TableRow key={teacher.id}>
-                                        <TableCell className="font-medium">{teacher.name}</TableCell>
+                                    <TableRow key={teacher.id} className={cn(!teacher.isActive && 'opacity-60')}>
+                                        <TableCell className={cn("font-medium", !teacher.isActive && 'line-through')}>{teacher.name}</TableCell>
                                         <TableCell>{teacher.id}</TableCell>
+                                        <TableCell>
+                                            <Badge variant={teacher.isActive ? 'default' : 'secondary'}>
+                                                {teacher.isActive ? 'Active' : 'Deactivated'}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Switch
+                                                checked={teacher.isActive}
+                                                onCheckedChange={() => toggleTeacherStatus(teacher.id, currentTeacherId)}
+                                                disabled={teacher.id === currentTeacherId}
+                                                aria-label="Toggle teacher status"
+                                            />
+                                        </TableCell>
                                         <TableCell className="text-right space-x-2">
                                             <Button variant="ghost" size="icon" onClick={() => { setEditingTeacher(teacher); changePasswordForm.reset(); setIsChangePasswordDialogOpen(true); }}>
                                                 <KeyRound className="h-4 w-4" /><span className="sr-only">Change Password</span>
