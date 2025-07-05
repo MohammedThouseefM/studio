@@ -3,12 +3,12 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { 
-  academicCalendarEvents as initialEventsData,
-  timeTable as initialTimeTable,
-  examTimeTable as initialExamTimeTable,
   collegeData as initialCollegeData,
   teachers as initialTeachers,
   students as initialStudents,
+  timeTable as initialTimeTable,
+  examTimeTable as initialExamTimeTable,
+  academicCalendarEvents as initialEventsData,
   pendingStudents as initialPendingStudents,
   leaveRequests as initialLeaveRequests,
   announcements as initialAnnouncements,
@@ -136,39 +136,42 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
       let finalState: CollegeState;
       try {
         const storedData = window.localStorage.getItem(LOCAL_STORAGE_KEY);
+        const initialState = getInitialState();
+        
         if (storedData) {
             const parsedData = JSON.parse(storedData);
             
-            // --- Teacher Merge Logic ---
-            const storedTeachers: Teacher[] = parsedData.teachers || [];
-            const storedTeachersMap = new Map(storedTeachers.map(t => [t.id, t]));
-            const mergedTeachers = initialTeachers.map(initialTeacher => 
-                storedTeachersMap.get(initialTeacher.id) || initialTeacher
-            );
-            storedTeachers.forEach(storedTeacher => {
-                if (!initialTeachers.some(it => it.id === storedTeacher.id)) {
-                    mergedTeachers.push(storedTeacher);
-                }
-            });
-            parsedData.teachers = mergedTeachers;
+            // --- Robust Merge Logic ---
+            // This ensures that default users from mock-data are always present,
+            // while user-created users and changes to existing users from localStorage are preserved.
 
-            // --- Student Merge Logic ---
-            const storedStudents: Student[] = parsedData.students || [];
-            const storedStudentsMap = new Map(storedStudents.map(s => [s.id, s]));
-            const mergedStudents = initialStudents.map(initialStudent => 
-                storedStudentsMap.get(initialStudent.id) || initialStudent
-            );
-            storedStudents.forEach(storedStudent => {
-                if (!initialStudents.some(is => is.id === storedStudent.id)) {
-                    mergedStudents.push(storedStudent);
+            // Merge Teachers
+            const storedTeachers: Teacher[] = parsedData.teachers || [];
+            const teachersMap = new Map(storedTeachers.map(t => [t.id, t]));
+            initialState.teachers.forEach(initialTeacher => {
+                if (!teachersMap.has(initialTeacher.id)) {
+                    teachersMap.set(initialTeacher.id, initialTeacher);
                 }
             });
-            parsedData.students = mergedStudents;
+            parsedData.teachers = Array.from(teachersMap.values());
+
+            // Merge Students
+            const storedStudents: Student[] = parsedData.students || [];
+            const studentsMap = new Map(storedStudents.map(s => [s.id, s]));
+            initialState.students.forEach(initialStudent => {
+                if (!studentsMap.has(initialStudent.id)) {
+                    studentsMap.set(initialStudent.id, initialStudent);
+                }
+            });
+            parsedData.students = Array.from(studentsMap.values());
             
-            finalState = parsedData;
+            // Combine initial state with parsed data. Parsed data will overwrite initial state
+            // for things like announcements, events, etc., preserving user changes.
+            finalState = { ...initialState, ...parsedData };
+
         } else {
             // No stored data, start fresh
-            finalState = getInitialState();
+            finalState = initialState;
         }
       } catch (error) {
         console.error('Failed to load or parse stored data, resetting.', error);
