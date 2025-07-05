@@ -227,7 +227,7 @@ export default function LandingPage() {
             <DialogTitle className="text-2xl">Welcome Back!</DialogTitle>
             <DialogDescription>
               {loginTab === 'student'
-                ? "Student ID is your University Number. The password is your Date of Birth in dd-MM-yyyy format."
+                ? "Student ID is your University Number. The password is your Date of Birth in YYYY-MM-DD format."
                 : "Teacher ID is your Staff ID. For demo, use ID: TEACHER01 / Pass: Teacher@Pass1"
               }
             </DialogDescription>
@@ -260,7 +260,7 @@ export default function LandingPage() {
                       <Input
                         id="student-password"
                         type={showStudentPassword ? 'text' : 'password'}
-                        placeholder="dd-MM-yyyy"
+                        placeholder="YYYY-MM-DD"
                         value={studentPassword}
                         onChange={(e) => setStudentPassword(e.target.value)}
                         required

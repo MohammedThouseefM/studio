@@ -7,25 +7,9 @@ export function validateStudent(id: string, pass: string, studentList: Student[]
   const user = studentList.find(u => u.university_number.toLowerCase() === id.toLowerCase());
   
   if (user) {
-    try {
-      // Stored DOB is 'YYYY-MM-DD'
-      const [storedYear, storedMonth, storedDay] = user.dob.split('-').map(Number);
-
-      // Input password is 'dd-MM-yyyy'
-      const passParts = pass.split('-');
-      if (passParts.length !== 3) return null;
-
-      const [inputDay, inputMonth, inputYear] = passParts.map(Number);
-      
-      // Check if parts are valid numbers before comparison
-      if (isNaN(inputDay) || isNaN(inputMonth) || isNaN(inputYear)) return null;
-
-      if (storedYear === inputYear && storedMonth === inputMonth && storedDay === inputDay) {
-        return user.isActive ? user : 'inactive';
-      }
-    } catch (e) {
-      console.error("Error validating student password date:", e);
-      return null;
+    // Password (pass) and stored DOB (user.dob) are both expected in YYYY-MM-DD format.
+    if (user.dob === pass) {
+      return user.isActive ? user : 'inactive';
     }
   }
   
@@ -37,6 +21,7 @@ export function validateTeacher(id:string, pass: string, teacherList: Teacher[])
   const user = teacherList.find(u => u.id.toLowerCase() === id.toLowerCase());
 
   if (user) {
+    // Password check is case-sensitive
     if (user.password === pass) {
       return user.isActive ? user : 'inactive';
     }
