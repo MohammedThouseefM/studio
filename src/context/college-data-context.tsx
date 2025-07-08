@@ -37,7 +37,6 @@ import {
 } from '@/lib/mock-data';
 import type { AttendanceState } from '@/components/attendance-sheet';
 import { format, parseISO } from 'date-fns';
-import { getAllStudents, getAllTeachers } from '@/lib/actions';
 
 export type CalendarEventWithId = RawCalendarEvent & { id: string };
 export type AuditLog = AuditLogType;
@@ -132,9 +131,9 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
   const [appState, setAppState] = useState<CollegeState>(() => getInitialState());
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load from backend/localStorage on mount
+  // Load from localStorage on mount
   useEffect(() => {
-    async function loadData() {
+    function loadData() {
         setIsLoaded(false);
         let storedState: CollegeState | null = null;
         
@@ -148,7 +147,7 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
             localStorage.removeItem('collegeAppState');
         }
 
-        const latestDataVersion = 3; // Increment this to force a reset for all users.
+        const latestDataVersion = 6; // Force a reset to clear out any bad data from previous sessions
         const defaultState = getInitialState(latestDataVersion);
 
         // If there's no stored state or if the data model has been updated, start fresh.
