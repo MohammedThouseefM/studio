@@ -142,7 +142,7 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
         const teachers = teachersResult.success ? teachersResult.data : initialTeachers;
 
         if (!studentsResult.success || !teachersResult.success) {
-            console.error("Failed to load data from backend, using mock data as fallback.");
+            console.warn("Could not connect to the database. This is expected if running without backend credentials. The app will use mock data.");
         }
 
         const newState: CollegeState = {

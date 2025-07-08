@@ -58,7 +58,6 @@ export async function getAllStudents() {
     const students = await getStudentsFromDb();
     return { success: true, data: students };
   } catch (error) {
-    console.error('Error fetching students:', error);
     return { success: false, error: 'Failed to fetch students from the database.' };
   }
 }
@@ -68,7 +67,6 @@ export async function getAllTeachers() {
     const teachers = await getTeachersFromDb();
     return { success: true, data: teachers };
   } catch (error) {
-    console.error('Error fetching teachers:', error);
     return { success: false, error: 'Failed to fetch teachers from the database.' };
   }
 }
