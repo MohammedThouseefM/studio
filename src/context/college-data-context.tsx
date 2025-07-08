@@ -33,6 +33,7 @@ import {
   type SemesterFee,
   type SubjectResult,
   type StudentResults,
+  type SemesterResult,
 } from '@/lib/mock-data';
 import type { AttendanceState } from '@/components/attendance-sheet';
 import { format, parseISO } from 'date-fns';
@@ -60,9 +61,10 @@ type CollegeState = {
   studentFeeDetails: StudentFeeDetails;
   studentResults: StudentResults;
   currentUser: Student | Teacher | null;
+  dataVersion: number;
 };
 
-const getInitialState = (): CollegeState => {
+const getInitialState = (dataVersion: number = 1): CollegeState => {
   return {
     events: initialEventsData.map((e, index) => ({ ...e, id: `event-${Date.now()}-${index}` })).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
     timeTable: initialTimeTable,
@@ -81,6 +83,7 @@ const getInitialState = (): CollegeState => {
     studentFeeDetails: initialStudentFeeDetails,
     studentResults: initialStudentResults,
     currentUser: null,
+    dataVersion: dataVersion,
   };
 };
 
@@ -126,57 +129,71 @@ type CollegeDataContextType = CollegeState & {
 const CollegeDataContext = createContext<CollegeDataContextType | undefined>(undefined);
 
 export function CollegeDataProvider({ children }: { children: ReactNode }) {
-  const [appState, setAppState] = useState<CollegeState>(getInitialState);
+  const [appState, setAppState] = useState<CollegeState>(() => getInitialState());
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load from backend on mount
+  // Load from backend/localStorage on mount
   useEffect(() => {
-    async function loadDataFromBackend() {
+    async function loadData() {
         setIsLoaded(false);
-        const [studentsResult, teachersResult] = await Promise.all([
-            getAllStudents(),
-            getAllTeachers(),
-        ]);
-
-        const students = studentsResult.success ? studentsResult.data : initialStudents;
-        const teachers = teachersResult.success ? teachersResult.data : initialTeachers;
-
-        if (!studentsResult.success || !teachersResult.success) {
-            console.warn("Could not connect to the database. This is expected if running without backend credentials. The app will use mock data.");
+        let storedState: CollegeState | null = null;
+        
+        try {
+            const storedStateJson = localStorage.getItem('collegeAppState');
+            if (storedStateJson) {
+                storedState = JSON.parse(storedStateJson);
+            }
+        } catch (error) {
+            console.warn("Could not parse stored state, starting fresh.", error);
+            localStorage.removeItem('collegeAppState');
         }
 
-        const newState: CollegeState = {
-            ...getInitialState(), // Start with fresh mock data for everything else
-            students,
-            teachers,
-        };
+        const latestDataVersion = 3; // Increment this to force a reset for all users.
+        const defaultState = getInitialState(latestDataVersion);
 
-        const storedUserId = localStorage.getItem('currentUserId');
-        const storedUserType = localStorage.getItem('currentUserType');
-        if (storedUserId && storedUserType) {
-            if (storedUserType === 'student') {
-                newState.currentUser = newState.students.find(s => s.id === storedUserId) || null;
-            } else {
-                newState.currentUser = newState.teachers.find(t => t.id === storedUserId) || null;
-            }
+        // If there's no stored state or if the data model has been updated, start fresh.
+        if (!storedState || storedState.dataVersion !== latestDataVersion) {
+            setAppState(defaultState);
+        } else {
+            // Merge: Use stored dynamic data but keep default static data to prevent data loss on code changes.
+             const mergedState: CollegeState = {
+                ...defaultState, // Start with fresh defaults (like timetables, events)
+                students: storedState.students || defaultState.students,
+                teachers: storedState.teachers || defaultState.teachers,
+                pendingStudents: storedState.pendingStudents || defaultState.pendingStudents,
+                leaveRequests: storedState.leaveRequests || defaultState.leaveRequests,
+                announcements: storedState.announcements || defaultState.announcements,
+                auditLogs: storedState.auditLogs || defaultState.auditLogs,
+                feedbackData: storedState.feedbackData || defaultState.feedbackData,
+                studentFeeDetails: storedState.studentFeeDetails || defaultState.studentFeeDetails,
+                studentResults: storedState.studentResults || defaultState.studentResults,
+                departments: storedState.departments || defaultState.departments,
+                years: storedState.years || defaultState.years,
+                hours: storedState.hours || defaultState.hours,
+                currentUser: storedState.currentUser || null,
+            };
+            setAppState(mergedState);
         }
         
-        setAppState(newState);
         setIsLoaded(true);
     }
-    loadDataFromBackend();
+    loadData();
   }, []);
+
+  // Persist state to localStorage whenever it changes
+  useEffect(() => {
+    if (isLoaded) {
+      try {
+        const stateToStore = JSON.stringify(appState);
+        localStorage.setItem('collegeAppState', stateToStore);
+      } catch (error) {
+        console.error("Failed to save state to localStorage", error);
+      }
+    }
+  }, [appState, isLoaded]);
 
   const setCurrentUser = (user: Student | Teacher | null) => {
     setAppState(prev => ({ ...prev, currentUser: user }));
-    if (user) {
-        const isStudent = 'university_number' in user;
-        localStorage.setItem('currentUserId', user.id);
-        localStorage.setItem('currentUserType', isStudent ? 'student' : 'teacher');
-    } else {
-        localStorage.removeItem('currentUserId');
-        localStorage.removeItem('currentUserType');
-    }
   };
 
   const logout = () => {
@@ -188,9 +205,6 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
     setAppState(prev => ({ ...prev, auditLogs: [newLog, ...prev.auditLogs] }));
   };
   
-  // NOTE: All the functions below currently only modify the local state.
-  // They will need to be updated to call server actions to persist changes to the database.
-
   const addEvent = (eventData: Omit<CalendarEventWithId, 'id'>, user: string) => {
     const newEvent: CalendarEventWithId = { ...eventData, id: `event-${Date.now()}` };
     setAppState(prev => ({ ...prev, events: [newEvent, ...prev.events].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) }));
@@ -250,7 +264,34 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
 
   const updateStudentFeeDetails = (studentId: string, semester: string, updatedFee: Pick<SemesterFee, 'totalFee' | 'paid'>, user: string) => { const student = appState.students.find(s => s.id === studentId); if (!student) return; setAppState(prev => { const studentFees = prev.studentFeeDetails[studentId] ? [...prev.studentFeeDetails[studentId]] : []; const updatedFees = studentFees.map(fee => { if (fee.semester === semester) { const newPaid = updatedFee.paid; const newTotal = updatedFee.totalFee; const balance = newTotal - newPaid; const status = balance <= 0 ? 'Paid' : (new Date() > parseISO(fee.dueDate) ? 'Overdue' : 'Pending'); return { ...fee, totalFee: newTotal, paid: newPaid, balance, status }; } return fee; }); return { ...prev, studentFeeDetails: { ...prev.studentFeeDetails, [studentId]: updatedFees } }; }); addAuditLog(user, `Updated fee for ${student.name} (Sem: ${semester}, Paid: ${updatedFee.paid}, Total: ${updatedFee.totalFee})`, 'student'); };
   
-  const updateStudentResults = (studentId: string, semester: string, subjectCode: string, updatedResult: Partial<SubjectResult>, user: string) => { const student = appState.students.find(s => s.id === studentId); if (!student) return; setAppState(prev => { const studentSemesters = prev.studentResults[studentId] ? [...prev.studentResults[studentId]] : []; const updatedSemesters = studentSemesters.map(sem => { if (sem.semester === semester) { const updatedSubjects = sem.results.map(subj => { if (subj.subjectCode === subjectCode) { return { ...subj, ...updatedResult }; } return subj; }); return { ...sem, results: updatedSubjects }; } return sem; }); return { ...prev, studentResults: { ...prev.studentResults, [studentId]: updatedSemesters } }; }); addAuditLog(user, `Updated results for ${student.name} (Sem: ${semester}, Subject: ${subjectCode})`, 'student'); };
+  const updateStudentResults = (studentId: string, semester: string, subjectCode: string, updatedResult: Partial<SubjectResult>, user: string) => {
+    const student = appState.students.find(s => s.id === studentId);
+    if (!student) return;
+
+    setAppState(prev => {
+        const newStudentResults = JSON.parse(JSON.stringify(prev.studentResults));
+        const studentSemesters = newStudentResults[studentId] || [];
+        
+        const semesterIndex = studentSemesters.findIndex(s => s.semester === semester);
+        
+        if (semesterIndex > -1) {
+            const semesterResults = studentSemesters[semesterIndex].results;
+            const subjectIndex = semesterResults.findIndex(r => r.subjectCode === subjectCode);
+
+            if (subjectIndex > -1) {
+                // Update existing subject
+                semesterResults[subjectIndex] = { ...semesterResults[subjectIndex], ...updatedResult };
+            } else {
+                // Add new subject
+                semesterResults.push(updatedResult as SubjectResult);
+            }
+        } 
+        newStudentResults[studentId] = studentSemesters;
+        return { ...prev, studentResults: newStudentResults };
+    });
+
+    addAuditLog(user, `Updated results for ${student.name} (Sem: ${semester}, Subject: ${subjectCode})`, 'student');
+  };
   
   const contextValue: CollegeDataContextType = { 
     ...appState,

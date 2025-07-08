@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { Award, Search, SlidersHorizontal, User, Save } from 'lucide-react';
+import { Award, Search, SlidersHorizontal, User, Save, PlusCircle } from 'lucide-react';
 import { useCollegeData } from '@/context/college-data-context';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { type Student, type SubjectResult } from '@/lib/mock-data';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { nanoid } from 'nanoid';
 
 export default function ResultManagementPage() {
     const { toast } = useToast();
@@ -27,7 +28,7 @@ export default function ResultManagementPage() {
     const [yearFilter, setYearFilter] = useState('');
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
     const [selectedSemester, setSelectedSemester] = useState<string | null>(null);
-    const [editableResults, setEditableResults] = useState<SubjectResult[]>([]);
+    const [editableResults, setEditableResults] = useState<(SubjectResult & { tempId: string })[]>([]);
     
     const availableSemesters = useMemo(() => {
         if (!selectedStudent) return [];
@@ -63,16 +64,16 @@ export default function ResultManagementPage() {
     useEffect(() => {
         if (selectedStudent && selectedSemester) {
             const results = studentResults[selectedStudent.id]?.find(r => r.semester === selectedSemester)?.results || [];
-            setEditableResults(JSON.parse(JSON.stringify(results)));
+            setEditableResults(results.map((r: SubjectResult) => ({ ...r, tempId: nanoid() })));
         } else {
             setEditableResults([]);
         }
     }, [selectedStudent, selectedSemester, studentResults]);
 
-    const handleResultChange = (subjectCode: string, field: keyof SubjectResult, value: string | number) => {
+    const handleResultChange = (tempId: string, field: keyof SubjectResult, value: string | number) => {
         setEditableResults(currentResults =>
             currentResults.map(res => {
-                if (res.subjectCode === subjectCode) {
+                if (res.tempId === tempId) {
                     const updatedRes = { ...res, [field]: value };
                     if (field === 'ciaMarks' || field === 'semesterMarks') {
                         updatedRes.totalMarks = (Number(updatedRes.ciaMarks) || 0) + (Number(updatedRes.semesterMarks) || 0);
@@ -84,16 +85,41 @@ export default function ResultManagementPage() {
         );
     };
 
-    const handleSaveChanges = (subjectCode: string) => {
+    const handleSaveChanges = (resultToUpdate: SubjectResult & { tempId: string }) => {
         if (!selectedStudent || !selectedSemester) return;
-        const resultToUpdate = editableResults.find(r => r.subjectCode === subjectCode);
-        if (resultToUpdate) {
-            updateStudentResults(selectedStudent.id, selectedSemester, subjectCode, resultToUpdate, currentTeacherId);
+
+        if (!resultToUpdate.subjectCode || !resultToUpdate.subjectName) {
             toast({
-                title: 'Result Updated',
-                description: `Result for ${resultToUpdate.subjectName} has been saved.`,
+                variant: 'destructive',
+                title: 'Incomplete Details',
+                description: 'Please provide both Subject Code and Name before saving.',
             });
+            return;
         }
+        
+        const { tempId, ...subjectData } = resultToUpdate;
+        updateStudentResults(selectedStudent.id, selectedSemester, resultToUpdate.subjectCode, subjectData, currentTeacherId);
+        
+        toast({
+            title: 'Result Saved',
+            description: `Result for ${resultToUpdate.subjectName} has been saved.`,
+        });
+    };
+
+    const handleAddSubject = () => {
+        setEditableResults(prev => [
+            ...prev,
+            {
+                tempId: nanoid(),
+                subjectCode: '',
+                subjectName: '',
+                ciaMarks: 0,
+                semesterMarks: 0,
+                totalMarks: 0,
+                grade: '',
+                resultStatus: 'Fail',
+            }
+        ]);
     };
 
     return (
@@ -144,28 +170,39 @@ export default function ResultManagementPage() {
                     </CardHeader>
                     <CardContent>
                         {selectedStudent && selectedSemester ? (
-                            <div className="rounded-md border overflow-x-auto">
-                                <Table>
-                                    <TableHeader><TableRow><TableHead>Subject</TableHead><TableHead>CIA</TableHead><TableHead>Semester</TableHead><TableHead>Total</TableHead><TableHead>Grade</TableHead><TableHead>Result</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
-                                    <TableBody>
-                                        {editableResults.map(res => (
-                                            <TableRow key={res.subjectCode}>
-                                                <TableCell className="font-medium">{res.subjectName}<br/><span className="text-xs text-muted-foreground">{res.subjectCode}</span></TableCell>
-                                                <TableCell><Input type="number" value={res.ciaMarks} onChange={e => handleResultChange(res.subjectCode, 'ciaMarks', e.target.value)} className="w-20" /></TableCell>
-                                                <TableCell><Input type="number" value={res.semesterMarks} onChange={e => handleResultChange(res.subjectCode, 'semesterMarks', e.target.value)} className="w-20" /></TableCell>
-                                                <TableCell className="font-bold">{res.totalMarks}</TableCell>
-                                                <TableCell><Input value={res.grade} onChange={e => handleResultChange(res.subjectCode, 'grade', e.target.value)} className="w-16" /></TableCell>
-                                                <TableCell>
-                                                    <Select value={res.resultStatus} onValueChange={(value) => handleResultChange(res.subjectCode, 'resultStatus', value as 'Pass' | 'Fail')}>
-                                                        <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
-                                                        <SelectContent><SelectItem value="Pass">Pass</SelectItem><SelectItem value="Fail">Fail</SelectItem></SelectContent>
-                                                    </Select>
-                                                </TableCell>
-                                                <TableCell className="text-right"><Button variant="ghost" size="icon" onClick={() => handleSaveChanges(res.subjectCode)}><Save className="h-4 w-4 text-primary" /></Button></TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
+                            <div className="space-y-4">
+                                <div className="rounded-md border overflow-x-auto">
+                                    <Table>
+                                        <TableHeader><TableRow><TableHead>Subject</TableHead><TableHead>CIA</TableHead><TableHead>Semester</TableHead><TableHead>Total</TableHead><TableHead>Grade</TableHead><TableHead>Result</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
+                                        <TableBody>
+                                            {editableResults.map(res => (
+                                                <TableRow key={res.tempId}>
+                                                    <TableCell className="font-medium space-y-1">
+                                                        <Input placeholder="Subject Name" value={res.subjectName} onChange={e => handleResultChange(res.tempId, 'subjectName', e.target.value)} className="w-36" />
+                                                        <Input placeholder="Subject Code" value={res.subjectCode} onChange={e => handleResultChange(res.tempId, 'subjectCode', e.target.value)} className="w-36 text-xs" />
+                                                    </TableCell>
+                                                    <TableCell><Input type="number" value={res.ciaMarks} onChange={e => handleResultChange(res.tempId, 'ciaMarks', e.target.value)} className="w-20" /></TableCell>
+                                                    <TableCell><Input type="number" value={res.semesterMarks} onChange={e => handleResultChange(res.tempId, 'semesterMarks', e.target.value)} className="w-20" /></TableCell>
+                                                    <TableCell className="font-bold">{res.totalMarks}</TableCell>
+                                                    <TableCell><Input value={res.grade} onChange={e => handleResultChange(res.tempId, 'grade', e.target.value)} className="w-16" /></TableCell>
+                                                    <TableCell>
+                                                        <Select value={res.resultStatus} onValueChange={(value) => handleResultChange(res.tempId, 'resultStatus', value as 'Pass' | 'Fail')}>
+                                                            <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
+                                                            <SelectContent><SelectItem value="Pass">Pass</SelectItem><SelectItem value="Fail">Fail</SelectItem></SelectContent>
+                                                        </Select>
+                                                    </TableCell>
+                                                    <TableCell className="text-right"><Button variant="ghost" size="icon" onClick={() => handleSaveChanges(res)}><Save className="h-4 w-4 text-primary" /></Button></TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                                <div className="flex justify-end">
+                                    <Button variant="outline" onClick={handleAddSubject}>
+                                        <PlusCircle className="mr-2 h-4 w-4" />
+                                        Add Subject
+                                    </Button>
+                                </div>
                             </div>
                         ) : (
                             <div className="h-96 flex items-center justify-center text-muted-foreground">
