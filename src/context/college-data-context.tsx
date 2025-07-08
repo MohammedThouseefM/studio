@@ -36,12 +36,11 @@ import {
 } from '@/lib/mock-data';
 import type { AttendanceState } from '@/components/attendance-sheet';
 import { format, parseISO } from 'date-fns';
+import { getAllStudents, getAllTeachers } from '@/lib/actions';
 
 export type CalendarEventWithId = RawCalendarEvent & { id: string };
 export type AuditLog = AuditLogType;
 export type { SemesterFee };
-
-const LOCAL_STORAGE_KEY = 'attend-ease-data-v8';
 
 type CollegeState = {
   events: CalendarEventWithId[];
@@ -130,85 +129,43 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
   const [appState, setAppState] = useState<CollegeState>(getInitialState);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load from localStorage on mount
+  // Load from backend on mount
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      let finalState: CollegeState;
-      try {
-        // Start with a fresh set of initial data.
-        const initialState = getInitialState();
-        
-        const storedDataJSON = window.localStorage.getItem(LOCAL_STORAGE_KEY);
-        if (storedDataJSON) {
-          const storedData = JSON.parse(storedDataJSON);
-          
-          // Safely merge teachers: Start with initial teachers, then update with any stored data.
-          const teacherMap = new Map<string, Teacher>(initialState.teachers.map(t => [t.id, t]));
-          if (Array.isArray(storedData.teachers)) {
-            storedData.teachers.forEach((teacher: Teacher) => {
-              // Update existing teachers or add new ones from storage.
-              teacherMap.set(teacher.id, { ...(teacherMap.get(teacher.id) || {}), ...teacher });
-            });
-          }
+    async function loadDataFromBackend() {
+        setIsLoaded(false);
+        const [studentsResult, teachersResult] = await Promise.all([
+            getAllStudents(),
+            getAllTeachers(),
+        ]);
 
-          // Safely merge students: Start with initial students, then update with any stored data.
-          const studentMap = new Map<string, Student>(initialState.students.map(s => [s.id, s]));
-          if (Array.isArray(storedData.students)) {
-            storedData.students.forEach((student: Student) => {
-              studentMap.set(student.id, { ...(studentMap.get(student.id) || {}), ...student });
-            });
-          }
-          
-          finalState = {
-            ...initialState, // Start with defaults
-            ...storedData, // Apply other stored dynamic data like events, logs, etc.
-            teachers: Array.from(teacherMap.values()), // Use safely merged teachers
-            students: Array.from(studentMap.values()), // Use safely merged students
-          };
+        const students = studentsResult.success ? studentsResult.data : initialStudents;
+        const teachers = teachersResult.success ? teachersResult.data : initialTeachers;
 
-        } else {
-          // No stored data, use fresh initial data.
-          finalState = getInitialState();
+        if (!studentsResult.success || !teachersResult.success) {
+            console.error("Failed to load data from backend, using mock data as fallback.");
         }
-      } catch (error) {
-        console.error('Failed to load or parse stored data, resetting.', error);
-        finalState = getInitialState();
-      }
 
-      // Restore current user session from separate storage items
-      const storedUserId = localStorage.getItem('currentUserId');
-      const storedUserType = localStorage.getItem('currentUserType');
-      if (storedUserId && storedUserType) {
-          if (storedUserType === 'student') {
-              finalState.currentUser = finalState.students.find(s => s.id === storedUserId) || null;
-          } else {
-              finalState.currentUser = finalState.teachers.find(t => t.id === storedUserId) || null;
-          }
-      } else {
-          finalState.currentUser = null;
-      }
-      
-      // Rehydrate Date objects from string representation in JSON
-      if (finalState.auditLogs) {
-          finalState.auditLogs = finalState.auditLogs.map((log: any) => ({...log, timestamp: new Date(log.timestamp)}));
-      }
+        const newState: CollegeState = {
+            ...getInitialState(), // Start with fresh mock data for everything else
+            students,
+            teachers,
+        };
 
-      setAppState(finalState);
-      setIsLoaded(true);
+        const storedUserId = localStorage.getItem('currentUserId');
+        const storedUserType = localStorage.getItem('currentUserType');
+        if (storedUserId && storedUserType) {
+            if (storedUserType === 'student') {
+                newState.currentUser = newState.students.find(s => s.id === storedUserId) || null;
+            } else {
+                newState.currentUser = newState.teachers.find(t => t.id === storedUserId) || null;
+            }
+        }
+        
+        setAppState(newState);
+        setIsLoaded(true);
     }
-  }, []); // Run only once on mount
-
-  // Save to localStorage on change
-  useEffect(() => {
-    if (typeof window !== 'undefined' && isLoaded) {
-      try {
-        const stateToSave = { ...appState, currentUser: null }; // Don't save currentUser directly
-        window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(stateToSave));
-      } catch (error) {
-        console.error('Error saving data to localStorage:', error);
-      }
-    }
-  }, [appState, isLoaded]);
+    loadDataFromBackend();
+  }, []);
 
   const setCurrentUser = (user: Student | Teacher | null) => {
     setAppState(prev => ({ ...prev, currentUser: user }));
@@ -231,6 +188,9 @@ export function CollegeDataProvider({ children }: { children: ReactNode }) {
     setAppState(prev => ({ ...prev, auditLogs: [newLog, ...prev.auditLogs] }));
   };
   
+  // NOTE: All the functions below currently only modify the local state.
+  // They will need to be updated to call server actions to persist changes to the database.
+
   const addEvent = (eventData: Omit<CalendarEventWithId, 'id'>, user: string) => {
     const newEvent: CalendarEventWithId = { ...eventData, id: `event-${Date.now()}` };
     setAppState(prev => ({ ...prev, events: [newEvent, ...prev.events].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) }));

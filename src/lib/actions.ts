@@ -1,3 +1,4 @@
+
 'use server';
 
 import { predictAttendance, type AttendancePredictionInput } from '@/ai/flows/attendance-prediction';
@@ -5,6 +6,7 @@ import { generateDefaulterReport } from '@/ai/flows/defaulter-report-flow';
 import { getMotivationalQuote as getQuoteFlow } from '@/ai/flows/quote-flow';
 import { generateSeatingArrangement, type SeatingArrangementInput } from '@/ai/flows/seating-arrangement-flow';
 import { students, previousAttendanceData } from '@/lib/mock-data';
+import { getStudents as getStudentsFromDb, getTeachers as getTeachersFromDb } from '@/lib/data-services';
 
 export async function getAttendancePrediction(input: AttendancePredictionInput) {
   try {
@@ -49,4 +51,24 @@ export async function getSeatingPlan(input: SeatingArrangementInput) {
         console.error('Error generating seating plan:', error);
         return { success: false, error: 'Failed to generate seating plan.' };
     }
+}
+
+export async function getAllStudents() {
+  try {
+    const students = await getStudentsFromDb();
+    return { success: true, data: students };
+  } catch (error) {
+    console.error('Error fetching students:', error);
+    return { success: false, error: 'Failed to fetch students from the database.' };
+  }
+}
+
+export async function getAllTeachers() {
+  try {
+    const teachers = await getTeachersFromDb();
+    return { success: true, data: teachers };
+  } catch (error) {
+    console.error('Error fetching teachers:', error);
+    return { success: false, error: 'Failed to fetch teachers from the database.' };
+  }
 }
